@@ -1,0 +1,29 @@
+{
+  "name": "Radio Receiver",
+  "description": "Receive and listen to stereo FM radio broadcasts on your browser or ChromeBook using an RTL2832U-based USB tuner.",
+  "version": "0.9",
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "app": {
+    "background": {
+      "scripts": ["main.js"]
+    }
+  },
+  "permissions": [
+    "storage",
+    "usb"
+  ],
+  "optional_permissions": [
+    {
+      "usbDevices": [
+        {
+          "vendorId": 3034,
+          "productId": 10296
+        }
+      ]
+    }
+  ]
+}

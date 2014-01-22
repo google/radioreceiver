@@ -1,0 +1,229 @@
+/*
+Copyright 2013 Google Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+body {
+  background-color: #ddd;
+}
+
+.titleBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 25px;
+  background-color: #aaa;
+  border-bottom: 1px #ddd groove;
+  -webkit-app-region: drag;
+}
+
+.titleText {
+  position: absolute;
+  bottom: 2px;
+  left: 10px;
+  right: 50px;
+  font-family: sans-serif;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.closeButton, .settingsButton {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px #ddd groove;
+  text-align: center;
+  font-size: 17px;
+  font-weight: bold;
+  -webkit-app-region: no-drag;
+}
+
+.closeButton:hover, .prefsButton:hover {
+  background-color: #bbb;
+}
+
+.settingsButton {
+  right: 50px;
+  width: 30px;
+}
+
+.closeButton {
+  right: 0;
+  width: 50px;
+}
+
+.gearIcon {
+  margin-top: 7px;
+}
+
+.top {
+  position: absolute;
+  top: 30px;
+  left: 5px;
+  width: 490px;
+  height: 135px;
+}
+
+.bottom {
+  position: absolute;
+  width: 490px;
+  left: 5px;
+  top: 165px;
+  height: 55px;
+}
+
+.display {
+  position: absolute;
+  border: 1px inset;
+  background-color: #343;
+  color: #afd;
+  left: 55px;
+  top: 0;
+  height: 125px;
+  width: 380px;
+  font-family: sans-serif;
+}
+
+.frequencyDisplay, .frequencyInput {
+  position: absolute;
+  left: 5px;
+  width: 310px;
+  font-size: 100px;
+  text-align: right;
+}
+
+.frequencyDisplay {
+  top: 5px;
+  cursor: text;
+}
+
+.frequencyInput {
+  top: 2px;
+  background: transparent;
+  border: none;
+  visibility: hidden;
+  color: #ffa;
+}
+
+.bandLabel {
+  position: absolute;
+  right: 10px;
+  top: 75px;
+  width: 40px;
+  text-align: center;
+  font-size: 25px;
+}
+
+.scanning {
+  -webkit-animation: blink 0.3s step-end infinite alternate;
+}
+
+@-webkit-keyframes blink {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+}
+
+.stereoIndicatorBox {
+  position: absolute;
+  right: 10px;
+  top: 25px;
+  width: 40px;
+  height: 22px;
+  fill: #afd;
+  cursor: pointer;
+}
+
+.stereoIndicator {
+  fill: #afd;
+}
+
+.stereoDisabled {
+  fill: #275;
+}
+
+.stereoUnavailable {
+  fill: transparent;
+}
+
+.freqMinusButton, .freqPlusButton {
+  position: absolute;
+  top: 0;
+  width: 50px;
+  height: 50px;
+}
+
+.scanDownButton, .scanUpButton {
+  position: absolute;
+  top: 55px;
+  width: 50px;
+  height: 70px;
+}
+
+.freqMinusButton, .scanDownButton {
+  left: 0;
+}
+
+.freqPlusButton, .scanUpButton {
+  right: 0;
+}
+
+.stereoButton {
+  border: 2px solid black;
+}
+
+.powerButton {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+}
+
+.presets {
+  position: absolute;
+  left: 100px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.presetsBox {
+  position: absolute;
+  left: 0px;
+  right: 180px;
+  top: 0;
+  bottom: 0;
+}
+
+.removePresetButton {
+  position: absolute;
+  right: 90px;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+}
+
+.savePresetButton {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 90px;
+}
+
