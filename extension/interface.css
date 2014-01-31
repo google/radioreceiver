@@ -206,9 +206,9 @@ body {
 .presetsBox {
   position: absolute;
   left: 0px;
-  right: 180px;
   top: 0;
   bottom: 0;
+  width: 205px;
 }
 
 .removePresetButton {
