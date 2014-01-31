@@ -19,7 +19,7 @@ Radio Receiver is 100% written in JavaScript, but is nevertheless fast enough th
 
 Radio Receiver was written to work with an RTL-2832U-based DVB-T (European digital TV) USB receiver, with a R820T tuner chip. You can easily buy one for $15 or less by searching for [RTL2832U R820T] on your favorite online store or web search engine.
 
-You can use this application on a ChromeBook, or on any other computer running a Chrome browser. Just install it using the Chrome Web Store or any other mechanism, plug in your USB dongle, and click on the icon to start the Radio Receiver application.
+You can use this application on a ChromeBook, or on any other computer running a Chrome browser. Just [install it using the Chrome Web Store](https://chrome.google.com/webstore/detail/radio-receiver/miieomcelenidlleokajkghmifldohpo) or any other mechanism, plug in your USB dongle, and click on the icon to start the Radio Receiver application.
 
 ## Acknowledgements
 
