@@ -22,6 +22,7 @@
  * @param {number} sampleRate The signal's sample rate.
  * @param {number} cutoffFreq The cut-off frequency in Hz (half-amplitude).
  * @param {number} The filter kernel's length. Should be an odd number.
+ * @param {Float32Array} The FIR coefficients for the filter. 
  */
 function getLowPassFIRCoeffs(sampleRate, cutoffFreq, length) {
   length += (length + 1) % 2;
@@ -54,7 +55,7 @@ function FIRFilter(coefficients, opt_step) {
   var coefs = coefficients;
   var step = opt_step || 1;
   var offset = coefs.length * step;
-  var curSamples;
+  var curSamples = new Float32Array(offset);
 
   /**
    * Loads a new block of samples to filter.
@@ -62,9 +63,7 @@ function FIRFilter(coefficients, opt_step) {
    */
   function loadSamples(samples) {
     var newSamples = new Float32Array(samples.data.length + offset);
-    if (curSamples) {
-      newSamples.set(curSamples.subarray(samples.length - offset));
-    }
+    newSamples.set(curSamples.subarray(curSamples.length - offset));
     newSamples.set(samples.data, offset);
     curSamples = newSamples;
   }
