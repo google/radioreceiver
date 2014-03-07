@@ -19,7 +19,7 @@
 function RadioController() {
 
   var TUNER = {'vendorId': 0x0bda, 'productId': 0x2838};
-  var SAMPLE_RATE = 2048000;
+  var SAMPLE_RATE = 1024000;
   var BUFS_PER_SEC = 5;
   var SAMPLES_PER_BUF = Math.floor(SAMPLE_RATE / BUFS_PER_SEC);
   var NULL_FUNC = function(){};
@@ -265,7 +265,7 @@ function RadioController() {
         if (state.state == STATE.PLAYING) {
           if (playingBlocks <= 2) {
             ++playingBlocks;
-            decoder.postMessage([data, stereoEnabled]);
+            decoder.postMessage([data, stereoEnabled], [data]);
           }
         }
         processState();
@@ -314,7 +314,7 @@ function RadioController() {
           --requestingBlocks;
           if (state.state == STATE.SCANNING) {
             ++playingBlocks;
-            decoder.postMessage([data, stereoEnabled, scanData]);
+            decoder.postMessage([data, stereoEnabled, scanData], [data]);
           }
           processState();
         });
