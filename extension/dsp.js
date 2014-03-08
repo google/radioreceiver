@@ -116,8 +116,8 @@ function Downsampler(inRate, outRate, opt_cutoff, opt_dropoff) {
   function downsample(samples) {
     filter.loadSamples(samples);
     var outArr = new Float32Array(Math.floor(samples.data.length / rateMul));
-    for (var i = 0; i < outArr.length; ++i) {
-      outArr[i] = filter.get(Math.floor(i * rateMul));
+    for (var i = 0, readFrom = 0; i < outArr.length; ++i, readFrom += rateMul) {
+      outArr[i] = filter.get(Math.floor(readFrom));
     }
     return new Samples(outArr, outRate);
   }
@@ -150,8 +150,8 @@ function IQDownsampler(inRate, outRate, opt_cutoff, opt_dropoff) {
     var numSamples = Math.floor(samples.data.length / (2 * rateMul));
     filter.loadSamples(samples);
     var outArrs = [new Float32Array(numSamples), new Float32Array(numSamples)];
-    for (var i = 0; i < numSamples; ++i) {
-      var idx = 2 * Math.floor(i * rateMul);
+    for (var i = 0, readFrom = 0; i < numSamples; ++i, readFrom += rateMul) {
+      var idx = 2 * Math.floor(readFrom);
       outArrs[0][i] = filter.get(idx);
       outArrs[1][i] = filter.get(idx + 1);
     }
