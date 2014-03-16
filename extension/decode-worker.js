@@ -49,24 +49,24 @@ function Decoder() {
   function process(buffer, inStereo, opt_data) {
     var samples = samplesFromUint8(buffer, IN_RATE);
     var demodulated = demodulator.demodulateTuned(samples);
-    var monoAudio = monoSampler.downsample(demodulated);
-    var rightAudio;
+    var leftAudio = monoSampler.downsample(demodulated);
+    var rightAudio = leftAudio;
 
     if (inStereo) {
       var stereo = stereoSeparator.separate(demodulated);
-      if (stereo.stereo) {
-        var stereoAudio = stereoSampler.downsample(stereo.output);
-        rightAudio = new Samples(new Float32Array(monoAudio.data), stereoAudio.rate);
-        for (var i = 0; i < stereoAudio.data.length; ++i) {
-          rightAudio.data[i] -= stereoAudio.data[i];
-          monoAudio.data[i] += stereoAudio.data[i];
+      if (stereo.found) {
+        var diffAudio = stereoSampler.downsample(stereo.diff);
+        rightAudio = new Samples(new Float32Array(leftAudio.data), diffAudio.rate);
+        for (var i = 0; i < diffAudio.data.length; ++i) {
+          rightAudio.data[i] -= diffAudio.data[i];
+          leftAudio.data[i] += diffAudio.data[i];
         }
         deemphasizer.inPlace(rightAudio);
       }
     }
 
-    deemphasizer.inPlace(monoAudio);
-    postMessage([monoAudio, rightAudio, opt_data], [monoAudio.data.buffer]);
+    deemphasizer.inPlace(leftAudio);
+    postMessage([leftAudio, rightAudio, opt_data], [leftAudio.data.buffer, rightAudio.data.buffer]);
   }
 
   return {

@@ -279,8 +279,8 @@ function StereoSeparator(sampleRate, pilotFreq) {
       cavg.add(corr * 10);
     }
     return {
-      stereo: cavg.getStd() < STD_THRES,
-      output: new Samples(out, samples.rate)
+      found: cavg.getStd() < STD_THRES,
+      diff: new Samples(out, samples.rate)
     };
   }
 

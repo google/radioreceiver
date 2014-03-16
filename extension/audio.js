@@ -29,14 +29,12 @@ function Player() {
   /**
    * Queues the given samples for playing at the appropriate time.
    * @param {Samples} leftSamples The samples for the left speaker.
-   * @param {?Samples} rightSamples The samples for the right speaker. If null,
-   *     the left speaker samples are also played on the right to produce
-   *     mono sound.
+   * @param {Samples} rightSamples The samples for the right speaker.
    */
   function play(leftSamples, rightSamples) {
     var buffer = ac.createBuffer(2, leftSamples.data.length, leftSamples.rate);
     buffer.getChannelData(0).set(leftSamples.data);
-    buffer.getChannelData(1).set(rightSamples ? rightSamples.data : leftSamples.data);
+    buffer.getChannelData(1).set(rightSamples.data);
     var source = ac.createBufferSource();
     source.buffer = buffer;
     source.connect(ac.destination);
