@@ -17,16 +17,16 @@
  */
 
 /**
- * Generates coefficients for a FIR low-pass filter with the given cut-off
- * frequency and kernel length at the given sample rate.
+ * Generates coefficients for a FIR low-pass filter with the given
+ * half-amplitude frequency and kernel length at the given sample rate.
  * @param {number} sampleRate The signal's sample rate.
- * @param {number} cutoffFreq The cut-off frequency in Hz (half-amplitude).
+ * @param {number} halfAmplFreq The half-amplitude frequency in Hz.
  * @param {number} The filter kernel's length. Should be an odd number.
  * @param {Float32Array} The FIR coefficients for the filter. 
  */
-function getLowPassFIRCoeffs(sampleRate, cutoffFreq, length) {
+function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
   length += (length + 1) % 2;
-  var freq = cutoffFreq / sampleRate;
+  var freq = halfAmplFreq / sampleRate;
   var coefs = new Float32Array(length);
   var center = Math.floor(length / 2);
   coefs[center] = 2 * Math.PI * freq;
@@ -94,18 +94,12 @@ function FIRFilter(coefficients, opt_step) {
  * Applies a low-pass filter and resamples to a lower sample rate.
  * @param {number} inRate The input signal's sample rate.
  * @param {number} outRate The output signal's sample rate.
- * @param {number=} opt_cutoff The cut-off frequency in Hz to filter to before
- *     downsampling to avoid aliasing. If unspecified, it will be
- *     calculated as outRate * 0.45.
- * @param {number=} opt_dropoff The drop-off bandwidth in Hz. This parameter
- *     determines the number of FIR coefficients. By default it will be
- *     calculated as outRate * 0.1.
+ * @param {Float32Array} coefficients The coefficients for the FIR filter to
+ *     apply to the original signal before downsampling it.
  * @constructor
  */
-function Downsampler(inRate, outRate, opt_cutoff, opt_dropoff) {
-  var cutoff = opt_cutoff || (outRate * 0.45);
-  var dropoff = opt_dropoff || (outRate * 0.1);
-  var filter = new FIRFilter(getLowPassFIRCoeffs(inRate, cutoff, (4 * outRate) / dropoff));
+function Downsampler(inRate, outRate, coefficients) {
+  var filter = new FIRFilter(coefficients);
   var rateMul = inRate / outRate;
 
   /**
@@ -132,12 +126,12 @@ function Downsampler(inRate, outRate, opt_cutoff, opt_dropoff) {
  * the separated I and Q streams.
  * @param {number} inRate The input signal's sample rate.
  * @param {number} outRate The output signal's sample rate.
+ * @param {Float32Array} coefficients The coefficients for the FIR filter to
+ *     apply to the original signal before downsampling it.
  * @constructor
  */
-function IQDownsampler(inRate, outRate, opt_cutoff, opt_dropoff) {
-  var cutoff = opt_cutoff || (outRate * 0.45);
-  var dropoff = opt_dropoff || (outRate * 0.1);
-  var filter = new FIRFilter(getLowPassFIRCoeffs(inRate, cutoff, (4 * outRate) / dropoff), 2);
+function IQDownsampler(inRate, outRate, coefficients) {
+  var filter = new FIRFilter(coefficients, 2);
   var rateMul = inRate / outRate;
 
   /**
@@ -164,32 +158,6 @@ function IQDownsampler(inRate, outRate, opt_cutoff, opt_dropoff) {
 }
 
 /**
- * A de-emphasis filter with the given time constant.
- * @param {number} inRate The signal's sample rate.
- * @param {number} timeConstant_uS The filter's time constant in microseconds.
- * @constructor
- */
-function Deemphasizer(sampleRate, timeConstant_uS) {
-  var mult = Math.exp(-1e6 / (timeConstant_uS * sampleRate));
-  var val = 0;
-
-  /**
-   * Deemphasizes the given samples in place.
-   * @param {Samples} samples The samples to deemphasize.
-   */
-  function inPlace(samples) {
-    for (var i = 0; i < samples.data.length; ++i) {
-      val = (1- mult) * samples.data[i] + mult * val;
-      samples.data[i] = val;
-    }
-  }
-
-  return {
-    inPlace: inPlace
-  };
-}
-
-/**
  * A class to demodulate IQ-interleaved samples into a raw audio signal.
  * @param {number} inRate The sample rate for the input signal.
  * @param {number} outRate The sample rate for the output audio.
@@ -200,7 +168,8 @@ function FMDemodulator(inRate, outRate, maxF) {
   var GAIN = 1;
   var AMPL_CONV = outRate * GAIN / (2 * Math.PI * maxF);
 
-  var downsampler = new IQDownsampler(inRate, outRate, maxF);
+  var coefs = getLowPassFIRCoeffs(inRate, maxF * 0.8, 51);
+  var downsampler = new IQDownsampler(inRate, outRate, coefs);
   var lI = 0;
   var lQ = 0;
 
