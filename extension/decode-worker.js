@@ -24,6 +24,7 @@ var INTER_RATE = 336000;
 var OUT_RATE = 48000;
 var MAX_F = 75000;
 var PILOT_FREQ = 19000;
+var DEEMPH_TC = 50;
 
 /**
  * A class to implement a worker that demodulates an FM broadcast station.
@@ -31,10 +32,11 @@ var PILOT_FREQ = 19000;
  */
 function Decoder() {
   var demodulator = new FMDemodulator(IN_RATE, INTER_RATE, MAX_F);
-  var filterCoefs = getLowPassFIRCoeffs(INTER_RATE, 10, 61);
+  var filterCoefs = getLowPassFIRCoeffs(INTER_RATE, 10, 41);
   var monoSampler = new Downsampler(INTER_RATE, OUT_RATE, filterCoefs);
   var stereoSampler = new Downsampler(INTER_RATE, OUT_RATE, filterCoefs);
   var stereoSeparator = new StereoSeparator(INTER_RATE, PILOT_FREQ);
+  var deemphasizer = new Deemphasizer(OUT_RATE, DEEMPH_TC);
 
   /**
    * Demodulates the tuner's output, producing mono or stereo sound, and
@@ -58,9 +60,11 @@ function Decoder() {
           rightAudio.data[i] -= diffAudio.data[i];
           leftAudio.data[i] += diffAudio.data[i];
         }
+        deemphasizer.inPlace(rightAudio);
       }
     }
 
+    deemphasizer.inPlace(leftAudio);
     postMessage([leftAudio, rightAudio, opt_data], [leftAudio.data.buffer, rightAudio.data.buffer]);
   }
 

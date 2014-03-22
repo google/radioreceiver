@@ -259,6 +259,32 @@ function StereoSeparator(sampleRate, pilotFreq) {
 }
 
 /**
+ * A de-emphasis filter with the given time constant.
+ * @param {number} inRate The signal's sample rate.
+ * @param {number} timeConstant_uS The filter's time constant in microseconds.
+ * @constructor
+ */
+function Deemphasizer(sampleRate, timeConstant_uS) {
+  var mult = Math.exp(-1e6 / (timeConstant_uS * sampleRate));
+  var val = 0;
+
+  /**
+   * Deemphasizes the given samples in place.
+   * @param {Samples} samples The samples to deemphasize.
+   */
+  function inPlace(samples) {
+    for (var i = 0; i < samples.data.length; ++i) {
+      val = (1- mult) * samples.data[i] + mult * val;
+      samples.data[i] = val;
+    }
+  }
+
+  return {
+    inPlace: inPlace
+  };
+}
+
+/**
  * An exponential moving average accumulator.
  * @param {number} weight Weight of the previous average value.
  * @param {boolean=} opt_std Whether to calculate the standard deviation.
