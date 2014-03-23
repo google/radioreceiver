@@ -349,13 +349,13 @@ function RadioController() {
    */
   decoder.onmessage = function(msg) {
     --playingBlocks;
-    var newStereo = !!msg.data[1];
+    var newStereo = msg.data[2]['stereo'];
     if (newStereo != stereo) {
       stereo = newStereo;
       ui && ui.update();
     }
     player.play(msg.data[0], msg.data[1]);
-    if (state.state == STATE.SCANNING && msg.data[2] && msg.data[2]['scanning']) {
+    if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
       if (overload(msg.data[0]) < 0.075) {
         setFrequency(msg.data[2].frequency);
       }

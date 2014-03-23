@@ -43,9 +43,10 @@ function Decoder() {
    * sends the demodulated audio back to the caller.
    * @param {ArrayBuffer} buffer A buffer containing the tuner's output.
    * @param {boolean} inStereo Whether to try decoding the stereo signal.
-   * @param {*=} opt_data Additional data to echo back to the caller.
+   * @param {Object=} opt_data Additional data to echo back to the caller.
    */
   function process(buffer, inStereo, opt_data) {
+    var data = opt_data || {};
     var samples = samplesFromUint8(buffer, IN_RATE);
     var demodulated = demodulator.demodulateTuned(samples);
     var leftAudio = monoSampler.downsample(demodulated);
@@ -54,6 +55,7 @@ function Decoder() {
     if (inStereo) {
       var stereo = stereoSeparator.separate(demodulated);
       if (stereo.found) {
+        data['stereo'] = true;
         var diffAudio = stereoSampler.downsample(stereo.diff);
         rightAudio = new Samples(new Float32Array(leftAudio.data), diffAudio.rate);
         for (var i = 0; i < diffAudio.data.length; ++i) {
@@ -65,7 +67,7 @@ function Decoder() {
     }
 
     deemphasizer.inPlace(leftAudio);
-    postMessage([leftAudio, rightAudio, opt_data], [leftAudio.data.buffer, rightAudio.data.buffer]);
+    postMessage([leftAudio, rightAudio, data], [leftAudio.data.buffer, rightAudio.data.buffer]);
   }
 
   return {
