@@ -21,7 +21,7 @@
  * half-amplitude frequency and kernel length at the given sample rate.
  * @param {number} sampleRate The signal's sample rate.
  * @param {number} halfAmplFreq The half-amplitude frequency in Hz.
- * @param {number} The filter kernel's length. Should be an odd number.
+ * @param {number} length The filter kernel's length. Should be an odd number.
  * @param {Float32Array} The FIR coefficients for the filter. 
  */
 function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
@@ -31,11 +31,10 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
   var center = Math.floor(length / 2);
   coefs[center] = 2 * Math.PI * freq;
   var sum = coefs[center];
-  for (var i = 1; i < center; ++i) {
+  for (var i = 1; i <= center; ++i) {
+    var angle = 2 * Math.PI * (center - i + 1) / (length + 2);
     var val = Math.sin(2 * Math.PI * freq * i) / i;
-    val *= (0.42
-        - 0.5 * Math.cos(2 * Math.PI * (center - i) / length)
-        + 0.08 * Math.cos(4 * Math.PI * (center - i) / length));
+    val *= (0.42 - 0.5 * Math.cos(angle) + 0.08 * Math.cos(2 * angle));
     coefs[center + i] = coefs[center - i] = val;
     sum += 2 * val;
   }
