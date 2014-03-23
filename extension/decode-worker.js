@@ -32,7 +32,7 @@ var DEEMPH_TC = 50;
  */
 function Decoder() {
   var demodulator = new FMDemodulator(IN_RATE, INTER_RATE, MAX_F);
-  var filterCoefs = getLowPassFIRCoeffs(INTER_RATE, 10, 41);
+  var filterCoefs = getLowPassFIRCoeffs(INTER_RATE, 10000, 41);
   var monoSampler = new Downsampler(INTER_RATE, OUT_RATE, filterCoefs);
   var stereoSampler = new Downsampler(INTER_RATE, OUT_RATE, filterCoefs);
   var stereoSeparator = new StereoSeparator(INTER_RATE, PILOT_FREQ);

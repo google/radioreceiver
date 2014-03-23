@@ -29,14 +29,18 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
   var freq = halfAmplFreq / sampleRate;
   var coefs = new Float32Array(length);
   var center = Math.floor(length / 2);
-  coefs[center] = 2 * Math.PI * freq;
-  var sum = coefs[center];
-  for (var i = 1; i <= center; ++i) {
-    var angle = 2 * Math.PI * (center - i + 1) / (length + 2);
-    var val = Math.sin(2 * Math.PI * freq * i) / i;
-    val *= (0.42 - 0.5 * Math.cos(angle) + 0.08 * Math.cos(2 * angle));
-    coefs[center + i] = coefs[center - i] = val;
-    sum += 2 * val;
+  var sum = 0;
+  for (var i = 0; i < length; ++i) {
+    var val;
+    if (i == center) {
+      val = 2 * Math.PI * freq;
+    } else {
+      var angle = 2 * Math.PI * (i + 1) / (length + 1);
+      val = Math.sin(2 * Math.PI * freq * (i - center)) / (i - center);
+      val *= 0.42 - 0.5 * Math.cos(angle) + 0.08 * Math.cos(2 * angle);
+    }
+    sum += val;
+    coefs[i] = val;
   }
   for (var i = 0; i < length; ++i) {
     coefs[i] /= sum;
