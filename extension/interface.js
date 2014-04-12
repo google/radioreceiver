@@ -389,7 +389,7 @@ function Interface(fmRadio) {
     chrome.app.window.create('error.html', {
         'bounds': {
           'width': 500,
-          'height': 100
+          'height': 125
         },
         'resizable': false
       }, function(win) {
@@ -451,6 +451,10 @@ function Interface(fmRadio) {
 }
 
 window.addEventListener('load', function() {
+  // If the user has set a custom zoom level, resize the window to fit
+  var zoom = chrome.app.window.current().getBounds().width / window.innerWidth;
+  chrome.app.window.current().resizeTo(500 * zoom, 225 * zoom);
+
   var radio = new RadioController();
   var interface = new Interface(radio);
   interface.attach();
