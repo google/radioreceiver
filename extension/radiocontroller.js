@@ -36,7 +36,7 @@ function RadioController() {
     TUNER: 2,
     ALL_ON: 3,
     TUNING: 4,
-    PLAYING: 5
+    DETECTING: 5
   };
 
   var decoder = new Worker('decode-worker.js');
@@ -225,121 +225,192 @@ function RadioController() {
    * Performs the appropriate action according to the current state.
    */
   function processState() {
-    if (state.state == STATE.STARTING) {
-      if (state.substate == SUBSTATE.USB) {
-        state = new State(STATE.STARTING, SUBSTATE.TUNER, state.param);
-        chrome.usb.findDevices(TUNER,
-            function(conns) {
-              if (conns.length == 0) {
-                state = new State(STATE.OFF);
-                throwError('USB tuner device not found. The Radio Receiver ' +
-                           'app needs an RTL2832U-based DVB-T dongle ' +
-                           '(with an R820T tuner chip) to work.');
-              } else {
-                connection = conns[0];
-                processState();
-              }
-            });
-      } else if (state.substate == SUBSTATE.TUNER) {
-        state = new State(STATE.STARTING, SUBSTATE.ALL_ON, state.param);
-        tuner = new RTL2832U(connection);
-        tuner.setOnError(throwError);
-        tuner.open(function() {
-        tuner.setSampleRate(SAMPLE_RATE, function(rate) {
-        tuner.setCenterFrequency(frequency, function() {
-        processState();
-        })})});
-      } else if (state.substate == SUBSTATE.ALL_ON) {
-        var cb = state.param;
-        state = new State(STATE.PLAYING);
-        tuner.resetBuffer(function() {
-        cb && cb();
-        ui && ui.update();
-        startPipeline();
-        });
+    switch (state.state) {
+      case STATE.STARTING:
+        stateStarting();
+        break;
+      case STATE.PLAYING:
+        statePlaying();
+        break;
+      case STATE.CHG_FREQ:
+        stateChangeFrequency();
+        break;
+      case STATE.SCANNING:
+        stateScanning();
+        break;
+      case STATE.STOPPING:
+        stateStopping();
+        break;
+    }
+  }
+
+  /**
+   * STARTING state. Initializes the tuner and starts the decoding pipeline.
+   *
+   * This state has several substates: USB (when it needs to acquire and
+   * initialize the USB device), TUNER (needs to set the sample rate and
+   * tuned frequency), and ALL_ON (needs to start the decoding pipeline).
+   *
+   * At the last substate it transitions into the PLAYING state.
+   */
+  function stateStarting() {
+    if (state.substate == SUBSTATE.USB) {
+      state = new State(STATE.STARTING, SUBSTATE.TUNER, state.param);
+      chrome.usb.findDevices(TUNER,
+          function(conns) {
+            if (conns.length == 0) {
+              state = new State(STATE.OFF);
+              throwError('USB tuner device not found. The Radio Receiver ' +
+                         'app needs an RTL2832U-based DVB-T dongle ' +
+                         '(with an R820T tuner chip) to work.');
+            } else {
+              connection = conns[0];
+              processState();
+            }
+          });
+    } else if (state.substate == SUBSTATE.TUNER) {
+      state = new State(STATE.STARTING, SUBSTATE.ALL_ON, state.param);
+      tuner = new RTL2832U(connection);
+      tuner.setOnError(throwError);
+      tuner.open(function() {
+      tuner.setSampleRate(SAMPLE_RATE, function(rate) {
+      tuner.setCenterFrequency(frequency, function() {
+      processState();
+      })})});
+    } else if (state.substate == SUBSTATE.ALL_ON) {
+      var cb = state.param;
+      state = new State(STATE.PLAYING);
+      tuner.resetBuffer(function() {
+      cb && cb();
+      ui && ui.update();
+      startPipeline();
+      });
+    }
+  }
+
+  /**
+   * PLAYING state. Reads a block of samples from the tuner and plays it.
+   *
+   * 2 blocks are in flight all at times, so while one block is being
+   * demodulated and played, the next one is already being sampled.
+   */
+  function statePlaying() {
+    ++requestingBlocks;
+    tuner.readSamples(SAMPLES_PER_BUF, function(data) {
+      --requestingBlocks;
+      if (state.state == STATE.PLAYING) {
+        if (playingBlocks <= 2) {
+          ++playingBlocks;
+          decoder.postMessage([data, stereoEnabled], [data]);
+        }
       }
-    } else if (state.state == STATE.PLAYING) {
+      processState();
+    });
+  }
+
+  /**
+   * CHG_FREQ state. Changes tuned frequency.
+   *
+   * First it waits until all in-flight blocks have been dealt with. When
+   * there are no more in-flight blocks it sets the new frequency, resets
+   * the buffer and transitions into the PLAYING state.
+   */
+  function stateChangeFrequency() {
+    if (requestingBlocks > 0) {
+      return;
+    }
+    frequency = state.param;
+    ui && ui.update();
+    tuner.setCenterFrequency(frequency, function() {
+    tuner.resetBuffer(function() {
+    state = new State(STATE.PLAYING);
+    startPipeline();
+    })});
+  }
+
+  /**
+   * SCANNING state. Scans for a station.
+   *
+   * First it waits until all in-flight blocks have been dealt with.
+   * Afterwards, it transitions between these two substates: TUNING (when it
+   * needs to change to the next frequency), DETECTING (when it needs to
+   * capture one block of samples and detect a station).
+   *
+   * From the DETECTING substate it can transition either to the TUNING
+   * substate to go to the next frequency or to the PLAYING state if it got
+   * back to the starting frequency. Not included in this function but
+   * relevant: if the decoder detects a station, it will call the
+   * setFrequency() function, causing a transition to the TUNING state.
+   */
+  function stateScanning() {
+    if (requestingBlocks > 0) {
+      return;
+    }
+    var param = state.param;
+    if (state.substate == SUBSTATE.TUNING) {
+      frequency += param.step;
+      if (frequency > param.max) {
+        frequency = param.min;
+      } else if (frequency < param.min) {
+        frequency = param.max;
+      }
+      ui && ui.update();
+      state = new State(STATE.SCANNING, SUBSTATE.DETECTING, param);
+      tuner.setCenterFrequency(frequency, function() {
+      tuner.resetBuffer(processState);
+      });
+    } else if (state.substate == SUBSTATE.DETECTING) {
+      if (frequency == param.start) {
+        state = new State(STATE.PLAYING);
+        startPipeline();
+        return;
+      }
+      state = new State(STATE.SCANNING, SUBSTATE.TUNING, param);
+      var scanData = {
+        'scanning': true,
+        'frequency': frequency
+      };
       ++requestingBlocks;
       tuner.readSamples(SAMPLES_PER_BUF, function(data) {
         --requestingBlocks;
-        if (state.state == STATE.PLAYING) {
-          if (playingBlocks <= 2) {
-            ++playingBlocks;
-            decoder.postMessage([data, stereoEnabled], [data]);
-          }
+        if (state.state == STATE.SCANNING) {
+          ++playingBlocks;
+          decoder.postMessage([data, stereoEnabled, scanData], [data]);
         }
         processState();
       });
-    } else if (state.state == STATE.CHG_FREQ) {
+    }
+  }
+
+  /**
+   * STOPPING state. Stops playing and shuts the tuner down.
+   *
+   * This state has several substates: ALL_ON (when it needs to wait until
+   * all in-flight blocks have been vacated and close the tuner), TUNER (when
+   * it has closed the tuner and needs to close the USB device), and USB (when
+   * it has closed the USB device). After the USB substate it will transition
+   * to the OFF state.
+   */
+  function stateStopping() {
+    if (state.substate == SUBSTATE.ALL_ON) {
       if (requestingBlocks > 0) {
         return;
       }
-      frequency = state.param;
+      state = new State(STATE.STOPPING, SUBSTATE.TUNER, state.param);
       ui && ui.update();
-      tuner.setCenterFrequency(frequency, function() {
-      tuner.resetBuffer(function() {
-      state = new State(STATE.PLAYING);
-      startPipeline();
-      })});
-    } else if (state.state == STATE.SCANNING) {
-      if (requestingBlocks > 0) {
-        return;
-      }
-      var param = state.param;
-      if (state.substate == SUBSTATE.TUNING) {
-        frequency += param.step;
-        if (frequency > param.max) {
-          frequency = param.min;
-        } else if (frequency < param.min) {
-          frequency = param.max;
-        }
-        ui && ui.update();
-        state = new State(STATE.SCANNING, SUBSTATE.PLAYING, param);
-        tuner.setCenterFrequency(frequency, function() {
-        tuner.resetBuffer(processState);
-        });
-      } else if (state.substate == SUBSTATE.PLAYING) {
-        if (frequency == param.start) {
-          state = new State(STATE.PLAYING);
-          startPipeline();
-          return;
-        }
-        state = new State(STATE.SCANNING, SUBSTATE.TUNING, param);
-        var scanData = {
-          'scanning': true,
-          'frequency': frequency
-        };
-        ++requestingBlocks;
-        tuner.readSamples(SAMPLES_PER_BUF, function(data) {
-          --requestingBlocks;
-          if (state.state == STATE.SCANNING) {
-            ++playingBlocks;
-            decoder.postMessage([data, stereoEnabled, scanData], [data]);
-          }
-          processState();
-        });
-      }
-    } else if (state.state == STATE.STOPPING) {
-      if (state.substate == SUBSTATE.ALL_ON) {
-        if (requestingBlocks > 0) {
-          return;
-        }
-        state = new State(STATE.STOPPING, SUBSTATE.TUNER, state.param);
-        ui && ui.update();
-        tuner.close(function() {
-          processState();
-        });
-      } else if (state.substate == SUBSTATE.TUNER) {
-        state = new State(STATE.STOPPING, SUBSTATE.USB, state.param);
-        chrome.usb.closeDevice(connection, function() {
-          processState();
-        });
-      } else if (state.substate == SUBSTATE.USB) {
-        var cb = state.param;
-        state = new State(STATE.OFF);
-        cb && cb();
-        ui && ui.update();
-      }
+      tuner.close(function() {
+        processState();
+      });
+    } else if (state.substate == SUBSTATE.TUNER) {
+      state = new State(STATE.STOPPING, SUBSTATE.USB, state.param);
+      chrome.usb.closeDevice(connection, function() {
+        processState();
+      });
+    } else if (state.substate == SUBSTATE.USB) {
+      var cb = state.param;
+      state = new State(STATE.OFF);
+      cb && cb();
+      ui && ui.update();
     }
   }
 
