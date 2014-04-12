@@ -227,20 +227,15 @@ function RadioController() {
   function processState() {
     switch (state.state) {
       case STATE.STARTING:
-        stateStarting();
-        break;
+        return stateStarting();
       case STATE.PLAYING:
-        statePlaying();
-        break;
+        return statePlaying();
       case STATE.CHG_FREQ:
-        stateChangeFrequency();
-        break;
+        return stateChangeFrequency();
       case STATE.SCANNING:
-        stateScanning();
-        break;
+        return stateScanning();
       case STATE.STOPPING:
-        stateStopping();
-        break;
+        return stateStopping();
     }
   }
 
