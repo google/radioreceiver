@@ -50,14 +50,13 @@ function Decoder() {
     var samples = samplesFromUint8(buffer, IN_RATE);
     var demodulated = demodulator.demodulateTuned(samples);
     var leftAudio = monoSampler.downsample(demodulated);
-    var rightAudio = leftAudio;
+    var rightAudio = new Samples(new Float32Array(leftAudio.data), leftAudio.rate);
 
     if (inStereo) {
       var stereo = stereoSeparator.separate(demodulated);
       if (stereo.found) {
         data['stereo'] = true;
         var diffAudio = stereoSampler.downsample(stereo.diff);
-        rightAudio = new Samples(new Float32Array(leftAudio.data), diffAudio.rate);
         for (var i = 0; i < diffAudio.data.length; ++i) {
           rightAudio.data[i] -= diffAudio.data[i];
           leftAudio.data[i] += diffAudio.data[i];
