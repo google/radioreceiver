@@ -124,7 +124,9 @@ function RtlCom(conn) {
    * @param {Function} kont The continuation for this function.
    */
   function writeDemodReg(page, addr, value, len, kont) {
-    writeRegBuffer(page, (addr << 8) | 0x20, numberToBuffer(value, len, true), kont);
+    writeRegBuffer(page, (addr << 8) | 0x20, numberToBuffer(value, len, true), function() {
+    readDemodReg(0x0a, 0x01, kont);
+    });
   }
 
   /**

@@ -143,7 +143,7 @@ function RTL2832U(conn) {
    */
   function setSampleRate(rate, kont) {
     var ratio = Math.floor(XTAL_FREQ * (1 << 22) / rate);
-    ratio &= ~3;
+    ratio &= 0x0ffffffc;
     var realRate = Math.floor(XTAL_FREQ * (1 << 22) / ratio);
     var ppmOffset = -1 * Math.floor(PPM * (1 << 24) / 1000000);
     com.writeEach([
