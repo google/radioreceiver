@@ -227,8 +227,8 @@ function StereoSeparator(sampleRate, pilotFreq) {
   /**
    * Locks on to the pilot tone and uses it to demodulate the stereo audio.
    * @param {Samples} samples The original audio stream.
-   * @return {Object} An object with a key 'stereo' that tells whether a
-   *     consistent stereo pilot tone was detected and a key 'output'
+   * @return {Object} An object with a key 'found' that tells whether a
+   *     consistent stereo pilot tone was detected and a key 'diff'
    *     that contains the original stream demodulated with the
    *     reconstructed stereo carrier.
    */
