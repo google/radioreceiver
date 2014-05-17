@@ -65,8 +65,9 @@ function Decoder() {
       }
     }
 
+    data['rate'] = OUT_RATE;
     deemphasizer.inPlace(leftAudio);
-    postMessage([leftAudio, rightAudio, data], [leftAudio.data.buffer, rightAudio.data.buffer]);
+    postMessage([leftAudio.data, rightAudio.data, data], [leftAudio.data.buffer, rightAudio.data.buffer]);
   }
 
   return {

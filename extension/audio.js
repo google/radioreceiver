@@ -28,18 +28,19 @@ function Player() {
 
   /**
    * Queues the given samples for playing at the appropriate time.
-   * @param {Samples} leftSamples The samples for the left speaker.
-   * @param {Samples} rightSamples The samples for the right speaker.
+   * @param {Float32Array} leftSamples The samples for the left speaker.
+   * @param {Float32Array} rightSamples The samples for the right speaker.
+   * @param {number} rate The sample rate.
    */
-  function play(leftSamples, rightSamples) {
-    var buffer = ac.createBuffer(2, leftSamples.data.length, leftSamples.rate);
-    buffer.getChannelData(0).set(leftSamples.data);
-    buffer.getChannelData(1).set(rightSamples.data);
+  function play(leftSamples, rightSamples, rate) {
+    var buffer = ac.createBuffer(2, leftSamples.length, rate);
+    buffer.getChannelData(0).set(leftSamples);
+    buffer.getChannelData(1).set(rightSamples);
     var source = ac.createBufferSource();
     source.buffer = buffer;
     source.connect(ac.destination);
     lastPlayedAt = Math.max(
-        lastPlayedAt + leftSamples.data.length / leftSamples.rate,
+        lastPlayedAt + leftSamples.length / rate,
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
   }
