@@ -413,36 +413,38 @@ function RadioController() {
    * Receives the sound from the demodulator and plays it.
    * @param {Event} msg The data sent by the demodulator.
    */
-  decoder.onmessage = function(msg) {
+  function receiveDemodulated(msg) {
     --playingBlocks;
     var newStereo = msg.data[2]['stereo'];
     if (newStereo != stereo) {
       stereo = newStereo;
       ui && ui.update();
     }
-    player.play(new Float32Array(msg.data[0]),
-                new Float32Array(msg.data[1]),
-                msg.data[2]['rate']);
+    var left = new Float32Array(msg.data[0]);
+    var right = new Float32Array(msg.data[1]);
+    player.play(left, right, msg.data[2]['rate']);
     if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
-      if (overload(msg.data[0]) < 0.075) {
+      if (overload(left) < 0.075) {
         setFrequency(msg.data[2].frequency);
       }
     }
-  };
+  }
+
+  decoder.addEventListener('message', receiveDemodulated);
 
   /**
    * Calculates the proportion of samples above maximum amplitude.
-   * @param {Samples} samples The audio stream.
+   * @param {Float32Array} samples The audio stream.
    * @param {number} The proportion of samples above the maximum amplitude.
    */
   function overload(samples) {
     var count = 0;
-    for (var i = 0; i < samples.data.length; ++i) {
-      if (samples.data[i] > 1 || samples.data[i] < -1) {
+    for (var i = 0; i < samples.length; ++i) {
+      if (samples[i] > 1 || samples[i] < -1) {
         ++count;
       }
     }
-    return count / samples.data.length;
+    return count / samples.length;
   }
 
   /**
