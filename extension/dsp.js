@@ -22,7 +22,7 @@
  * @param {number} sampleRate The signal's sample rate.
  * @param {number} halfAmplFreq The half-amplitude frequency in Hz.
  * @param {number} length The filter kernel's length. Should be an odd number.
- * @param {Float32Array} The FIR coefficients for the filter. 
+ * @return {Float32Array} The FIR coefficients for the filter. 
  */
 function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
   length += (length + 1) % 2;
@@ -341,6 +341,7 @@ function Samples(floatArray, rate) {
  * Converts the given buffer of unsigned 8-bit samples into a samples object.
  * @param {ArrayBuffer} buffer A buffer containing the unsigned 8-bit samples.
  * @param {number} rate The buffer's sample rate.
+ * @return {Samples} The converted samples.
  */
 function samplesFromUint8(buffer, rate) {
   var arr = new Uint8Array(buffer);
