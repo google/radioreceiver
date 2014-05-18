@@ -420,7 +420,9 @@ function RadioController() {
       stereo = newStereo;
       ui && ui.update();
     }
-    player.play(msg.data[0], msg.data[1], msg.data[2]['rate']);
+    player.play(new Float32Array(msg.data[0]),
+                new Float32Array(msg.data[1]),
+                msg.data[2]['rate']);
     if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
       if (overload(msg.data[0]) < 0.075) {
         setFrequency(msg.data[2].frequency);
