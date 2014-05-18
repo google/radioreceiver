@@ -20,9 +20,6 @@
 #include <cmath>
 #include <stdint.h>
 
-#include <cstdio>
-
-
 #include "dsp.h"
 
 using namespace std;
