@@ -1,11 +1,11 @@
 // Copyright 2014 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,12 +55,12 @@ vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq, int length
   return coefficients;
 }
 
-unique_ptr<Samples> samplesFromUint8(uint8_t* buffer, int length, int rate) {
+Samples samplesFromUint8(uint8_t* buffer, int length, int rate) {
   vector<float> out(length);
   for (int i = 0; i < length; ++i) {
     out[i] = buffer[i] / 128.0 - 1;
   }
-  return unique_ptr<Samples>(new Samples(out, rate));
+  return Samples(out, rate);
 }
 
 
@@ -71,11 +71,10 @@ FIRFilter::FIRFilter(const vector<float>& coefficients, int step)
 
 void FIRFilter::loadSamples(const Samples& samples) {
   int fullLen = samples.getData().size() + offset_;
-  move_backward(curSamples_.end() - offset_, curSamples_.end(), curSamples_.begin());
-  if (curSamples_.size() < fullLen) {
-    curSamples_.resize(fullLen);
-  }
-  copy(samples.getData().begin(), samples.getData().end(), curSamples_.begin() + offset_);
+  vector<float> newSamples(fullLen);
+  auto newStart = copy(curSamples_.end() - offset_, curSamples_.end(), newSamples.begin());
+  copy(samples.getData().begin(), samples.getData().end(), newStart);
+  curSamples_ = newSamples;
 }
 
 float FIRFilter::get(int index) {
@@ -91,7 +90,7 @@ float FIRFilter::get(int index) {
 Downsampler::Downsampler(int inRate, int outRate, const vector<float>& coefficients)
     : filter_(coefficients, 1), rateMul_(inRate / outRate), outRate_(outRate) {}
 
-unique_ptr<Samples> Downsampler::downsample(const Samples& samples) {
+Samples Downsampler::downsample(const Samples& samples) {
   filter_.loadSamples(samples);
   int outLen = samples.getData().size() / rateMul_;
   vector<float> out(outLen);
@@ -99,14 +98,14 @@ unique_ptr<Samples> Downsampler::downsample(const Samples& samples) {
   for (int i = 0; i < outLen; ++i, readFrom += rateMul_) {
     out[i] = filter_.get((int) readFrom);
   }
-  return unique_ptr<Samples>(new Samples(out, outRate_));
+  return Samples(out, outRate_);
 }
 
 
 IQDownsampler::IQDownsampler(int inRate, int outRate, const vector<float>& coefficients)
     : filter_(coefficients, 2), rateMul_(inRate / outRate), outRate_(outRate) {}
 
-unique_ptr<SamplesIQ> IQDownsampler::downsample(const Samples& samples) {
+SamplesIQ IQDownsampler::downsample(const Samples& samples) {
   int numSamples = samples.getData().size() / (2 * rateMul_);
   filter_.loadSamples(samples);
   vector<float> outI(numSamples);
@@ -117,7 +116,7 @@ unique_ptr<SamplesIQ> IQDownsampler::downsample(const Samples& samples) {
     outI[i] = filter_.get(idx);
     outQ[i] = filter_.get(idx + 1);
   }
-  return unique_ptr<SamplesIQ>(new SamplesIQ(Samples(outI, outRate_), Samples(outQ, outRate_)));
+  return SamplesIQ(outI, outQ, outRate_);
 }
 
 
@@ -130,10 +129,10 @@ FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF)
     downsampler_(inRate, outRate, getLowPassFIRCoeffs(inRate, maxF * kMaxFFactor, kFilterLen)),
     lI_(0), lQ_(0) {}
 
-unique_ptr<Samples> FMDemodulator::demodulateTuned(const Samples& samples) {
-  unique_ptr<SamplesIQ> iqSamples(downsampler_.downsample(samples));
-  vector<float> I = iqSamples->first.getData();
-  vector<float> Q = iqSamples->second.getData();
+Samples FMDemodulator::demodulateTuned(const Samples& samples) {
+  SamplesIQ iqSamples(downsampler_.downsample(samples));
+  vector<float> I = iqSamples.getI();
+  vector<float> Q = iqSamples.getQ();
   int outLen = I.size();
   vector<float> out(outLen);
   for (int i = 0; i < outLen; ++i) {
@@ -143,7 +142,7 @@ unique_ptr<Samples> FMDemodulator::demodulateTuned(const Samples& samples) {
     lI_ = I[i];
     lQ_ = Q[i];
   }
-  return unique_ptr<Samples>(new Samples(out, outRate_));
+  return Samples(out, outRate_);
 }
 
 
@@ -165,10 +164,10 @@ StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
     float freq = (pilotFreq + i / 100 - 40) * k2Pi / sampleRate;
     sinTable_[i] = sin(freq);
     cosTable_[i] = cos(freq);
-  }      
+  }
 }
 
-unique_ptr<StereoSignal> StereoSeparator::separate(const Samples& samples) {
+StereoSignal StereoSeparator::separate(const Samples& samples) {
   vector<float> in = samples.getData();
   int outLen = in.size();
   vector<float> out(outLen);
@@ -188,7 +187,7 @@ unique_ptr<StereoSignal> StereoSeparator::separate(const Samples& samples) {
     sin_ = newSin;
     cavg_.add(corr * 10);
   }
-  return unique_ptr<StereoSignal>(new StereoSignal(cavg_.getStd(), Samples(out, samples.getRate())));
+  return StereoSignal(cavg_.getStd(), Samples(out, samples.getRate()));
 }
 
 
@@ -208,4 +207,3 @@ void Deemphasizer::inPlace(const Samples& samples) {
 }
 
 }  // namespace radioreceiver
-

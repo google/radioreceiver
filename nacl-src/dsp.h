@@ -1,11 +1,11 @@
 // Copyright 2014 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,20 +38,47 @@ class Samples {
  public:
   /**
    * Instance constructor.
-   * @param data The sample vector. The constructor takes ownership of it.
+   * @param data The sample vector.
    * @param rate The sample rate.
    */
   Samples(const vector<float>& data, int rate)
       : data_(data), rate_(rate) {}
+  Samples() : data_(vector<float>()), rate_(0) {}
+  Samples(const Samples& other) : data_(other.data_), rate_(other.rate_) {}
+  Samples(Samples&& other) : data_(move(other.data_)), rate_(other.rate_) {}
 
   int getRate() const { return rate_; }
-  vector<float> getData() const { return data_; }
+  const vector<float>& getData() const { return data_; }
+  vector<float>& getData() { return data_; }
 };
 
 /**
  * A deinterlaced I/Q sample stream.
  */
-typedef pair<Samples,Samples> SamplesIQ;
+class SamplesIQ {
+  vector<float> dataI_;
+  vector<float> dataQ_;
+  int rate_;
+
+ public:
+  /**
+   * Instance constructor.
+   * @param data The vector for the I samples.
+   * @param data The vector for the Q samples.
+   * @param rate The sample rate.
+   */
+  SamplesIQ(const vector<float>& dataI, const vector<float>& dataQ, int rate)
+      : dataI_(dataI), dataQ_(dataQ), rate_(rate) {}
+  SamplesIQ() : dataI_(vector<float>()), dataQ_(vector<float>()), rate_(0) {}
+  SamplesIQ(const SamplesIQ& other) : dataI_(other.dataI_), dataQ_(other.dataQ_), rate_(other.rate_) {}
+  SamplesIQ(SamplesIQ&& other) : dataI_(move(other.dataI_)), dataQ_(move(other.dataQ_)), rate_(other.rate_) {}
+
+  int getRate() const { return rate_; }
+  const vector<float>& getI() const { return dataI_; }
+  vector<float>& getI() { return dataI_; }
+  const vector<float>& getQ() const { return dataQ_; }
+  vector<float>& getQ() { return dataQ_; }
+};
 
 /**
  * Converts the given buffer of unsigned 8-bit samples into a samples object.
@@ -60,7 +87,7 @@ typedef pair<Samples,Samples> SamplesIQ;
  * @param rate The buffer's sample rate.
  * @return The converted samples.
  */
-unique_ptr<Samples> samplesFromUint8(uint8_t* buffer, int length, int rate);
+Samples samplesFromUint8(uint8_t* buffer, int length, int rate);
 
 /**
  * Generates coefficients for a FIR low-pass filter with the given
@@ -99,7 +126,7 @@ class FIRFilter {
    * Returns a filtered sample.
    * @param index The index of the sample to return, corresponding
    *     to the same index in the latest sample block loaded via loadSamples().
-   */  
+   */
   float get(int index);
 };
 
@@ -126,7 +153,7 @@ class Downsampler {
    * @param samples The sample block to downsample.
    * @return The downsampled block.
    */
-  unique_ptr<Samples> downsample(const Samples& samples);
+  Samples downsample(const Samples& samples);
 };
 
 /**
@@ -152,7 +179,7 @@ class IQDownsampler {
    * @param samples The sample block to downsample.
    * @return The deinterlaced and downsampled block.
    */
-  unique_ptr<SamplesIQ> downsample(const Samples& samples);
+  SamplesIQ downsample(const Samples& samples);
 };
 
 /**
@@ -174,7 +201,7 @@ class FMDemodulator {
    * @param inRate The sample rate for the input signal.
    * @param outRate The sample rate for the output audio.
    * @param maxF The maximum frequency deviation.
-   */ 
+   */
   FMDemodulator(int inRate, int outRate, int maxF);
 
   /**
@@ -182,7 +209,7 @@ class FMDemodulator {
    * @param samples The samples to demodulate.
    * @return The demodulated sound.
    */
-  unique_ptr<Samples> demodulateTuned(const Samples& samples);
+  Samples demodulateTuned(const Samples& samples);
 };
 
 
@@ -198,7 +225,8 @@ class StereoSignal {
       : pilotDetected_(pilotDetected), stereoDiff_(stereoDiff) {}
 
   bool wasPilotDetected() const { return pilotDetected_; }
-  Samples getStereoDiff() const { return stereoDiff_; }
+  const Samples& getStereoDiff() const { return stereoDiff_; }
+  Samples& getStereoDiff() { return stereoDiff_; }
 };
 
 
@@ -241,14 +269,13 @@ class StereoSeparator {
    * @param pilotFreq The frequency of the pilot tone.
    */
   StereoSeparator(int sampleRate, int pilotFreq);
-  
+
   /**
    * Locks on to the pilot tone and uses it to demodulate the stereo audio.
    * @param samples The original audio stream.
-   * @return A container for the separated signal. Ownership is passed to
-   *     the caller.
+   * @return A container for the separated signal.
    */
-  unique_ptr<StereoSignal> separate(const Samples& samples);
+  StereoSignal separate(const Samples& samples);
 };
 
 
@@ -278,4 +305,3 @@ class Deemphasizer {
 }  // namespace radioreceiver
 
 #endif  // DSP_H_
-

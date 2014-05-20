@@ -1,11 +1,11 @@
 // Copyright 2014 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,33 +34,34 @@ Decoder::Decoder() : demodulator_(kInRate, kInterRate, kMaxF),
                      stereoSeparator_(kInterRate, kPilotFreq),
                      deemphasizer_(kOutRate, kDeemphTc) {}
 
-void Decoder::process(uint8_t* buffer, int length, bool inStereo,
-    unique_ptr<Samples>& leftAudio, unique_ptr<Samples>& rightAudio) {
+StereoAudio Decoder::process(uint8_t* buffer, int length, bool inStereo) {
 
-  unique_ptr<Samples> samples = samplesFromUint8(buffer, length, kInRate);
-  unique_ptr<Samples> demodulated = demodulator_.demodulateTuned(*samples);
-  
-  leftAudio = monoSampler_.downsample(*demodulated);
-  rightAudio = nullptr;
+  Samples samples(samplesFromUint8(buffer, length, kInRate));
+  Samples demodulated(demodulator_.demodulateTuned(samples));
+
+  StereoAudio output;
+  output.inStereo = false;
+  output.left = monoSampler_.downsample(demodulated);
 
   if (inStereo) {
-    unique_ptr<StereoSignal> stereo = stereoSeparator_.separate(*demodulated);
-    if (stereo->wasPilotDetected()) {
-      unique_ptr<Samples> diffAudio = stereoSampler_.downsample(stereo->getStereoDiff());
-      vector<float> diffAudioData = diffAudio->getData();
-      vector<float> leftAudioData = leftAudio->getData();
+    StereoSignal stereo(stereoSeparator_.separate(demodulated));
+    if (stereo.wasPilotDetected()) {
+      Samples diffAudio (stereoSampler_.downsample(stereo.getStereoDiff()));
+      vector<float>& diffAudioData = diffAudio.getData();
+      vector<float>& leftAudioData = output.left.getData();
       vector<float> rightAudioData(diffAudioData.size());
       for (int i = 0; i < diffAudioData.size(); ++i) {
         rightAudioData[i] = leftAudioData[i] - diffAudioData[i];
         leftAudioData[i] += diffAudioData[i];
       }
-      rightAudio = unique_ptr<Samples>(new Samples(rightAudioData, diffAudio->getRate()));
-      deemphasizer_.inPlace(*rightAudio);
+      output.right = Samples(rightAudioData, diffAudio.getRate());
+      output.inStereo = true;
+      deemphasizer_.inPlace(output.right);
     }
   }
 
-  deemphasizer_.inPlace(*leftAudio);
+  deemphasizer_.inPlace(output.left);
+  return output;
 }
 
 }  // namespace radioreceiver
-

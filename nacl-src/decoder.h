@@ -1,11 +1,11 @@
 // Copyright 2014 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,9 +31,26 @@ using namespace std;
 namespace radioreceiver {
 
 /**
+ * A small structure to contain stereo audio.
+ */
+struct StereoAudio {
+  Samples left;
+  Samples right;
+  bool inStereo;
+};
+
+/**
  * A class to implement a worker that demodulates an FM broadcast station.
  */
 class Decoder {
+  FMDemodulator demodulator_;
+  vector<float> filterCoefs_;
+  Downsampler monoSampler_;
+  Downsampler stereoSampler_;
+  StereoSeparator stereoSeparator_;
+  Deemphasizer deemphasizer_;
+
+ public:
   static const int kInRate = 1008000;
   static const int kInterRate = 336000;
   static const int kOutRate = 48000;
@@ -43,15 +60,6 @@ class Decoder {
   static const int kFilterFreq = 10000;
   static const int kFilterLen = 41;
 
-
-  FMDemodulator demodulator_;
-  vector<float> filterCoefs_;
-  Downsampler monoSampler_;
-  Downsampler stereoSampler_;
-  StereoSeparator stereoSeparator_;
-  Deemphasizer deemphasizer_;
-
- public:
   Decoder();
 
   /**
@@ -63,11 +71,9 @@ class Decoder {
    * @param[out] leftAudio A pointer to store the left ear audio data.
    * @param[out] rightAudio A pointer to store the right ear audio data.
    */
-  void process(uint8_t* buffer, int length, bool inStereo,
-               unique_ptr<Samples>& leftAudio, unique_ptr<Samples>& rightAudio);
+  StereoAudio process(uint8_t* buffer, int length, bool inStereo);
 };
 
 }  // namespace radioreceiver
 
 #endif  // DECODER_H_
-
