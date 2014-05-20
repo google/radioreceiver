@@ -38,7 +38,7 @@ float generate(Config cfg, float phase,
                uint8_t* buffer, int length) {
   int pilotFreq = 19000;
   int maxF = 75000;
-  for (int i = 0; i < length; i += 2) {
+  for (int i = 0; i < length / 2; ++i) {
     float samplePre = 0;
     if (cfg.stereo) {
       float sampleLeft = cos(k2Pi * cfg.leftFreq * i / cfg.rate);
@@ -54,8 +54,8 @@ float generate(Config cfg, float phase,
     phase += k2Pi * samplePre * maxF / cfg.rate;
     float sampleI = cos(phase);
     float sampleQ = sin(phase);
-    buffer[i] = 255 * (sampleI + 1) / 2;
-    buffer[i + 1] = 255 * (sampleQ + 1) / 2;
+    buffer[2 * i] = 255 * (sampleI + 1) / 2;
+    buffer[2 * i + 1] = 255 * (sampleQ + 1) / 2;
   }
   return phase;
 }
@@ -85,9 +85,9 @@ int main(int argc, char* argv[]) {
 
   uint8_t buffer[kBufLen];
 
-  long samples = cfg.duration * cfg.rate;
-  for (long i = 0; i < samples; i += kBufLen) {
-    int wanted = samples - i;
+  long bytes = 2 * cfg.duration * cfg.rate;
+  for (long i = 0; i < bytes; i += kBufLen) {
+    int wanted = bytes - i;
     if (wanted > kBufLen) {
       wanted = kBufLen;
     }
