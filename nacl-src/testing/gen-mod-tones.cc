@@ -34,22 +34,25 @@ struct Config {
   float duration;
 };
 
-float generate(Config cfg, float phase,
-               uint8_t* buffer, int length) {
+void generate(Config cfg, uint8_t* buffer, int length) {
+  static float phase = 0;
+  static int sample = 0;
   int pilotFreq = 19000;
   int maxF = 75000;
   for (int i = 0; i < length / 2; ++i) {
+    ++sample;
     float samplePre = 0;
     if (cfg.stereo) {
-      float sampleLeft = cos(k2Pi * cfg.leftFreq * i / cfg.rate);
-      float sampleRight = cos(k2Pi * cfg.rightFreq * i / cfg.rate);
-      float samplePilot = cos(k2Pi * pilotFreq * i / cfg.rate);
+      float sampleLeft = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
+      float sampleRight = sin(k2Pi * cfg.rightFreq * sample / cfg.rate);
+      float samplePilot = sin(k2Pi * pilotFreq * sample / cfg.rate);
       float sampleSum = sampleLeft + sampleRight;
       float sampleDiff = sampleLeft - sampleRight;
-      float sampleTop = sampleDiff * cos(k2Pi * 2 * pilotFreq * i / cfg.rate);
+      float sampleTop = sampleDiff *
+          sin(k2Pi * 2 * pilotFreq * sample / cfg.rate);
       samplePre = sampleSum * .45 + samplePilot * .1 + sampleTop * .45;
     } else {
-      samplePre = cos(k2Pi * cfg.leftFreq * i / cfg.rate);
+      samplePre = cos(k2Pi * cfg.leftFreq * sample / cfg.rate);
     }
     phase += k2Pi * samplePre * maxF / cfg.rate;
     float sampleI = cos(phase);
@@ -57,7 +60,6 @@ float generate(Config cfg, float phase,
     buffer[2 * i] = 255 * (sampleI + 1) / 2;
     buffer[2 * i + 1] = 255 * (sampleQ + 1) / 2;
   }
-  return phase;
 }
 
 int main(int argc, char* argv[]) {
@@ -91,7 +93,7 @@ int main(int argc, char* argv[]) {
     if (wanted > kBufLen) {
       wanted = kBufLen;
     }
-    generate(cfg, 0, buffer, wanted);
+    generate(cfg, buffer, wanted);
     cout.write(reinterpret_cast<char*>(buffer), wanted);
   }
 }
