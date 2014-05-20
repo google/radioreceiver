@@ -298,7 +298,7 @@ class Deemphasizer {
    * Deemphasizes the given samples in place.
    * @param samples The samples to deemphasize.
    */
-  void inPlace(const Samples& samples);
+  void inPlace(Samples& samples);
 };
 
 
