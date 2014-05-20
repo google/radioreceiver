@@ -29,6 +29,8 @@ using namespace std;
 
 namespace radioreceiver {
 
+const double k2Pi = 2 * 3.14159265358979;
+
 vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq, int length) {
   length += (length + 1) % 2;
   float freq = halfAmplFreq / sampleRate;
@@ -38,10 +40,10 @@ vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq, int length
   for (int i = 0; i < length; ++i) {
     float val;
     if (i == center) {
-      val = 2 * M_PI * freq;
+      val = k2Pi * freq;
     } else {
-      float angle = 2 * M_PI * (i + 1) / (length + 1);
-      val = sin(2 * M_PI * freq * (i - center)) / (i - center);
+      float angle = k2Pi * (i + 1) / (length + 1);
+      val = sin(k2Pi * freq * (i - center)) / (i - center);
       val *= 0.42 - 0.5 * cos(angle) + 0.08 * cos(2 * angle);
     }
     sum += val;
@@ -63,7 +65,8 @@ unique_ptr<Samples> samplesFromUint8(uint8_t* buffer, int length, int rate) {
 
 
 FIRFilter::FIRFilter(const vector<float>& coefficients, int step)
-    : coefficients_(coefficients), curSamples_(offset_, 0),
+    : coefficients_(coefficients),
+      curSamples_(coefficients.size() * step, 0),
       step_(step), offset_(coefficients.size() * step) {}
 
 void FIRFilter::loadSamples(const Samples& samples) {
@@ -123,7 +126,7 @@ const float FMDemodulator::kMaxFFactor = 0.8;
 
 
 FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF)
-  : outRate_(outRate), amplConv_(outRate * kGain / (2 * M_PI * maxF)),
+  : outRate_(outRate), amplConv_(outRate * kGain / (k2Pi * maxF)),
     downsampler_(inRate, outRate, getLowPassFIRCoeffs(inRate, maxF * kMaxFFactor, kFilterLen)),
     lI_(0), lQ_(0) {}
 
@@ -159,7 +162,7 @@ float ExpAverage::add(float value) {
 StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
     : sin_(0), cos_(1), iavg_(9999), qavg_(9999), cavg_(49999, true) {
   for (int i = 0; i < 8001; ++i) {
-    float freq = (pilotFreq + i / 100 - 40) * 2 * M_PI / sampleRate;
+    float freq = (pilotFreq + i / 100 - 40) * k2Pi / sampleRate;
     sinTable_[i] = sin(freq);
     cosTable_[i] = cos(freq);
   }      
