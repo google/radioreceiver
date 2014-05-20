@@ -20,9 +20,13 @@
 #ifndef DECODER_H_
 #define DECODER_H_
 
+#include <memory>
 #include <stdint.h>
+#include <vector>
 
 #include "dsp.h"
+
+using namespace std;
 
 namespace radioreceiver {
 
@@ -41,7 +45,7 @@ class Decoder {
 
 
   FMDemodulator demodulator_;
-  float* filterCoefs_;
+  vector<float> filterCoefs_;
   Downsampler monoSampler_;
   Downsampler stereoSampler_;
   StereoSeparator stereoSeparator_;
@@ -49,7 +53,6 @@ class Decoder {
 
  public:
   Decoder();
-  ~Decoder();
 
   /**
    * Demodulates the tuner's output, producing mono or stereo sound, and
@@ -60,7 +63,8 @@ class Decoder {
    * @param[out] leftAudio A pointer to store the left ear audio data.
    * @param[out] rightAudio A pointer to store the right ear audio data.
    */
-  void process(uint8_t* buffer, int length, bool inStereo, Samples** leftAudio, Samples** rightAudio);
+  void process(uint8_t* buffer, int length, bool inStereo,
+               unique_ptr<Samples>& leftAudio, unique_ptr<Samples>& rightAudio);
 };
 
 }  // namespace radioreceiver

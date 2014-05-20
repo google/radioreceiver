@@ -19,74 +19,75 @@
 #ifndef DSP_H_
 #define DSP_H_
 
+#include <memory>
 #include <stdint.h>
+#include <utility>
+#include <vector>
+
+using namespace std;
 
 namespace radioreceiver {
 
 /**
- * A class to store a list of floating-point samples with a given rate.
+ * A class to store a vector of floating-point samples with a given rate.
  */
 class Samples {
-  float *data_;
-  int length_;
+  vector<float> data_;
   int rate_;
 
  public:
   /**
    * Instance constructor.
-   * @param data The sample array. The constructor takes ownership of it.
-   * @param length The length of the sample array.
+   * @param data The sample vector. The constructor takes ownership of it.
    * @param rate The sample rate.
    */
-  Samples(float* data, int length, int rate)
-      : data_(data), length_(length), rate_(rate) {}
-  ~Samples() { delete data_; }
+  Samples(const vector<float>& data, int rate)
+      : data_(data), rate_(rate) {}
 
   int getRate() const { return rate_; }
-  float* getData() const { return data_; }
-  int getLength() const { return length_; }
+  vector<float> getData() const { return data_; }
 };
+
+/**
+ * A deinterlaced I/Q sample stream.
+ */
+typedef pair<Samples,Samples> SamplesIQ;
 
 /**
  * Converts the given buffer of unsigned 8-bit samples into a samples object.
  * @param buffer A buffer containing the unsigned 8-bit samples.
  * @param length The buffer's length.
  * @param rate The buffer's sample rate.
- * @return The converted samples. Ownership is transferred to the caller.
+ * @return The converted samples.
  */
-Samples* samplesFromUint8(uint8_t* buffer, int length, int rate);
+unique_ptr<Samples> samplesFromUint8(uint8_t* buffer, int length, int rate);
 
 /**
  * Generates coefficients for a FIR low-pass filter with the given
  * half-amplitude frequency and kernel length at the given sample rate.
  * @param sampleRate The signal's sample rate.
  * @param halfAmplFreq The half-amplitude frequency in Hz.
- * @param length The length of the coefficient array. Must be an odd number.
+ * @param length The length of the coefficient array. Should be an odd number.
  * @return The filter coefficients.
  */
-float* getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq, int length);
+vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq, int length);
 
 /**
  * A Finite Impulse Response filter.
  */
 class FIRFilter {
-  float* coefficients_;
-  int coefLen_;
+  vector<float> coefficients_;
+  vector<float> curSamples_;
   int step_;
   int offset_;
-  float* curSamples_;
-  int curSampleLen_;
-  int curSampleCap_;
 
  public:
   /**
    * Constructor for an filter with the given coefficients and step interval.
    * @param coefficients The coefficients of the filter to apply.
-   * @param coefLen The number of filter coefficients.
    * @param step The stepping between samples.
    */
-  FIRFilter(float* coefficients, int coefLen, int step = 1);
-  ~FIRFilter();
+  FIRFilter(const vector<float>& coefficients, int step = 1);
 
   /**
    * Loads a new block of samples to filter.
@@ -117,16 +118,15 @@ class Downsampler {
    * @param outRate The output signal's sample rate.
    * @param coefficients The coefficients for the FIR filter to apply to the
    *     original signal before downsampling it.
-   * @param coefLen The length of the FIR filter coefficients.
    */
-  Downsampler(int inRate, int outRate, float* coefficients, int coefLen);
+  Downsampler(int inRate, int outRate, const vector<float>& coefficients);
 
   /**
    * Returns a downsampled version of the given samples.
    * @param samples The sample block to downsample.
-   * @return The downsampled block. Ownership is transferred to the caller.
+   * @return The downsampled block.
    */
-  Samples* downsample(const Samples& samples);
+  unique_ptr<Samples> downsample(const Samples& samples);
 };
 
 /**
@@ -144,19 +144,15 @@ class IQDownsampler {
    * @param outRate The output signal's sample rate.
    * @param coefficients The coefficients for the FIR filter to apply to the
    *     original signal before downsampling it.
-   * @param coefLen The length of the FIR filter coefficients.
    */
-  IQDownsampler(int inRate, int outRate, float* coefficients, int coefLen);
+  IQDownsampler(int inRate, int outRate, const vector<float>& coefficients);
 
   /**
    * Returns a downsampled version of the given samples.
    * @param samples The sample block to downsample.
-   * @param[out] samplesI Pointer to write the samples for the I stream to.
-   *     Ownership is transferred to the caller.
-   * @param[out] samplesQ Pointer to write the samples for the Q stream to.
-   *     Ownership is transferred to the caller.
+   * @return The deinterlaced and downsampled block.
    */
-  void downsample(const Samples& samples, Samples** samplesI, Samples** samplesQ);
+  unique_ptr<SamplesIQ> downsample(const Samples& samples);
 };
 
 /**
@@ -169,7 +165,6 @@ class FMDemodulator {
 
   int outRate_;
   float amplConv_;
-  float* filterCoefs_;
   IQDownsampler downsampler_;
   float lI_;
   float lQ_;
@@ -181,14 +176,13 @@ class FMDemodulator {
    * @param maxF The maximum frequency deviation.
    */ 
   FMDemodulator(int inRate, int outRate, int maxF);
-  ~FMDemodulator();
 
   /**
    * Demodulates the given I/Q samples.
    * @param samples The samples to demodulate.
-   * @return The demodulated sound. Ownership is transferred to the caller.
+   * @return The demodulated sound.
    */
-  Samples* demodulateTuned(const Samples& samples);
+  unique_ptr<Samples> demodulateTuned(const Samples& samples);
 };
 
 
@@ -197,15 +191,14 @@ class FMDemodulator {
  */
 class StereoSignal {
   bool pilotDetected_;
-  Samples* stereoDiff_;
+  Samples stereoDiff_;
 
  public:
-  StereoSignal(bool pilotDetected, Samples* stereoDiff)
+  StereoSignal(bool pilotDetected, const Samples& stereoDiff)
       : pilotDetected_(pilotDetected), stereoDiff_(stereoDiff) {}
-  ~StereoSignal() { delete stereoDiff_; }
 
   bool wasPilotDetected() const { return pilotDetected_; }
-  Samples* getStereoDiff() const { return stereoDiff_; }
+  Samples getStereoDiff() const { return stereoDiff_; }
 };
 
 
@@ -255,7 +248,7 @@ class StereoSeparator {
    * @return A container for the separated signal. Ownership is passed to
    *     the caller.
    */
-  StereoSignal* separate(const Samples& samples);
+  unique_ptr<StereoSignal> separate(const Samples& samples);
 };
 
 

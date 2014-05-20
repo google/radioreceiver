@@ -17,6 +17,7 @@
  */
 
 #include <cstring>
+#include <memory>
 #include <stdint.h>
 
 #include <ppapi/cpp/module.h>
@@ -26,6 +27,8 @@
 #include <ppapi/cpp/var_dictionary.h>
 
 #include "decode-module.h"
+
+using namespace std;
 
 namespace radioreceiver {
 
@@ -49,26 +52,24 @@ void DecodeInstance::HandleMessage(const pp::Var& message) {
   uint8_t* buf = reinterpret_cast<uint8_t*>(buffer.Map());
   int bufLen = buffer.ByteLength();
 
-  Samples* leftAudio;
-  Samples* rightAudio;
-  decoder_.process(buf, bufLen, inStereo, &leftAudio, &rightAudio);
+  unique_ptr<Samples> leftAudio;
+  unique_ptr<Samples> rightAudio;
+  decoder_.process(buf, bufLen, inStereo, leftAudio, rightAudio);
 
   buffer.Unmap();
 
   int rate = leftAudio->getRate();
   bool isStereo = false;
-  int bufSize = sizeof(float) * leftAudio->getLength();
+  int bufSize = sizeof(float) * leftAudio->getData().size();
   pp::VarArrayBuffer left(bufSize);
   pp::VarArrayBuffer right(bufSize);
-  memcpy(left.Map(), leftAudio->getData(), bufSize);
-  if (rightAudio != 0) {
+  memcpy(left.Map(), leftAudio->getData().data(), bufSize);
+  if (rightAudio) {
     isStereo = true;
-    memcpy(right.Map(), rightAudio->getData(), bufSize);
-    delete rightAudio;
+    memcpy(right.Map(), rightAudio->getData().data(), bufSize);
   } else {
-    memcpy(right.Map(), leftAudio->getData(), bufSize);
+    memcpy(right.Map(), leftAudio->getData().data(), bufSize);
   }
-  delete leftAudio;
 
   pp::VarDictionary dict;
   if (arr.Get(2).is_dictionary()) {

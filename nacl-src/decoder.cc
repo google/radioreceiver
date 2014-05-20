@@ -17,51 +17,49 @@
  * audio signals, and sends them back.
  */
 
+#include <memory>
+#include <vector>
+
 #include "decoder.h"
 #include "dsp.h"
+
+using namespace std;
 
 namespace radioreceiver {
 
 Decoder::Decoder() : demodulator_(kInRate, kInterRate, kMaxF),
                      filterCoefs_(getLowPassFIRCoeffs(kInterRate, kFilterFreq, kFilterLen)),
-                     monoSampler_(kInterRate, kOutRate, filterCoefs_, kFilterLen),
-                     stereoSampler_(kInterRate, kOutRate, filterCoefs_, kFilterLen),
+                     monoSampler_(kInterRate, kOutRate, filterCoefs_),
+                     stereoSampler_(kInterRate, kOutRate, filterCoefs_),
                      stereoSeparator_(kInterRate, kPilotFreq),
                      deemphasizer_(kOutRate, kDeemphTc) {}
 
-Decoder::~Decoder() {
-  delete filterCoefs_;
-}
-
 void Decoder::process(uint8_t* buffer, int length, bool inStereo,
-    Samples** leftAudio, Samples** rightAudio) {
+    unique_ptr<Samples>& leftAudio, unique_ptr<Samples>& rightAudio) {
 
-  Samples* samples = samplesFromUint8(buffer, length, kInRate);
-  Samples* demodulated = demodulator_.demodulateTuned(*samples);
-  delete samples;
-  *leftAudio = monoSampler_.downsample(*demodulated);
-  *rightAudio = 0;
+  unique_ptr<Samples> samples = samplesFromUint8(buffer, length, kInRate);
+  unique_ptr<Samples> demodulated = demodulator_.demodulateTuned(*samples);
+  
+  leftAudio = monoSampler_.downsample(*demodulated);
+  rightAudio = nullptr;
 
   if (inStereo) {
-    StereoSignal* stereo = stereoSeparator_.separate(*demodulated);
+    unique_ptr<StereoSignal> stereo = stereoSeparator_.separate(*demodulated);
     if (stereo->wasPilotDetected()) {
-      Samples* diffAudio = stereoSampler_.downsample(*stereo->getStereoDiff());
-      float* diffAudioData = diffAudio->getData();
-      float* leftAudioData = (*leftAudio)->getData();
-      float* rightAudioData = new float[diffAudio->getLength()];
-      for (int i = 0; i < diffAudio->getLength(); ++i) {
+      unique_ptr<Samples> diffAudio = stereoSampler_.downsample(stereo->getStereoDiff());
+      vector<float> diffAudioData = diffAudio->getData();
+      vector<float> leftAudioData = leftAudio->getData();
+      vector<float> rightAudioData(diffAudioData.size());
+      for (int i = 0; i < diffAudioData.size(); ++i) {
         rightAudioData[i] = leftAudioData[i] - diffAudioData[i];
         leftAudioData[i] += diffAudioData[i];
       }
-      *rightAudio = new Samples(rightAudioData, diffAudio->getLength(), diffAudio->getRate());
-      delete diffAudio;
-      deemphasizer_.inPlace(**rightAudio);
+      rightAudio = unique_ptr<Samples>(new Samples(rightAudioData, diffAudio->getRate()));
+      deemphasizer_.inPlace(*rightAudio);
     }
-    delete stereo;
   }
 
-  delete demodulated;
-  deemphasizer_.inPlace(**leftAudio);
+  deemphasizer_.inPlace(*leftAudio);
 }
 
 }  // namespace radioreceiver
