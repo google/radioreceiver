@@ -28,7 +28,8 @@ using namespace std;
 namespace radioreceiver {
 
 Decoder::Decoder() : demodulator_(kInRate, kInterRate, kMaxF),
-                     filterCoefs_(getLowPassFIRCoeffs(kInterRate, kFilterFreq, kFilterLen)),
+                     filterCoefs_(getLowPassFIRCoeffs(
+                         kInterRate, kFilterFreq, kFilterLen)),
                      monoSampler_(kInterRate, kOutRate, filterCoefs_),
                      stereoSampler_(kInterRate, kOutRate, filterCoefs_),
                      stereoSeparator_(kInterRate, kPilotFreq),
@@ -42,6 +43,7 @@ StereoAudio Decoder::process(uint8_t* buffer, int length, bool inStereo) {
   StereoAudio output;
   output.inStereo = false;
   output.left = monoSampler_.downsample(demodulated);
+  output.right = output.left;
 
   if (inStereo) {
     StereoSignal stereo(stereoSeparator_.separate(demodulated));
@@ -49,18 +51,17 @@ StereoAudio Decoder::process(uint8_t* buffer, int length, bool inStereo) {
       Samples diffAudio(stereoSampler_.downsample(stereo.getStereoDiff()));
       vector<float>& diffAudioData = diffAudio.getData();
       vector<float>& leftAudioData = output.left.getData();
-      vector<float> rightAudioData(diffAudioData.size());
+      vector<float>& rightAudioData = output.right.getData();
       for (int i = 0; i < diffAudioData.size(); ++i) {
-        rightAudioData[i] = leftAudioData[i] - diffAudioData[i];
+        rightAudioData[i] -= diffAudioData[i];
         leftAudioData[i] += diffAudioData[i];
       }
-      output.right = Samples(rightAudioData, diffAudio.getRate());
       output.inStereo = true;
-      deemphasizer_.inPlace(output.right);
     }
   }
 
   deemphasizer_.inPlace(output.left);
+  deemphasizer_.inPlace(output.right);
   return output;
 }
 
