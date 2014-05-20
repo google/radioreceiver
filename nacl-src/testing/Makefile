@@ -1,5 +1,7 @@
 CPPFLAGS=-std=c++0x -I$(PWD)/.. -g
 
-all:	testrun
+all:	gen-mod-tones demod-stdin
 
-testrun:	testrun.cc ../dsp.cc ../decoder.cc
+gen-mod-tones:	gen-mod-tones.cc
+
+demod-stdin:	demod-stdin.cc ../dsp.cc ../decoder.cc
