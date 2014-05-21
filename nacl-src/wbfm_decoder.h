@@ -17,8 +17,8 @@
  * audio signals, and sends them back.
  */
 
-#ifndef DECODER_H_
-#define DECODER_H_
+#ifndef WBFM_DECODER_H_
+#define WBFM_DECODER_H_
 
 #include <memory>
 #include <stdint.h>
@@ -40,9 +40,9 @@ struct StereoAudio {
 };
 
 /**
- * A class to implement a worker that demodulates an FM broadcast station.
+ * A decoder for a Wideband FM sample stream.
  */
-class Decoder {
+class WBFMDecoder {
   FMDemodulator demodulator_;
   vector<float> filterCoefs_;
   Downsampler monoSampler_;
@@ -51,29 +51,31 @@ class Decoder {
   Deemphasizer deemphasizer_;
 
  public:
-  static const int kInRate = 1008000;
   static const int kInterRate = 336000;
-  static const int kOutRate = 48000;
   static const int kMaxF = 75000;
   static const int kPilotFreq = 19000;
   static const int kDeemphTc = 50;
   static const int kFilterFreq = 10000;
   static const int kFilterLen = 41;
 
-  Decoder();
+  /**
+   * Constructor for the decoder.
+   * @param inRate The sample rate for the input sample stream.
+   * @param outRate The sample rate for the output stereo audio stream.
+   *     The recommended rate is 48000.
+   */
+  WBFMDecoder(int inRate, int outRate);
 
   /**
-   * Demodulates the tuner's output, producing mono or stereo sound, and
-   * sends the demodulated audio back to the caller.
-   * @param buffer A buffer containing the tuner's output.
-   * @param length The length of the buffer.
+   * Demodulates a block of floating-point samples, producing a block of
+   * stereo audio.
+   * @param samples The samples to decode.
    * @param inStereo Whether to try decoding the stereo signal.
-   * @param[out] leftAudio A pointer to store the left ear audio data.
-   * @param[out] rightAudio A pointer to store the right ear audio data.
+   * @return The generated stereo audio block.
    */
-  StereoAudio process(uint8_t* buffer, int length, bool inStereo);
+  StereoAudio decode(const Samples& samples, bool inStereo);
 };
 
 }  // namespace radioreceiver
 
-#endif  // DECODER_H_
+#endif  // WBFM_DECODER_H_

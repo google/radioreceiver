@@ -48,7 +48,7 @@ struct SamplesIQ {
  * @param rate The buffer's sample rate.
  * @return The converted samples.
  */
-Samples samplesFromUint8(uint8_t* buffer, int length, int rate);
+Samples samplesFromUint8(uint8_t* buffer, int length);
 
 /**
  * Generates coefficients for a FIR low-pass filter with the given

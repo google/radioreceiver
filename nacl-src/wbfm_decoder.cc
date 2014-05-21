@@ -20,24 +20,22 @@
 #include <memory>
 #include <vector>
 
-#include "decoder.h"
 #include "dsp.h"
+#include "wbfm_decoder.h"
 
 using namespace std;
 
 namespace radioreceiver {
 
-Decoder::Decoder() : demodulator_(kInRate, kInterRate, kMaxF),
-                     filterCoefs_(getLowPassFIRCoeffs(
-                         kInterRate, kFilterFreq, kFilterLen)),
-                     monoSampler_(kInterRate, kOutRate, filterCoefs_),
-                     stereoSampler_(kInterRate, kOutRate, filterCoefs_),
-                     stereoSeparator_(kInterRate, kPilotFreq),
-                     deemphasizer_(kOutRate, kDeemphTc) {}
+WBFMDecoder::WBFMDecoder(int inRate, int outRate)
+    : demodulator_(inRate, kInterRate, kMaxF),
+      filterCoefs_(getLowPassFIRCoeffs(kInterRate, kFilterFreq, kFilterLen)),
+      monoSampler_(kInterRate, outRate, filterCoefs_),
+      stereoSampler_(kInterRate, outRate, filterCoefs_),
+      stereoSeparator_(kInterRate, kPilotFreq),
+      deemphasizer_(outRate, kDeemphTc) {}
 
-StereoAudio Decoder::process(uint8_t* buffer, int length, bool inStereo) {
-
-  Samples samples(samplesFromUint8(buffer, length, kInRate));
+StereoAudio WBFMDecoder::decode(const Samples& samples, bool inStereo) {
   Samples demodulated(demodulator_.demodulateTuned(samples));
 
   StereoAudio output;

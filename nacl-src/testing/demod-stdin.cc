@@ -20,7 +20,7 @@
 #include <string>
 
 #include "dsp.h"
-#include "decoder.h"
+#include "wbfm_decoder.h"
 
 using namespace radioreceiver;
 using namespace std;
@@ -31,10 +31,12 @@ const float k2Pi = 2 * 3.14159265358979;
 struct Config {
   bool stereo;
   int blockSize;
+  int inRate;
+  int outRate;
 };
 
 int main(int argc, char* argv[]) {
-  Config cfg { true, 65536 };
+  Config cfg { true, 65536, 1008000, 48000 };
 
   for (int i = 1; i < argc; ++i) {
     if (string("-mono") == argv[i]) {
@@ -42,6 +44,10 @@ int main(int argc, char* argv[]) {
     } else if (string("-blocksize") == argv[i]) {
       cfg.blockSize = stoi(argv[++i]);
       cfg.blockSize -= (cfg.blockSize % 2);
+    } else if (string("-inrate") == argv[i]) {
+      cfg.inRate = stoi(argv[++i]);
+    } else if (string("-outrate") == argv[i]) {
+      cfg.outRate = stoi(argv[++i]);
     } else {
       cerr << "Unknown flag: " << argv[i] << endl;
       return 1;
@@ -50,12 +56,13 @@ int main(int argc, char* argv[]) {
 
   char outBlock[4];
   char* buffer = new char[cfg.blockSize];
-  Decoder decoder;
+  WBFMDecoder decoder(cfg.inRate, cfg.outRate);
   while (!cin.eof()) {
     cin.read(buffer, cfg.blockSize);
     int read = cin.gcount();
-    StereoAudio audio = decoder.process(
-        reinterpret_cast<uint8_t*>(buffer), read, cfg.stereo);
+    StereoAudio audio = decoder.decode(
+        samplesFromUint8(reinterpret_cast<uint8_t*>(buffer), read),
+        cfg.stereo);
     for (int i = 0; i < audio.left.size(); ++i) {
       int left = audio.left[i] * 32767;
       outBlock[0] = left & 0xff;

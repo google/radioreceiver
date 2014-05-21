@@ -5,8 +5,8 @@ include $(NACL_SDK_ROOT)/tools/common.mk
 TARGET = radio-decoder
 LIBS = ppapi_cpp ppapi
 
-CFLAGS = -Wall
-SOURCES = decode-module.cc decoder.cc dsp.cc
+CFLAGS = -Wall -std=gnu++11
+SOURCES = decode-module.cc dsp.cc wbfm_decoder.cc
 
 $(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),$(CFLAGS))))
 
