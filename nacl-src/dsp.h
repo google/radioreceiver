@@ -47,6 +47,12 @@ class Samples {
   Samples(const Samples& other) : data_(other.data_), rate_(other.rate_) {}
   Samples(Samples&& other) : data_(move(other.data_)), rate_(other.rate_) {}
 
+  Samples& operator=(const Samples& other) {
+    data_ = other.data_;
+    rate_ = other.rate_;
+    return *this;
+  }
+
   int getRate() const { return rate_; }
   const vector<float>& getData() const { return data_; }
   vector<float>& getData() { return data_; }
