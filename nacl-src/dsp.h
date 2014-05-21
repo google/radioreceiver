@@ -148,7 +148,7 @@ class IQDownsampler {
 class FMDemodulator {
   static const float kGain;
   static const float kMaxFFactor;
-  static const int kFilterLen = 51;
+  static const int kFilterLen = 101;
 
   float amplConv_;
   IQDownsampler downsampler_;
