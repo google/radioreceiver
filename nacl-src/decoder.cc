@@ -50,8 +50,8 @@ StereoAudio Decoder::process(uint8_t* buffer, int length, bool inStereo) {
     if (stereo.wasPilotDetected()) {
       Samples diffAudio(stereoSampler_.downsample(stereo.getStereoDiff()));
       for (int i = 0; i < diffAudio.size(); ++i) {
-        output.right[i] -= diffAudio[i];
-        output.left[i] += diffAudio[i];
+        output.right[i] -= 2 * diffAudio[i];
+        output.left[i] += 2 * diffAudio[i];
       }
       output.inStereo = true;
     }
