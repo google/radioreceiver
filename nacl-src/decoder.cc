@@ -49,12 +49,9 @@ StereoAudio Decoder::process(uint8_t* buffer, int length, bool inStereo) {
     StereoSignal stereo(stereoSeparator_.separate(demodulated));
     if (stereo.wasPilotDetected()) {
       Samples diffAudio(stereoSampler_.downsample(stereo.getStereoDiff()));
-      vector<float>& diffAudioData = diffAudio.getData();
-      vector<float>& leftAudioData = output.left.getData();
-      vector<float>& rightAudioData = output.right.getData();
-      for (int i = 0; i < diffAudioData.size(); ++i) {
-        rightAudioData[i] -= diffAudioData[i];
-        leftAudioData[i] += diffAudioData[i];
+      for (int i = 0; i < diffAudio.size(); ++i) {
+        output.right[i] -= diffAudio[i];
+        output.left[i] += diffAudio[i];
       }
       output.inStereo = true;
     }

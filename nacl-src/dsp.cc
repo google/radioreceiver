@@ -57,11 +57,11 @@ vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq,
 }
 
 Samples samplesFromUint8(uint8_t* buffer, int length, int rate) {
-  vector<float> out(length);
+  Samples out(length);
   for (int i = 0; i < length; ++i) {
     out[i] = buffer[i] / 128.0 - 1;
   }
-  return Samples(out, rate);
+  return out;
 }
 
 
@@ -71,11 +71,11 @@ FIRFilter::FIRFilter(const vector<float>& coefficients, int step)
       step_(step), offset_(coefficients.size() * step) {}
 
 void FIRFilter::loadSamples(const Samples& samples) {
-  int fullLen = samples.getData().size() + offset_;
-  vector<float> newSamples(fullLen);
+  int fullLen = samples.size() + offset_;
+  Samples newSamples(fullLen);
   auto newStart = copy(curSamples_.end() - offset_, curSamples_.end(),
                        newSamples.begin());
-  copy(samples.getData().begin(), samples.getData().end(), newStart);
+  copy(samples.begin(), samples.end(), newStart);
   curSamples_ = newSamples;
 }
 
@@ -91,36 +91,36 @@ float FIRFilter::get(int index) {
 
 Downsampler::Downsampler(int inRate, int outRate,
                          const vector<float>& coefs)
-    : filter_(coefs, 1), rateMul_(inRate / outRate), outRate_(outRate) {}
+    : filter_(coefs, 1), rateMul_(inRate / outRate) {}
 
 Samples Downsampler::downsample(const Samples& samples) {
   filter_.loadSamples(samples);
-  int outLen = samples.getData().size() / rateMul_;
-  vector<float> out(outLen);
+  int outLen = samples.size() / rateMul_;
+  Samples out(outLen);
   float readFrom = 0;
   for (int i = 0; i < outLen; ++i, readFrom += rateMul_) {
     out[i] = filter_.get((int) readFrom);
   }
-  return Samples(out, outRate_);
+  return out;
 }
 
 
 IQDownsampler::IQDownsampler(int inRate, int outRate,
                              const vector<float>& coefs)
-    : filter_(coefs, 2), rateMul_(inRate / outRate), outRate_(outRate) {}
+    : filter_(coefs, 2), rateMul_(inRate / outRate) {}
 
 SamplesIQ IQDownsampler::downsample(const Samples& samples) {
-  int numSamples = samples.getData().size() / (2 * rateMul_);
+  int numSamples = samples.size() / (2 * rateMul_);
   filter_.loadSamples(samples);
-  vector<float> outI(numSamples);
-  vector<float> outQ(numSamples);
+  Samples outI(numSamples);
+  Samples outQ(numSamples);
   float readFrom = 0;
   for (int i = 0; i < numSamples; ++i, readFrom += rateMul_) {
     int idx = 2 * readFrom;
     outI[i] = filter_.get(idx);
     outQ[i] = filter_.get(idx + 1);
   }
-  return SamplesIQ(outI, outQ, outRate_);
+  return SamplesIQ{outI, outQ};
 }
 
 
@@ -128,17 +128,17 @@ const float FMDemodulator::kGain = 1;
 const float FMDemodulator::kMaxFFactor = 0.8;
 
 FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF)
-  : outRate_(outRate), amplConv_(outRate * kGain / (k2Pi * maxF)),
+  : amplConv_(outRate * kGain / (k2Pi * maxF)),
     downsampler_(inRate, outRate,
                  getLowPassFIRCoeffs(inRate, maxF * kMaxFFactor, kFilterLen)),
     lI_(0), lQ_(0) {}
 
 Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   SamplesIQ iqSamples(downsampler_.downsample(samples));
-  vector<float>& I = iqSamples.getI();
-  vector<float>& Q = iqSamples.getQ();
+  Samples& I = iqSamples.I;
+  Samples& Q = iqSamples.Q;
   int outLen = I.size();
-  vector<float> out(outLen);
+  Samples out(outLen);
   for (int i = 0; i < outLen; ++i) {
     float divisor = (I[i] * I[i] + Q[i] * Q[i]);
     float deltaAngle = divisor == 0
@@ -148,7 +148,7 @@ Samples FMDemodulator::demodulateTuned(const Samples& samples) {
     lI_ = I[i];
     lQ_ = Q[i];
   }
-  return Samples(out, outRate_);
+  return out;
 }
 
 
@@ -174,7 +174,7 @@ StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
 }
 
 StereoSignal StereoSeparator::separate(const Samples& samples) {
-  vector<float> out(samples.getData());
+  Samples out(samples);
   for (int i = 0; i < out.size(); ++i) {
     float hdev = iavg_.add(out[i] * sin_);
     float vdev = qavg_.add(out[i] * cos_);
@@ -191,7 +191,7 @@ StereoSignal StereoSeparator::separate(const Samples& samples) {
     sin_ = newSin;
     cavg_.add(corr * 10);
   }
-  return StereoSignal(cavg_.getStd(), Samples(out, samples.getRate()));
+  return StereoSignal(cavg_.getStd(), out);
 }
 
 
@@ -199,10 +199,9 @@ Deemphasizer::Deemphasizer(int sampleRate, int timeConstant_uS)
   : mult_(exp(-1e6 / (timeConstant_uS * sampleRate))), val_(0) {}
 
 void Deemphasizer::inPlace(Samples& samples) {
-  vector<float>& data = samples.getData();
-  for (int i = 0; i < samples.getData().size(); ++i) {
-    val_ = (1 - mult_) * data[i] + mult_ * val_;
-    data[i] = val_;
+  for (int i = 0; i < samples.size(); ++i) {
+    val_ = (1 - mult_) * samples[i] + mult_ * val_;
+    samples[i] = val_;
   }
 }
 

@@ -29,61 +29,16 @@ using namespace std;
 namespace radioreceiver {
 
 /**
- * A class to store a vector of floating-point samples with a given rate.
+ * Type for sample block storage.
  */
-class Samples {
-  vector<float> data_;
-  int rate_;
-
- public:
-  /**
-   * Instance constructor.
-   * @param data The sample vector.
-   * @param rate The sample rate.
-   */
-  Samples(const vector<float>& data, int rate)
-      : data_(data), rate_(rate) {}
-  Samples() : data_(vector<float>()), rate_(0) {}
-  Samples(const Samples& other) : data_(other.data_), rate_(other.rate_) {}
-  Samples(Samples&& other) : data_(move(other.data_)), rate_(other.rate_) {}
-
-  Samples& operator=(const Samples& other) {
-    data_ = other.data_;
-    rate_ = other.rate_;
-    return *this;
-  }
-
-  int getRate() const { return rate_; }
-  const vector<float>& getData() const { return data_; }
-  vector<float>& getData() { return data_; }
-};
+typedef vector<float> Samples;
 
 /**
  * A deinterlaced I/Q sample stream.
  */
-class SamplesIQ {
-  vector<float> dataI_;
-  vector<float> dataQ_;
-  int rate_;
-
- public:
-  /**
-   * Instance constructor.
-   * @param data The vector for the I samples.
-   * @param data The vector for the Q samples.
-   * @param rate The sample rate.
-   */
-  SamplesIQ(const vector<float>& dataI, const vector<float>& dataQ, int rate)
-      : dataI_(dataI), dataQ_(dataQ), rate_(rate) {}
-  SamplesIQ() : dataI_(vector<float>()), dataQ_(vector<float>()), rate_(0) {}
-  SamplesIQ(const SamplesIQ& other) : dataI_(other.dataI_), dataQ_(other.dataQ_), rate_(other.rate_) {}
-  SamplesIQ(SamplesIQ&& other) : dataI_(move(other.dataI_)), dataQ_(move(other.dataQ_)), rate_(other.rate_) {}
-
-  int getRate() const { return rate_; }
-  const vector<float>& getI() const { return dataI_; }
-  vector<float>& getI() { return dataI_; }
-  const vector<float>& getQ() const { return dataQ_; }
-  vector<float>& getQ() { return dataQ_; }
+struct SamplesIQ {
+  Samples I;
+  Samples Q;
 };
 
 /**
@@ -103,14 +58,15 @@ Samples samplesFromUint8(uint8_t* buffer, int length, int rate);
  * @param length The length of the coefficient array. Should be an odd number.
  * @return The filter coefficients.
  */
-vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq, int length);
+vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq,
+                                  int length);
 
 /**
  * A Finite Impulse Response filter.
  */
 class FIRFilter {
   vector<float> coefficients_;
-  vector<float> curSamples_;
+  Samples curSamples_;
   int step_;
   int offset_;
 
@@ -142,7 +98,6 @@ class FIRFilter {
 class Downsampler {
   FIRFilter filter_;
   float rateMul_;
-  int outRate_;
 
  public:
   /**
@@ -168,7 +123,6 @@ class Downsampler {
 class IQDownsampler {
   FIRFilter filter_;
   float rateMul_;
-  int outRate_;
 
  public:
   /**
@@ -196,7 +150,6 @@ class FMDemodulator {
   static const float kMaxFFactor;
   static const int kFilterLen = 51;
 
-  int outRate_;
   float amplConv_;
   IQDownsampler downsampler_;
   float lI_;

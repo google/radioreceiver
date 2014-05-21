@@ -56,11 +56,11 @@ int main(int argc, char* argv[]) {
     int read = cin.gcount();
     StereoAudio audio = decoder.process(
         reinterpret_cast<uint8_t*>(buffer), read, cfg.stereo);
-    for (int i = 0; i < audio.left.getData().size(); ++i) {
-      int left = audio.left.getData()[i] * 32767;
+    for (int i = 0; i < audio.left.size(); ++i) {
+      int left = audio.left[i] * 32767;
       outBlock[0] = left & 0xff;
       outBlock[1] = (left >> 8) & 0xff;
-      int right = audio.right.getData()[i] * 32767;
+      int right = audio.right[i] * 32767;
       outBlock[2] = right & 0xff;
       outBlock[3] = (right >> 8) & 0xff;
       cout.write(outBlock, 4);
