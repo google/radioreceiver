@@ -153,23 +153,33 @@ Samples FMDemodulator::demodulateTuned(const Samples& samples) {
 }
 
 
-ExpAverage::ExpAverage(int weight, bool calcStd)
-    : weight_(weight), calcStd_(calcStd), avg_(0), std_(0) {}
+class StereoSeparator::ExpAverage {
+  float weight_;
+  bool calcStd_;
+  float avg_;
+  float std_;
 
-float ExpAverage::add(float value) {
-  avg_ = (weight_ * avg_ + value) / (weight_ + 1);
-  if (calcStd_) {
-    float dev = value - avg_;
-    std_ = (weight_ * std_ + dev * dev) / (weight_ + 1);
+ public:
+  ExpAverage(int weight, bool calcStd = false)
+      : weight_(weight), calcStd_(calcStd), avg_(0), std_(0) {}
+
+  float add(float value) {
+    avg_ = (weight_ * avg_ + value) / (weight_ + 1);
+    if (calcStd_) {
+      float dev = value - avg_;
+      std_ = (weight_ * std_ + dev * dev) / (weight_ + 1);
+    }
+    return avg_;
   }
-  return avg_;
-}
+
+  float getStd() { return std_; }
+};
 
 StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
     : sin_(0), cos_(1),
-      iavg_(sampleRate * 0.03),
-      qavg_(sampleRate * 0.03),
-      cavg_(sampleRate * 0.15, true) {
+      iavg_(new ExpAverage(sampleRate * 0.03)),
+      qavg_(new ExpAverage(sampleRate * 0.03)),
+      cavg_(new ExpAverage(sampleRate * 0.15, true)) {
   for (int i = 0; i < 8001; ++i) {
     float freq = (pilotFreq + i / 400 - 10) * k2Pi / sampleRate;
     sinTable_[i] = sin(freq);
@@ -177,11 +187,13 @@ StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
   }
 }
 
+StereoSeparator::~StereoSeparator() {}
+
 StereoSignal StereoSeparator::separate(const Samples& samples) {
   Samples out(samples);
   for (int i = 0; i < out.size(); ++i) {
-    float hdev = qavg_.add(out[i] * cos_);
-    float vdev = iavg_.add(out[i] * -sin_);
+    float hdev = qavg_->add(out[i] * cos_);
+    float vdev = iavg_->add(out[i] * -sin_);
     out[i] *= sin_ * cos_ * 2;
     float corr;
     if (vdev > 0) {
@@ -193,9 +205,9 @@ StereoSignal StereoSeparator::separate(const Samples& samples) {
     float newSin = sin_ * cosTable_[idx] + cos_ * sinTable_[idx];
     cos_ = cos_ * cosTable_[idx] - sin_ * sinTable_[idx];
     sin_ = newSin;
-    cavg_.add(corr * 10);
+    cavg_->add(corr * 10);
   }
-  return StereoSignal{cavg_.getStd(), out};
+  return StereoSignal{cavg_->getStd() < kStdThres, out};
 }
 
 Deemphasizer::Deemphasizer(int sampleRate, int timeConstant_uS)

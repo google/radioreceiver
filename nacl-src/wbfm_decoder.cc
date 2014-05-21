@@ -33,7 +33,8 @@ WBFMDecoder::WBFMDecoder(int inRate, int outRate)
       monoSampler_(kInterRate, outRate, filterCoefs_),
       stereoSampler_(kInterRate, outRate, filterCoefs_),
       stereoSeparator_(kInterRate, kPilotFreq),
-      deemphasizer_(outRate, kDeemphTc) {}
+      leftDeemph_(outRate, kDeemphTc),
+      rightDeemph_(outRate, kDeemphTc) {}
 
 StereoAudio WBFMDecoder::decode(const Samples& samples, bool inStereo) {
   Samples demodulated(demodulator_.demodulateTuned(samples));
@@ -55,8 +56,8 @@ StereoAudio WBFMDecoder::decode(const Samples& samples, bool inStereo) {
     }
   }
 
-  deemphasizer_.inPlace(output.left);
-  deemphasizer_.inPlace(output.right);
+  leftDeemph_.inPlace(output.left);
+  rightDeemph_.inPlace(output.right);
   return output;
 }
 

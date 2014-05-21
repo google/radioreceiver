@@ -173,24 +173,6 @@ class FMDemodulator {
 
 
 /**
- * An exponential moving average accumulator.
- */
-class ExpAverage {
-  float weight_;
-  bool calcStd_;
-  float avg_;
-  float std_;
-
- public:
-  ExpAverage(int weight, bool calcStd = false);
-
-  float add(float value);
-
-  float getStd() { return std_; }
-};
-
-
-/**
  * A container for a separated stereo signal.
  */
 struct StereoSignal {
@@ -209,9 +191,10 @@ class StereoSeparator {
   float cosTable_[8001];
   float sin_;
   float cos_;
-  ExpAverage iavg_;
-  ExpAverage qavg_;
-  ExpAverage cavg_;
+  class ExpAverage;
+  unique_ptr<ExpAverage> iavg_;
+  unique_ptr<ExpAverage> qavg_;
+  unique_ptr<ExpAverage> cavg_;
 
  public:
   /**
@@ -220,6 +203,7 @@ class StereoSeparator {
    * @param pilotFreq The frequency of the pilot tone.
    */
   StereoSeparator(int sampleRate, int pilotFreq);
+  ~StereoSeparator();
 
   /**
    * Locks on to the pilot tone and uses it to demodulate the stereo audio.

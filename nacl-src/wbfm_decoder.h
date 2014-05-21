@@ -48,7 +48,8 @@ class WBFMDecoder {
   Downsampler monoSampler_;
   Downsampler stereoSampler_;
   StereoSeparator stereoSeparator_;
-  Deemphasizer deemphasizer_;
+  Deemphasizer leftDeemph_;
+  Deemphasizer rightDeemph_;
 
  public:
   static const int kInterRate = 336000;
