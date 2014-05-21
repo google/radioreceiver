@@ -173,23 +173,6 @@ class FMDemodulator {
 
 
 /**
- * A container for a separated stereo signal.
- */
-class StereoSignal {
-  bool pilotDetected_;
-  Samples stereoDiff_;
-
- public:
-  StereoSignal(bool pilotDetected, const Samples& stereoDiff)
-      : pilotDetected_(pilotDetected), stereoDiff_(stereoDiff) {}
-
-  bool wasPilotDetected() const { return pilotDetected_; }
-  const Samples& getStereoDiff() const { return stereoDiff_; }
-  Samples& getStereoDiff() { return stereoDiff_; }
-};
-
-
-/**
  * An exponential moving average accumulator.
  */
 class ExpAverage {
@@ -204,6 +187,15 @@ class ExpAverage {
   float add(float value);
 
   float getStd() { return std_; }
+};
+
+
+/**
+ * A container for a separated stereo signal.
+ */
+struct StereoSignal {
+  bool hasPilot;
+  Samples diff;
 };
 
 

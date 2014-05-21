@@ -67,8 +67,10 @@ Samples samplesFromUint8(uint8_t* buffer, int length) {
 
 FIRFilter::FIRFilter(const vector<float>& coefficients, int step)
     : coefficients_(coefficients),
-      curSamples_(coefficients.size() * step, 0),
-      step_(step), offset_(coefficients.size() * step) {}
+      curSamples_((coefficients.size() - 1) * step, 0),
+      step_(step), offset_((coefficients.size() - 1) * step) {
+  reverse(coefficients_.begin(), coefficients_.end());
+}
 
 void FIRFilter::loadSamples(const Samples& samples) {
   int fullLen = samples.size() + offset_;
@@ -81,9 +83,8 @@ void FIRFilter::loadSamples(const Samples& samples) {
 
 float FIRFilter::get(int index) {
   float out = 0;
-  int sampleOff = index + offset_;
-  for (int i = coefficients_.size() - 1; i >= 0; --i) {
-    out += coefficients_[i] * curSamples_[sampleOff - i * step_];
+  for (int i = 0; i < coefficients_.size(); ++i) {
+    out += coefficients_[i] * curSamples_[index + i * step_];
   }
   return out;
 }
@@ -194,7 +195,7 @@ StereoSignal StereoSeparator::separate(const Samples& samples) {
     sin_ = newSin;
     cavg_.add(corr * 10);
   }
-  return StereoSignal(cavg_.getStd(), out);
+  return StereoSignal{cavg_.getStd(), out};
 }
 
 Deemphasizer::Deemphasizer(int sampleRate, int timeConstant_uS)

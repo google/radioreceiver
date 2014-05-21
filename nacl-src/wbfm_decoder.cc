@@ -45,8 +45,8 @@ StereoAudio WBFMDecoder::decode(const Samples& samples, bool inStereo) {
 
   if (inStereo) {
     StereoSignal stereo(stereoSeparator_.separate(demodulated));
-    if (stereo.wasPilotDetected()) {
-      Samples diffAudio(stereoSampler_.downsample(stereo.getStereoDiff()));
+    if (stereo.hasPilot) {
+      Samples diffAudio(stereoSampler_.downsample(stereo.diff));
       for (int i = 0; i < diffAudio.size(); ++i) {
         output.right[i] -= 2 * diffAudio[i];
         output.left[i] += 2 * diffAudio[i];
