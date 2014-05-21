@@ -65,9 +65,13 @@ int main(int argc, char* argv[]) {
         cfg.stereo);
     for (int i = 0; i < audio.left.size(); ++i) {
       int left = audio.left[i] * 32767;
+      if (left > 32767) left = 32767;
+      if (left < -32767) left = -32767;
       outBlock[0] = left & 0xff;
       outBlock[1] = (left >> 8) & 0xff;
       int right = audio.right[i] * 32767;
+      if (right > 32767) right = 32767;
+      if (right < -32767) right = -32767;
       outBlock[2] = right & 0xff;
       outBlock[3] = (right >> 8) & 0xff;
       cout.write(outBlock, 4);

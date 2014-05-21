@@ -52,7 +52,7 @@ void generate(Config cfg, uint8_t* buffer, int length) {
           sin(k2Pi * 2 * pilotFreq * sample / cfg.rate);
       samplePre = sampleSum * .45 + samplePilot * .1 + sampleTop * .45;
     } else {
-      samplePre = cos(k2Pi * cfg.leftFreq * sample / cfg.rate);
+      samplePre = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
     }
     phase += k2Pi * samplePre * maxF / cfg.rate;
     float sampleI = cos(phase);
