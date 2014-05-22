@@ -19,6 +19,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstring>
 #include <memory>
 #include <stdint.h>
 #include <vector>
@@ -75,11 +76,14 @@ FIRFilter::FIRFilter(const vector<float>& coefficients, int step)
 
 void FIRFilter::loadSamples(const Samples& samples) {
   int fullLen = samples.size() + offset_;
-  Samples newSamples(fullLen);
-  auto newStart = copy(curSamples_.end() - offset_, curSamples_.end(),
-                       newSamples.begin());
-  copy(samples.begin(), samples.end(), newStart);
-  curSamples_ = newSamples;
+  float* curArr = curSamples_.data();
+  float* endOfCur = curArr + curSamples_.size() - offset_;
+  memmove(curArr, endOfCur, offset_ * sizeof(float));
+  if (fullLen != curSamples_.size()) {
+    curSamples_.resize(fullLen);
+    curArr = curSamples_.data();
+  }
+  memmove(curArr + offset_, samples.data(), samples.size() * sizeof(float));
 }
 
 float FIRFilter::get(int index) {
@@ -117,15 +121,16 @@ IQDownsampler::IQDownsampler(int inRate, int outRate,
 SamplesIQ IQDownsampler::downsample(const Samples& samples) {
   int numSamples = samples.size() / (2 * rateMul_);
   filter_.loadSamples(samples);
-  Samples outI(numSamples);
-  Samples outQ(numSamples);
+  SamplesIQ out{Samples(numSamples), Samples(numSamples)};
+  float* I = out.I.data();
+  float* Q = out.Q.data();
   float readFrom = 0;
   for (int i = 0; i < numSamples; ++i, readFrom += rateMul_) {
     int idx = 2 * readFrom;
-    outI[i] = filter_.get(idx);
-    outQ[i] = filter_.get(idx + 1);
+    I[i] = filter_.get(idx);
+    Q[i] = filter_.get(idx + 1);
   }
-  return SamplesIQ{outI, outQ};
+  return out;
 }
 
 
