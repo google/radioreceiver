@@ -88,11 +88,9 @@ void FIRFilter::loadSamples(const Samples& samples) {
 
 float FIRFilter::get(int index) {
   float out = 0;
-  float* coef = coefficients_.data();
-  float* samp = curSamples_.data();
   for (int ic = 0, is = index, sz = coefficients_.size(); ic < sz;
        ++ic, is += step_) {
-    out += coef[ic] * samp[is];
+    out += coefficients_[ic] * curSamples_[is];
   }
   return out;
 }
@@ -122,13 +120,11 @@ SamplesIQ IQDownsampler::downsample(const Samples& samples) {
   int numSamples = samples.size() / (2 * rateMul_);
   filter_.loadSamples(samples);
   SamplesIQ out{Samples(numSamples), Samples(numSamples)};
-  float* I = out.I.data();
-  float* Q = out.Q.data();
   float readFrom = 0;
   for (int i = 0; i < numSamples; ++i, readFrom += rateMul_) {
     int idx = 2 * readFrom;
-    I[i] = filter_.get(idx);
-    Q[i] = filter_.get(idx + 1);
+    out.I[i] = filter_.get(idx);
+    out.Q[i] = filter_.get(idx + 1);
   }
   return out;
 }
@@ -145,19 +141,18 @@ FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF)
 
 Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   SamplesIQ iqSamples(downsampler_.downsample(samples));
-  float* I = iqSamples.I.data();
-  float* Q = iqSamples.Q.data();
   int outLen = iqSamples.I.size();
   Samples out(outLen);
-  float* outArr = out.data();
   for (int i = 0; i < outLen; ++i) {
-    float divisor = (I[i] * I[i] + Q[i] * Q[i]);
+    float I = iqSamples.I[i];
+    float Q = iqSamples.Q[i];
+    float divisor = (I * I + Q * Q);
     float deltaAngle = divisor == 0
         ? 0
-        : ((I[i] * (Q[i] - lQ_) - Q[i]* (I[i] - lI_)) / divisor);
-    outArr[i] = deltaAngle * (1 + deltaAngle * deltaAngle / 3) * amplConv_;
-    lI_ = I[i];
-    lQ_ = Q[i];
+        : ((I * (Q - lQ_) - Q * (I - lI_)) / divisor);
+    out[i] = deltaAngle * (1 + deltaAngle * deltaAngle / 3) * amplConv_;
+    lI_ = I;
+    lQ_ = Q;
   }
   return out;
 }
