@@ -181,7 +181,7 @@ StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
       qavg_(new ExpAverage(sampleRate * 0.03)),
       cavg_(new ExpAverage(sampleRate * 0.15, true)) {
   for (int i = 0; i < 8001; ++i) {
-    float freq = (pilotFreq + i / 400 - 10) * k2Pi / sampleRate;
+    float freq = (pilotFreq + i / 100 - 40) * k2Pi / sampleRate;
     sinTable_[i] = sin(freq);
     cosTable_[i] = cos(freq);
   }
@@ -193,13 +193,13 @@ StereoSignal StereoSeparator::separate(const Samples& samples) {
   Samples out(samples);
   for (int i = 0; i < out.size(); ++i) {
     float hdev = qavg_->add(out[i] * cos_);
-    float vdev = iavg_->add(out[i] * -sin_);
+    float vdev = iavg_->add(out[i] * sin_);
     out[i] *= sin_ * cos_ * 2;
     float corr;
     if (vdev > 0) {
-      corr = fmaxf(-4, fminf(4, -hdev / vdev));
+      corr = fmaxf(-4, fminf(4, hdev / vdev));
     } else {
-      corr = hdev > 0 ? -4 : 4;
+      corr = hdev == 0 ? 0 : hdev > 0 ? 4 : -4;
     }
     int idx = roundf((corr + 4) * 1000);
     float newSin = sin_ * cosTable_[idx] + cos_ * sinTable_[idx];
