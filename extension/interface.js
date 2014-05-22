@@ -131,6 +131,18 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Changes frequency with the mouse wheel.
+   * @param {MouseWheelEvent} event The received event.
+   */
+  function changeFrequencyWheel(event) {
+    if (event.wheelDelta < 0) {
+      frequencyMinus();
+    } else if (event.wheelDelta > 0) {
+      frequencyPlus();
+    }
+  }
+
+  /**
    * Tunes one step down.
    * Called when the '<' button is pressed.
    */
@@ -425,6 +437,7 @@ function Interface(fmRadio) {
     settingsButton.addEventListener('click', showSettings);
     closeButton.addEventListener('click', close);
     frequencyDisplay.addEventListener('click', showFrequencyEditor);
+    frequencyDisplay.addEventListener('mousewheel', changeFrequencyWheel);
     frequencyInput.addEventListener('change', changeFrequency);
     frequencyInput.addEventListener('blur', hideFrequencyEditor);
     stereoIndicator.addEventListener('click', toggleStereo);
