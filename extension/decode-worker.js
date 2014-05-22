@@ -36,7 +36,8 @@ function Decoder() {
   var monoSampler = new Downsampler(INTER_RATE, OUT_RATE, filterCoefs);
   var stereoSampler = new Downsampler(INTER_RATE, OUT_RATE, filterCoefs);
   var stereoSeparator = new StereoSeparator(INTER_RATE, PILOT_FREQ);
-  var deemphasizer = new Deemphasizer(OUT_RATE, DEEMPH_TC);
+  var leftDeemph = new Deemphasizer(OUT_RATE, DEEMPH_TC);
+  var rightDeemph = new Deemphasizer(OUT_RATE, DEEMPH_TC);
 
   /**
    * Demodulates the tuner's output, producing mono or stereo sound, and
@@ -61,12 +62,12 @@ function Decoder() {
           rightAudio.data[i] -= diffAudio.data[i];
           leftAudio.data[i] += diffAudio.data[i];
         }
-        deemphasizer.inPlace(rightAudio);
       }
     }
 
     data['rate'] = OUT_RATE;
-    deemphasizer.inPlace(leftAudio);
+    leftDeemph.inPlace(leftAudio);
+    rightDeemph.inPlace(rightAudio);
     postMessage([leftAudio.data.buffer, rightAudio.data.buffer, data],
                 [leftAudio.data.buffer, rightAudio.data.buffer]);
   }

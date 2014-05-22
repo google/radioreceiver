@@ -57,7 +57,7 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
 function FIRFilter(coefficients, opt_step) {
   var coefs = coefficients;
   var step = opt_step || 1;
-  var offset = coefs.length * step;
+  var offset = (coefs.length - 1) * step;
   var curSamples = new Float32Array(offset);
 
   /**
@@ -80,9 +80,8 @@ function FIRFilter(coefficients, opt_step) {
    */
   function get(index) {
     var out = 0;
-    var sampleOff = index + offset;
-    for (var i = coefs.length - 1; i >= 0; --i) {
-      out += coefs[i] * curSamples[sampleOff - i * step];
+    for (var i = 0; i < coefs.length; ++i) {
+      out += coefs[i] * curSamples[index + i * step];
     }
     return out;
   }
