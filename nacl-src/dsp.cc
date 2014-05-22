@@ -59,9 +59,8 @@ vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq,
 
 Samples samplesFromUint8(uint8_t* buffer, int length) {
   Samples out(length);
-  float* outArr = out.data();
   for (int i = 0; i < length; ++i) {
-    outArr[i] = buffer[i] / 128.0 - 1;
+    out[i] = buffer[i] / 128.0 - 1;
   }
   return out;
 }
