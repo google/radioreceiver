@@ -58,8 +58,9 @@ vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq,
 
 Samples samplesFromUint8(uint8_t* buffer, int length) {
   Samples out(length);
+  float* outArr = out.data();
   for (int i = 0; i < length; ++i) {
-    out[i] = buffer[i] / 128.0 - 1;
+    outArr[i] = buffer[i] / 128.0 - 1;
   }
   return out;
 }
@@ -83,8 +84,11 @@ void FIRFilter::loadSamples(const Samples& samples) {
 
 float FIRFilter::get(int index) {
   float out = 0;
-  for (int i = 0; i < coefficients_.size(); ++i) {
-    out += coefficients_[i] * curSamples_[index + i * step_];
+  float* coef = coefficients_.data();
+  float* samp = curSamples_.data();
+  for (int ic = 0, is = index, sz = coefficients_.size(); ic < sz;
+       ++ic, is += step_) {
+    out += coef[ic] * samp[is];
   }
   return out;
 }
@@ -136,16 +140,17 @@ FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF)
 
 Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   SamplesIQ iqSamples(downsampler_.downsample(samples));
-  Samples& I = iqSamples.I;
-  Samples& Q = iqSamples.Q;
-  int outLen = I.size();
+  float* I = iqSamples.I.data();
+  float* Q = iqSamples.Q.data();
+  int outLen = iqSamples.I.size();
   Samples out(outLen);
+  float* outArr = out.data();
   for (int i = 0; i < outLen; ++i) {
     float divisor = (I[i] * I[i] + Q[i] * Q[i]);
     float deltaAngle = divisor == 0
         ? 0
         : ((I[i] * (Q[i] - lQ_) - Q[i]* (I[i] - lI_)) / divisor);
-    out[i] = deltaAngle * (1 + deltaAngle * deltaAngle / 3) * amplConv_;
+    outArr[i] = deltaAngle * (1 + deltaAngle * deltaAngle / 3) * amplConv_;
     lI_ = I[i];
     lQ_ = Q[i];
   }
@@ -155,31 +160,24 @@ Samples FMDemodulator::demodulateTuned(const Samples& samples) {
 
 class StereoSeparator::ExpAverage {
   float weight_;
-  bool calcStd_;
   float avg_;
-  float std_;
 
  public:
-  ExpAverage(int weight, bool calcStd = false)
-      : weight_(weight), calcStd_(calcStd), avg_(0), std_(0) {}
+  ExpAverage(int weight) : weight_(weight), avg_(0) {}
 
   float add(float value) {
     avg_ = (weight_ * avg_ + value) / (weight_ + 1);
-    if (calcStd_) {
-      float dev = value - avg_;
-      std_ = (weight_ * std_ + dev * dev) / (weight_ + 1);
-    }
     return avg_;
   }
 
-  float getStd() { return std_; }
+  float get() { return avg_; }
 };
 
 StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
     : sin_(0), cos_(1),
       iavg_(new ExpAverage(sampleRate * 0.03)),
       qavg_(new ExpAverage(sampleRate * 0.03)),
-      cavg_(new ExpAverage(sampleRate * 0.15, true)) {
+      cavg_(new ExpAverage(sampleRate * 0.15)) {
   for (int i = 0; i < 8001; ++i) {
     float freq = (pilotFreq + i / 100 - 40) * k2Pi / sampleRate;
     sinTable_[i] = sin(freq);
@@ -189,9 +187,11 @@ StereoSeparator::StereoSeparator(int sampleRate, int pilotFreq)
 
 StereoSeparator::~StereoSeparator() {}
 
+const float StereoSeparator::kCorrThres = 4;
+
 StereoSignal StereoSeparator::separate(const Samples& samples) {
   Samples out(samples);
-  for (int i = 0; i < out.size(); ++i) {
+  for (int i = 0, sz = out.size(); i < sz; ++i) {
     float hdev = qavg_->add(out[i] * cos_);
     float vdev = iavg_->add(out[i] * sin_);
     out[i] *= sin_ * cos_ * 2;
@@ -205,16 +205,17 @@ StereoSignal StereoSeparator::separate(const Samples& samples) {
     float newSin = sin_ * cosTable_[idx] + cos_ * sinTable_[idx];
     cos_ = cos_ * cosTable_[idx] - sin_ * sinTable_[idx];
     sin_ = newSin;
-    cavg_->add(corr * 10);
+    cavg_->add(corr * corr);
   }
-  return StereoSignal{cavg_->getStd() < kStdThres, out};
+
+  return StereoSignal{cavg_->get() < kCorrThres, out};
 }
 
 Deemphasizer::Deemphasizer(int sampleRate, int timeConstant_uS)
   : mult_(exp(-1e6 / (timeConstant_uS * sampleRate))), val_(0) {}
 
 void Deemphasizer::inPlace(Samples& samples) {
-  for (int i = 0; i < samples.size(); ++i) {
+  for (int i = 0, sz = samples.size(); i < sz; ++i) {
     val_ = (1 - mult_) * samples[i] + mult_ * val_;
     samples[i] = val_;
   }

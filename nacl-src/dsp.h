@@ -185,7 +185,7 @@ struct StereoSignal {
  * A class to extract the stereo channel from a demodulated FM signal.
  */
 class StereoSeparator {
-  static const int kStdThres = 400;
+  static const float kCorrThres;
 
   float sinTable_[8001];
   float cosTable_[8001];
