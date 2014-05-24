@@ -353,7 +353,7 @@ function RtlCom(conn) {
    * @param {Function} kont The continuation for this function.
    */
   function claimInterface(kont) {
-    chrome.usb.claimInterface(conn, 1, kont);
+    chrome.usb.claimInterface(conn, 0, kont);
   }
 
   /**
@@ -361,7 +361,7 @@ function RtlCom(conn) {
    * @param {Function} kont The continuation for this function.
    */
   function releaseInterface(kont) {
-    chrome.usb.releaseInterface(conn, 1, kont);
+    chrome.usb.releaseInterface(conn, 0, kont);
   }
 
   /**

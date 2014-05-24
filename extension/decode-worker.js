@@ -19,7 +19,7 @@
 
 importScripts('dsp.js');
 
-var IN_RATE = 1008000;
+var IN_RATE = 1024000;
 var INTER_RATE = 336000;
 var OUT_RATE = 48000;
 var MAX_F = 75000;

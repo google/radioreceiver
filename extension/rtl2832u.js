@@ -188,9 +188,7 @@ function RTL2832U(conn) {
     com.writeEach([
       [CMD.REG, BLOCK.USB, REG.EPA_CTL, 0x0210, 2],
       [CMD.REG, BLOCK.USB, REG.EPA_CTL, 0x0000, 2]
-    ], function() {
-    setTimeout(kont, 10);
-    });
+    ], kont);
   }
 
   /**
