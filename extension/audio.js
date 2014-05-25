@@ -25,6 +25,8 @@ function Player() {
 
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
   var ac = new (window.AudioContext || window.webkitAudioContext)();
+  var gainNode = ac.createGainNode();
+  gainNode.connect(ac.destination);
 
   /**
    * Queues the given samples for playing at the appropriate time.
@@ -38,15 +40,24 @@ function Player() {
     buffer.getChannelData(1).set(rightSamples);
     var source = ac.createBufferSource();
     source.buffer = buffer;
-    source.connect(ac.destination);
+    source.connect(gainNode);
     lastPlayedAt = Math.max(
         lastPlayedAt + leftSamples.length / rate,
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
   }
 
+  /**
+   * Sets the volume for playing samples.
+   * @param {number} volume The volume to set, between 0 and 1.
+   */
+  function setVolume(volume) {
+    gainNode.gain.value = volume;
+  }
+
   return {
-    play: play
+    play: play,
+    setVolume: setVolume
   };
 }
 

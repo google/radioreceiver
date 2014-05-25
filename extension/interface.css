@@ -117,6 +117,53 @@ body {
   color: #ffa;
 }
 
+.volumeBox {
+  position: absolute;
+  right: 10px;
+  top: 50px;
+  width: 40px;
+  text-align: center;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.volumeIcon {
+  vertical-align: bottom;
+  fill: #afd;
+}
+
+.volumeSliderBox {
+  position: absolute;
+  right: -50px;
+  top: 20px;
+  width: 160px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.85);
+  box-shadow: 0px 0px 5px black;
+  border-radius: 15px;
+  visibility: hidden;
+  z-index: 1;
+}
+
+.volumeSlider {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: 6px;
+  width: 140px;
+  -webkit-appearance: none;
+  border-radius: 2px;
+  background-color: #7fbfa5;
+}
+
+.volumeSlider:focus {
+  outline: 0;
+}
+
+.volumeMuted {
+  color: #c54;
+}
+
 .bandLabel {
   position: absolute;
   right: 10px;

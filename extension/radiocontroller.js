@@ -47,6 +47,7 @@ function RadioController() {
   var frequency = 88500000;
   var stereo = true;
   var stereoEnabled = true;
+  var volume = 1;
   var errorHandler;
   var tuner;
   var connection;
@@ -179,6 +180,24 @@ function RadioController() {
    */
   function isStereoEnabled() {
     return stereoEnabled;
+  }
+
+  /**
+   * Sets the playing volume.
+   * @param {number} newVolume The volume, a value between 0 and 1.
+   */
+  function setVolume(newVolume) {
+    volume = newVolume;
+    player.setVolume(volume);
+    ui && ui.update();
+  }
+
+  /**
+   * Returns the current volume.
+   * @return {number} The current volume, between 0 and 1.
+   */
+  function getVolume() {
+    return volume;
   }
 
   /**
@@ -473,6 +492,8 @@ function RadioController() {
     isStereo: isStereo,
     enableStereo: enableStereo,
     isStereoEnabled: isStereoEnabled,
+    setVolume: setVolume,
+    getVolume: getVolume,
     setInterface: setInterface,
     setOnError: setOnError
   };

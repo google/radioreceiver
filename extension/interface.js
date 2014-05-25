@@ -56,8 +56,10 @@ function Interface(fmRadio) {
 
     if (!fmRadio.isStereoEnabled()) {
       stereoIndicator.classList.add('stereoDisabled');
+      stereoIndicator.classList.remove('stereoUnavailable');
     } else if (!fmRadio.isStereo()) {
       stereoIndicator.classList.add('stereoUnavailable');
+      stereoIndicator.classList.remove('stereoDisabled');
     } else {
       stereoIndicator.classList.remove('stereoDisabled');
       stereoIndicator.classList.remove('stereoUnavailable');
@@ -66,6 +68,14 @@ function Interface(fmRadio) {
       bandLabel.classList.add('scanning');
     } else {
       bandLabel.classList.remove('scanning');
+    }
+    var volume = Math.round(fmRadio.getVolume() * 100);
+    volumeLabel.textContent = volume;
+    volumeSlider.value = volume;
+    if (volume == 0) {
+      volumeLabel.classList.add('volumeMuted');
+    } else {
+      volumeLabel.classList.remove('volumeMuted');
     }
 
     selectCurrentPreset();
@@ -99,6 +109,7 @@ function Interface(fmRadio) {
       fmRadio.stop();
     }
     saveCurrentStation();
+    saveVolume();
   }
 
   /**
@@ -188,6 +199,51 @@ function Interface(fmRadio) {
    */
   function toggleStereo() {
     fmRadio.enableStereo(!fmRadio.isStereoEnabled());
+  }
+
+  /**
+   * Shows a control to change volume.
+   */
+  function changeVolume() {
+    setVisible(volumeSliderBox, true);
+    volumeSlider.focus();
+  }
+
+  /**
+   * Changes volume with the mouse wheel.
+   * @param {MouseWheelEvent} event The received event.
+   */
+  function changeVolumeWheel(event) {
+    if (event.wheelDelta < 0) {
+      setVolume(fmRadio.getVolume() - 0.1);
+    } else if (event.wheelDelta > 0) {
+      setVolume(fmRadio.getVolume() + 0.1);
+    }
+  }
+
+  /**
+   * Changes volume with the mouse wheel.
+   * @param {MouseWheelEvent} event The received event.
+   */
+  function changeVolumeSlider() {
+    var volume = volumeSlider.value;
+    setVolume(volume / 100);
+  }
+
+  /**
+   * Makes the volume slider disappear when the user clicks outside it.
+   */
+  function blurVolumeSlider() {
+    setVisible(volumeSliderBox, false);
+  }
+
+  /**
+   * Sets the audio volume.
+   * @param {number} volume The new volume, between 0 and 1.
+   */
+  function setVolume(volume) {
+    volume = volume < 0 ? 0 : volume > 1 ? 1 : volume;
+    fmRadio.setVolume(volume);
   }
 
   /**
@@ -304,6 +360,22 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Loads the previously-set volume.
+   */
+  function loadVolume() {
+    chrome.storage.local.get('volume', function(cfg) {
+      setVolume(cfg['volume'] || 1);
+    });
+  }
+
+  /**
+   * Saves the current volume.
+   */
+  function saveVolume() {
+    chrome.storage.local.set({'volume': fmRadio.getVolume()});
+  }
+
+  /**
    * Loads the settings.
    */
   function loadSettings() {
@@ -388,6 +460,7 @@ function Interface(fmRadio) {
    */
   function close() {
     saveCurrentStation();
+    saveVolume();
     fmRadio.stop(function() {
       chrome.app.window.current().close();
     });
@@ -441,6 +514,11 @@ function Interface(fmRadio) {
     frequencyInput.addEventListener('change', changeFrequency);
     frequencyInput.addEventListener('blur', hideFrequencyEditor);
     stereoIndicator.addEventListener('click', toggleStereo);
+    volumeBox.addEventListener('click', changeVolume);
+    volumeBox.addEventListener('mousewheel', changeVolumeWheel);
+    volumeSlider.addEventListener('change', changeVolumeSlider);
+    volumeSlider.addEventListener('blur', blurVolumeSlider);
+    volumeSlider.addEventListener('mousewheel', changeVolumeWheel);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);
@@ -454,6 +532,7 @@ function Interface(fmRadio) {
     loadSettings();
     loadPresets();
     loadCurrentStation();
+    loadVolume();
     update();
   }
 
