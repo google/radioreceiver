@@ -33,7 +33,7 @@ using namespace std;
 
 namespace radioreceiver {
 
-static const int kInRate = 1008000;
+static const int kInRate = 1024000;
 static const int kOutRate = 48000;
 
 DecodeInstance::DecodeInstance(PP_Instance instance)

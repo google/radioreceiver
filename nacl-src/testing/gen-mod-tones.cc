@@ -63,7 +63,7 @@ void generate(Config cfg, uint8_t* buffer, int length) {
 }
 
 int main(int argc, char* argv[]) {
-  Config cfg { true, 997, 1499, 1008000, 1.0 };
+  Config cfg { true, 997, 1499, 1024000, 1.0 };
 
   for (int i = 1; i < argc; ++i) {
     if (string("-freq") == argv[i]) {

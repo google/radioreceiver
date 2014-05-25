@@ -97,7 +97,7 @@ float FIRFilter::get(int index) {
 
 Downsampler::Downsampler(int inRate, int outRate,
                          const vector<float>& coefs)
-    : filter_(coefs, 1), rateMul_(inRate / outRate) {}
+    : filter_(coefs, 1), rateMul_((float) inRate / outRate) {}
 
 Samples Downsampler::downsample(const Samples& samples) {
   filter_.loadSamples(samples);
@@ -113,7 +113,7 @@ Samples Downsampler::downsample(const Samples& samples) {
 
 IQDownsampler::IQDownsampler(int inRate, int outRate,
                              const vector<float>& coefs)
-    : filter_(coefs, 2), rateMul_(inRate / outRate) {}
+    : filter_(coefs, 2), rateMul_((float) inRate / outRate) {}
 
 SamplesIQ IQDownsampler::downsample(const Samples& samples) {
   int numSamples = samples.size() / (2 * rateMul_);
@@ -121,7 +121,7 @@ SamplesIQ IQDownsampler::downsample(const Samples& samples) {
   SamplesIQ out{Samples(numSamples), Samples(numSamples)};
   float readFrom = 0;
   for (int i = 0; i < numSamples; ++i, readFrom += rateMul_) {
-    int idx = 2 * readFrom;
+    int idx = 2 * ((int) readFrom);
     out.I[i] = filter_.get(idx);
     out.Q[i] = filter_.get(idx + 1);
   }
@@ -209,6 +209,7 @@ StereoSignal StereoSeparator::separate(const Samples& samples) {
 
   return StereoSignal{cavg_->get() < kCorrThres, out};
 }
+
 
 Deemphasizer::Deemphasizer(int sampleRate, int timeConstant_uS)
   : mult_(exp(-1e6 / (timeConstant_uS * sampleRate))), val_(0) {}

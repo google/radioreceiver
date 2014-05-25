@@ -36,7 +36,7 @@ struct Config {
 };
 
 int main(int argc, char* argv[]) {
-  Config cfg { true, 65536, 1008000, 48000 };
+  Config cfg { true, 65536, 1024000, 48000 };
 
   for (int i = 1; i < argc; ++i) {
     if (string("-mono") == argv[i]) {
