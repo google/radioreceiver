@@ -49,6 +49,10 @@ function RadioController() {
   var stereoEnabled = true;
   var volume = 1;
   var ppm = 0;
+  var actualPpm = 0;
+  var estimatingPpm = false;
+  var offsetCount = -1;
+  var offsetSum = 0;
   var autoGain = true;
   var gain = 0;
   var errorHandler;
@@ -339,10 +343,13 @@ function RadioController() {
           });
     } else if (state.substate == SUBSTATE.TUNER) {
       state = new State(STATE.STARTING, SUBSTATE.ALL_ON, state.param);
-      tuner = new RTL2832U(connection, ppm, autoGain ? null : gain);
+      actualPpm = ppm;
+      tuner = new RTL2832U(connection, actualPpm, autoGain ? null : gain);
       tuner.setOnError(throwError);
       tuner.open(function() {
       tuner.setSampleRate(SAMPLE_RATE, function(rate) {
+      offsetSum = 0;
+      offsetCount = -1;
       tuner.setCenterFrequency(frequency, function() {
       processState();
       })})});
@@ -390,6 +397,8 @@ function RadioController() {
     }
     frequency = state.param;
     ui && ui.update();
+    offsetSum = 0;
+    offsetCount = -1;
     tuner.setCenterFrequency(frequency, function() {
     tuner.resetBuffer(function() {
     state = new State(STATE.PLAYING);
@@ -425,6 +434,8 @@ function RadioController() {
       }
       ui && ui.update();
       state = new State(STATE.SCANNING, SUBSTATE.DETECTING, param);
+      offsetSum = 0;
+      offsetCount = -1;
       tuner.setCenterFrequency(frequency, function() {
       tuner.resetBuffer(processState);
       });
@@ -501,10 +512,53 @@ function RadioController() {
       if (overload(left) < 0.075) {
         setFrequency(msg.data[2].frequency);
       }
+    } else if (estimatingPpm) {
+      if (offsetCount >= 0) {
+        var sum = 0;
+        for (var i = 0; i < left.length; ++i) {
+          sum += left[i];
+        }
+        offsetSum += sum / left.length;
+      }
+      ++offsetCount;
+      if (offsetCount == 50) {
+        estimatingPpm = false;
+      }
     }
   }
 
   decoder.addEventListener('message', receiveDemodulated);
+
+  /**
+   * Starts or stops calculating an estimated frequency correction.
+   * @param {boolean} doEstimate Whether the estimate should run.
+   */
+  function estimatePpm(doEstimate) {
+    estimatingPpm = doEstimate;
+    offsetSum = 0;
+    offsetCount = -1;
+  }
+
+  /**
+   * Returns whether the radio is currently estimating frequency correction.
+   */
+  function isEstimatingPpm() {
+    return estimatingPpm;
+  }
+
+  /**
+   * Returns an estimated needed frequency correction.
+   * @return {number} The estimated correction, in parts per million.
+   */
+  function getPpmEstimate() {
+    if (offsetCount > 0) {
+      var offset = offsetSum / offsetCount;
+      var freqOffset = 75000 * offset;
+      return Math.round(actualPpm - 1e6 * freqOffset / frequency);
+    } else {
+      return 0;
+    }
+  }
 
   /**
    * Calculates the proportion of samples above maximum amplitude.
@@ -555,6 +609,9 @@ function RadioController() {
     setManualGain: setManualGain,
     isAutoGain: isAutoGain,
     getManualGain: getManualGain,
+    estimatePpm: estimatePpm,
+    isEstimatingPpm: isEstimatingPpm,
+    getPpmEstimate: getPpmEstimate,
     setInterface: setInterface,
     setOnError: setOnError
   };

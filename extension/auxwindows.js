@@ -48,14 +48,31 @@ var AuxWindows = (function() {
   function settings(settings) {
     chrome.app.window.create('settings.html', {
         'bounds': {
-          'width': 250,
-          'height': 150
+          'width': 350,
+          'height': 220
         },
         'resizable': false
       }, function(win) {
         win.contentWindow['opener'] = window;
         win.contentWindow['settings'] = settings;
     });
+  }
+
+  /**
+   * Shows a window for the frequency correction factor estimator.
+   * @param {AppWindow} mainWindow The app's main window.
+   */
+  function estimatePpm(mainWindow) {
+    chrome.app.window.create('estimateppm.html', {
+        'bounds': {
+          'width': 350,
+          'height': 250
+        },
+        'resizable': false
+      }, function(win) {
+        win.contentWindow['opener'] = window;
+        win.contentWindow['mainWindow'] = mainWindow;
+    });  
   }
 
   /**
@@ -96,6 +113,7 @@ var AuxWindows = (function() {
   return {
     savePreset: savePreset,
     settings: settings,
+    estimatePpm: estimatePpm,
     error: error,
     resizeCurrentTo: resizeCurrentTo,
     closeCurrent: closeCurrent

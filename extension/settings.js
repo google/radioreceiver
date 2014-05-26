@@ -22,7 +22,6 @@ if (settings && settings['region']) {
   }
 }
 ppm.value = (settings && settings['ppm']) || 0;
-var nerdSettings = settings && settings['nerdSettings'];
 
 autoGain.checked = settings && settings['autoGain'];
 gain.value = (settings && settings['gain']) || 0;
@@ -33,7 +32,6 @@ function save() {
     'type': 'setsettings',
     'data': {
       'region': region.options[region.selectedIndex].value || 'WW',
-      'nerdSettings': !!nerdSettings,
       'ppm': ppm.value || 0,
       'autoGain': autoGain.checked,
       'gain': gain.value
@@ -47,32 +45,14 @@ function exit() {
   AuxWindows.closeCurrent();
 }
 
-function showNerdSettings() {
-  if (nerdSettings) {
-    nerdSettingsOpen.style.display = 'block';
-    nerdSettingsClosed.style.display = 'none';
-    AuxWindows.resizeCurrentTo(250, 245);  
-  } else {
-    nerdSettingsOpen.style.display = 'none';
-    nerdSettingsClosed.style.display = 'block';
-    AuxWindows.resizeCurrentTo(250, 130);  
-  }
-}
-
 cancel.addEventListener('click', exit);
 ok.addEventListener('click', save);
-
-nerdSettingsOpenLink.addEventListener('click', function() {
-  nerdSettings = true;
-  showNerdSettings();
-});
-nerdSettingsCloseLink.addEventListener('click', function() {
-  nerdSettings = false;
-  showNerdSettings();
+estimatePpmLink.addEventListener('click', function() {
+  AuxWindows.estimatePpm(opener);
 });
 autoGain.addEventListener('change', function() {
   gain.disabled = autoGain.checked;
 });
 
-showNerdSettings();
+AuxWindows.resizeCurrentTo(350, 220);  
 

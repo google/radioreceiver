@@ -518,10 +518,10 @@ function Interface(fmRadio) {
   };
 }
 
+var radio = new RadioController();
+
 window.addEventListener('load', function() {
   AuxWindows.resizeCurrentTo(500, 225);
-
-  var radio = new RadioController();
   var interface = new Interface(radio);
   interface.attach();
 });

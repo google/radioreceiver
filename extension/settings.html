@@ -18,15 +18,6 @@ limitations under the License.
 <title>Radio Receiver Settings</title>
 <script src="auxwindows.js"></script>
 <style>
-.nerdSettingsOpen {
-  display: none;
-}
-a {
-  text-decoration: none;
-}
-.arrow {
-  color: black;
-}
 .ppm {
   text-align: right;
 }
@@ -39,17 +30,11 @@ a {
 <option value="WW">Rest of the World</option>
 </select>
 </p>
-<div id="nerdSettingsClosed" class="nerdSettingsClose">
-<p><a id="nerdSettingsOpenLink" href="#"><span class="arrow">&#9660;</span>&nbsp;Settings for nerds</a></p>
-</div>
-<div id="nerdSettingsOpen" class="nerdSettingsOpen">
-<p><a id="nerdSettingsCloseLink" href="#"><span class="arrow">&#9650;</span>&nbsp;Settings for nerds</a></p>
-<p>Frequency correction: <input id="ppm" class="ppm" name="ppm" type="text" size="5"> PPM.</p>
+<p>Frequency correction: <input id="ppm" class="ppm" name="ppm" type="text" size="4"> PPM. <a id="estimatePpmLink" href="#">Suggest a value</a>.</p>
 <p>Tuner gain: <input id="autoGain" name="autoGain" type="checkbox">Automatic</input> / <input id="gain" name="gain" type="text" size="2"> dB.
 </span>
 </p>
-<p>These settings take effect after you turn the radio off and back on.</p>
-</div>
+<p>You may need to turn the radio off and on before those settings take effect.</p>
 <button id="ok" type="submit">Save</button> <button id="cancel">Cancel</button>
 <script src="settings.js"></script>
 </body>
