@@ -15,9 +15,11 @@
 /**
  * Operations on the RTL2832U demodulator.
  * @param {ConnectionHandle} conn The USB connection handle.
+ * @param {number} ppm The frequency correction factor, in parts per million.
+ * @param {number=} opt_gain The optional gain in dB. If unspecified or null, sets auto gain.
  * @constructor
  */
-function RTL2832U(conn) {
+function RTL2832U(conn, ppm, opt_gain) {
 
   /**
    * Frequency of the oscillator crystal.
@@ -28,12 +30,6 @@ function RTL2832U(conn) {
    * Tuner intermediate frequency.
    */
   var IF_FREQ = 3570000;
-
-  /**
-   * Correction factor for the crystal frequency, in parts per million.
-   * This will be configurable in the future.
-   */
-  var PPM = 0;
 
   /**
    * The number of bytes for each sample.
@@ -110,7 +106,7 @@ function RTL2832U(conn) {
       [CMD.DEMODREG, 0, 0x0d, 0x83, 1]
     ], function() {
 
-    var xtalFreq = Math.floor(XTAL_FREQ * (1 + PPM / 1000000));
+    var xtalFreq = Math.floor(XTAL_FREQ * (1 + ppm / 1000000));
     com.i2c.open(function() {
     R820T.check(com, function(found) {
     if (found) {
@@ -131,8 +127,23 @@ function RTL2832U(conn) {
       [CMD.DEMODREG, 1, 0x15, 0x01, 1]
     ], function() {
     tuner.init(function() {
+    setGain(opt_gain, function() {
     com.i2c.close(kont);
-    })})})})})})});
+    })})})})})})})});
+  }
+
+  /**
+   * Sets the requested gain.
+   * @param {number|null|undefined} gain The gain in dB, or null/undefined
+   *     for automatic gain.
+   * @param {Function} kont The continuation for this function.
+   */
+  function setGain(gain, kont) {
+    if (gain == null) {
+      tuner.setAutoGain(kont);
+    } else {
+      tuner.setManualGain(gain, kont);
+    }
   }
 
   /**
@@ -145,7 +156,7 @@ function RTL2832U(conn) {
     var ratio = Math.floor(XTAL_FREQ * (1 << 22) / rate);
     ratio &= 0x0ffffffc;
     var realRate = Math.floor(XTAL_FREQ * (1 << 22) / ratio);
-    var ppmOffset = -1 * Math.floor(PPM * (1 << 24) / 1000000);
+    var ppmOffset = -1 * Math.floor(ppm * (1 << 24) / 1000000);
     com.writeEach([
       [CMD.DEMODREG, 1, 0x9f, (ratio >> 16) & 0xffff, 2],
       [CMD.DEMODREG, 1, 0xa1, ratio & 0xffff, 2],

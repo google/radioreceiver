@@ -30,10 +30,11 @@ function save() {
 }
 
 function exit() {
-  chrome.app.window.current().close();
+  AuxWindows.closeCurrent();
 }
 
 cancel.addEventListener('click', exit);
 ok.addEventListener('click', save);
 stationName.addEventListener('change', save);
 
+AuxWindows.resizeCurrentTo(300, 120);

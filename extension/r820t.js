@@ -72,9 +72,8 @@ function R820T(com, xtalFreq, throwError) {
    */
   function init(kont) {
     initRegisters(REGISTERS, function() {
-    initElectronics(function() {
-    setAutoGain(kont);
-    })});
+    initElectronics(kont);
+    });
   }
 
   /**
@@ -159,6 +158,36 @@ function R820T(com, xtalFreq, throwError) {
       [0x05, 0x00, 0x10],
       [0x07, 0x10, 0x10],
       [0x0c, 0x0b, 0x9f]
+    ], kont);
+  }
+
+  /**
+   * Sets the tuner's manual gain.
+   * @param {number} gain The tuner's gain, in dB.
+   * @param {Function} kont The continuation for this function.
+   */
+  function setManualGain(gain, kont) {
+    var step = 0;
+    if (gain <= 15) {
+      step = Math.round(((0.00467 * gain - 0.127) * gain + 1.42) * gain - 0.05);
+    } else if (gain <= 41.5) {
+      step = Math.round(((0.00703 * gain - 0.0542) * gain + 1.82) * gain - 8.8);
+    } else {
+      step = Math.round(((0.116105 * gain - 15.5431) * gain + 693.409) * gain - 10282.3);
+    }
+    if (step < 0) {
+      step = 0;
+    } else if (step > 28) {
+      step = 28;
+    }
+    var lnaValue = Math.floor((step + 1) / 2);
+    var mixerValue = Math.floor(step / 2);
+    writeEach([
+      [0x05, 0x10, 0x10],
+      [0x07, 0x00, 0x10],
+      [0x0c, 0x08, 0x9f],
+      [0x05, lnaValue, 0x0f],
+      [0x07, lnaValue, 0x0f]
     ], kont);
   }
 
@@ -358,6 +387,8 @@ function R820T(com, xtalFreq, throwError) {
   return {
     init: init,
     setFrequency: setFrequency,
+    setAutoGain: setAutoGain,
+    setManualGain: setManualGain,
     close: close
   };
 }

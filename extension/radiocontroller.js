@@ -48,6 +48,9 @@ function RadioController() {
   var stereo = true;
   var stereoEnabled = true;
   var volume = 1;
+  var ppm = 0;
+  var autoGain = true;
+  var gain = 0;
   var errorHandler;
   var tuner;
   var connection;
@@ -201,6 +204,58 @@ function RadioController() {
   }
 
   /**
+   * Sets the tuner's frequency correction factor in parts per million.
+   * The setting takes effect the next time open() is called.
+   * @param {number} newPpm The new correction factor.
+   */
+  function setCorrectionPpm(newPpm) {
+    ppm = Math.floor(newPpm);
+  }
+
+  /**
+   * Returns the current correction factor.
+   */
+  function getCorrectionPpm() {
+    return ppm;
+  }
+
+  /**
+   * Sets automatic tuner gain.
+   */
+  function setAutoGain() {
+    autoGain = true;
+  }
+
+  /**
+   * Sets a particular tuner gain.
+   * @param {number} gain The tuner gain in dB.
+   */
+  function setManualGain(newGain) {
+    autoGain = false;
+    if (newGain < 0) {
+      gain = 0;
+    } else if (newGain > 47.4) {
+      gain = 47.4;
+    } else {
+      gain = newGain;
+    }
+  }
+
+  /**
+   * Returns whether automatic gain is currently set.
+   */
+  function isAutoGain() {
+    return autoGain;
+  }
+
+  /**
+   * Returns the currently-set manual gain in dB.
+   */
+  function getManualGain() {
+    return gain;
+  }
+
+  /**
    * Saves a reference to the current user interface controller.
    * @param {Object} iface The controller. Must have an update() method.
    */
@@ -284,7 +339,7 @@ function RadioController() {
           });
     } else if (state.substate == SUBSTATE.TUNER) {
       state = new State(STATE.STARTING, SUBSTATE.ALL_ON, state.param);
-      tuner = new RTL2832U(connection);
+      tuner = new RTL2832U(connection, ppm, autoGain ? null : gain);
       tuner.setOnError(throwError);
       tuner.open(function() {
       tuner.setSampleRate(SAMPLE_RATE, function(rate) {
@@ -494,6 +549,12 @@ function RadioController() {
     isStereoEnabled: isStereoEnabled,
     setVolume: setVolume,
     getVolume: getVolume,
+    setCorrectionPpm: setCorrectionPpm,
+    getCorrectionPpm: getCorrectionPpm,
+    setAutoGain: setAutoGain,
+    setManualGain: setManualGain,
+    isAutoGain: isAutoGain,
+    getManualGain: getManualGain,
     setInterface: setInterface,
     setOnError: setOnError
   };

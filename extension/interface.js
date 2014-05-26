@@ -23,7 +23,8 @@ function Interface(fmRadio) {
    * Settings.
    */
   var settings = {
-    'region': 'WW'
+    'region': 'WW',
+    'nerdSettings': false
   };
 
   /**
@@ -315,23 +316,7 @@ function Interface(fmRadio) {
    * Called when the 'Save' button is pressed.
    */
   function savePreset() {
-    chrome.app.window.create('savedialog.html', {
-        'bounds': {
-          'width': 400,
-          'height': 100
-        },
-        'resizable': false
-      }, function(win) {
-        var frequency = getFrequencyMHz();
-        win.contentWindow['opener'] = window;
-        var stationData = {
-          'frequency': frequency
-        };
-        if (frequency in presets) {
-          stationData['name'] = presets[frequency];
-        }
-        win.contentWindow['station'] = stationData;
-    });
+    AuxWindows.savePreset(getFrequencyMHz(), presets);
   }
 
   /**
@@ -397,16 +382,10 @@ function Interface(fmRadio) {
    * Shows the settings dialog.
    */
   function showSettings() {
-    chrome.app.window.create('settings.html', {
-        'bounds': {
-          'width': 400,
-          'height': 100
-        },
-        'resizable': false
-      }, function(win) {
-        win.contentWindow['opener'] = window;
-        win.contentWindow['settings'] = settings;
-    });
+    settings['ppm'] = fmRadio.getCorrectionPpm();
+    settings['autoGain'] = fmRadio.isAutoGain();
+    settings['gain'] = fmRadio.getManualGain();
+    AuxWindows.settings(settings);
   }
 
   /**
@@ -426,6 +405,12 @@ function Interface(fmRadio) {
     } else {
       freqStep = 100000;
     }
+    if (settings['autoGain'] || null == settings['autoGain']) {
+      fmRadio.setAutoGain();
+    } else {
+      fmRadio.setManualGain(settings['gain']);
+    }
+    fmRadio.setCorrectionPpm(settings['ppm'] || 0);
     setFrequency(fmRadio.getFrequency(), true);
   }
 
@@ -462,7 +447,7 @@ function Interface(fmRadio) {
     saveCurrentStation();
     saveVolume();
     fmRadio.stop(function() {
-      chrome.app.window.current().close();
+      AuxWindows.closeCurrent();
     });
   }
 
@@ -471,16 +456,7 @@ function Interface(fmRadio) {
    * @param {string} msg The message to show.
    */
   function showErrorWindow(msg) {
-    chrome.app.window.create('error.html', {
-        'bounds': {
-          'width': 500,
-          'height': 125
-        },
-        'resizable': false
-      }, function(win) {
-        win.contentWindow['opener'] = window;
-        win.contentWindow['errorMsg'] = msg;
-    });
+    AuxWindows.error(msg);
   }
 
   /**
@@ -543,9 +519,7 @@ function Interface(fmRadio) {
 }
 
 window.addEventListener('load', function() {
-  // If the user has set a custom zoom level, resize the window to fit
-  var zoom = chrome.app.window.current().getBounds().width / window.innerWidth;
-  chrome.app.window.current().resizeTo(500 * zoom, 225 * zoom);
+  AuxWindows.resizeCurrentTo(500, 225);
 
   var radio = new RadioController();
   var interface = new Interface(radio);

@@ -19,8 +19,9 @@ function exit() {
     'type': 'exit'
   };
   window['opener'].postMessage(msg, '*');
-  chrome.app.window.current().close();
+  AuxWindows.closeCurrent();
 }
 
 exitButton.addEventListener('click', exit);
 
+AuxWindows.resizeCurrentTo(500, 125);
