@@ -1,3 +1,4 @@
 *.pem
 *.crx
+*.zip
 nacl-src/pnacl
