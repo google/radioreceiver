@@ -1,6 +1,6 @@
 # Radio Receiver
 
-An application to listen to broadcast stereo FM radio from your Chrome browser or your ChromeBook computer using a $15 USB radio tuner.
+An application to listen to broadcast stereo FM radio from your Chrome browser or your ChromeBook computer using a $15 USB digital TV tuner.
 
 ## What is this
 
