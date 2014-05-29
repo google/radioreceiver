@@ -68,6 +68,10 @@ body {
   margin-top: 7px;
 }
 
+.closeIcon {
+  margin-top: 9px;
+}
+
 .top {
   position: absolute;
   top: 30px;
