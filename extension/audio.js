@@ -23,9 +23,8 @@ function Player() {
   var lastPlayedAt = -1;
   var frameno = 0;
 
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
   var ac = new (window.AudioContext || window.webkitAudioContext)();
-  var gainNode = ac.createGainNode();
+  var gainNode = ac.createGain ? ac.createGain() : ac.createGainNode();
   gainNode.connect(ac.destination);
 
   /**
