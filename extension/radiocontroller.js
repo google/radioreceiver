@@ -18,7 +18,8 @@
  */
 function RadioController() {
 
-  var TUNER = {'vendorId': 0x0bda, 'productId': 0x2838};
+  var TUNERS = [{'vendorId': 0x0bda, 'productId': 0x2832}, 
+                {'vendorId': 0x0bda, 'productId': 0x2838}];
   var SAMPLE_RATE = 1024000; // Must be a multiple of 512 * BUFS_PER_SEC
   var BUFS_PER_SEC = 5;
   var SAMPLES_PER_BUF = Math.floor(SAMPLE_RATE / BUFS_PER_SEC);
@@ -69,7 +70,7 @@ function RadioController() {
     if (state.state == STATE.OFF) {
       state = new State(STATE.STARTING, SUBSTATE.USB, opt_callback);
       chrome.permissions.request(
-        {'permissions': [{'usbDevices': [TUNER]}]},
+        {'permissions': [{'usbDevices': TUNERS}]},
         function(res) {
           if (!res) {
             state = new State(STATE.OFF);
@@ -329,18 +330,7 @@ function RadioController() {
   function stateStarting() {
     if (state.substate == SUBSTATE.USB) {
       state = new State(STATE.STARTING, SUBSTATE.TUNER, state.param);
-      chrome.usb.findDevices(TUNER,
-          function(conns) {
-            if (conns.length == 0) {
-              state = new State(STATE.OFF);
-              throwError('USB tuner device not found. The Radio Receiver ' +
-                         'app needs an RTL2832U-based DVB-T dongle ' +
-                         '(with an R820T tuner chip) to work.');
-            } else {
-              connection = conns[0];
-              processState();
-            }
-          });
+      doFindDevices(0);
     } else if (state.substate == SUBSTATE.TUNER) {
       state = new State(STATE.STARTING, SUBSTATE.ALL_ON, state.param);
       actualPpm = ppm;
@@ -361,6 +351,30 @@ function RadioController() {
       ui && ui.update();
       startPipeline();
       });
+    }
+  }
+
+  /**
+   * Finds the first matching tuner USB device in the tuner device definition
+   * list and transitions to the next substate.
+   * @param {number} index The first element in the list to find.
+   */
+  function doFindDevices(index) {
+    if (index == TUNERS.length) {
+      state = new State(STATE.OFF);
+      throwError('USB tuner device not found. The Radio Receiver ' +
+                 'app needs an RTL2832U-based DVB-T dongle ' +
+                 '(with an R820T tuner chip) to work.');
+    } else {
+      chrome.usb.findDevices(TUNERS[index],
+          function(conns) {
+            if (conns.length == 0) {
+              doFindDevices(index + 1);
+            } else {
+              connection = conns[0];
+              processState();
+            }
+          });
     }
   }
 
