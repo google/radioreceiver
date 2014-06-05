@@ -485,11 +485,11 @@ function Interface(fmRadio) {
     powerOffButton.addEventListener('click', powerOff);
     settingsButton.addEventListener('click', showSettings);
     closeButton.addEventListener('click', close);
-    frequencyDisplay.addEventListener('click', showFrequencyEditor);
+    frequencyDisplay.addEventListener('focus', showFrequencyEditor);
     frequencyDisplay.addEventListener('mousewheel', changeFrequencyWheel);
     frequencyInput.addEventListener('change', changeFrequency);
     frequencyInput.addEventListener('blur', hideFrequencyEditor);
-    stereoIndicator.addEventListener('click', toggleStereo);
+    stereoIndicatorBox.addEventListener('click', toggleStereo);
     volumeBox.addEventListener('click', changeVolume);
     volumeBox.addEventListener('mousewheel', changeVolumeWheel);
     volumeSlider.addEventListener('change', changeVolumeSlider);

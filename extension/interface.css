@@ -18,6 +18,20 @@ body {
   background-color: #ddd;
 }
 
+.invisibleButton {
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  align-items: inherit;
+  display: inherit;
+  box-sizing: inherit;
+  -webkit-appearance: inherit;
+}
+
 .titleBar {
   position: absolute;
   top: 0;
@@ -50,6 +64,10 @@ body {
   -webkit-app-region: no-drag;
 }
 
+.settingsButton:focus {
+  outline: 0;
+}
+
 .closeButton:hover, .prefsButton:hover {
   background-color: #bbb;
 }
@@ -62,10 +80,6 @@ body {
 .closeButton {
   right: 0;
   width: 50px;
-}
-
-.gearIcon {
-  margin-top: 7px;
 }
 
 .closeIcon {
@@ -128,7 +142,6 @@ body {
   width: 40px;
   text-align: center;
   font-size: 16px;
-  cursor: pointer;
 }
 
 .volumeIcon {
@@ -197,7 +210,6 @@ body {
   width: 40px;
   height: 22px;
   fill: #afd;
-  cursor: pointer;
 }
 
 .stereoIndicator {
@@ -262,7 +274,7 @@ body {
   width: 205px;
 }
 
-.removePresetButton {
+.savePresetButton {
   position: absolute;
   right: 90px;
   top: 0;
@@ -270,7 +282,7 @@ body {
   width: 90px;
 }
 
-.savePresetButton {
+.removePresetButton {
   position: absolute;
   right: 0;
   top: 0;
