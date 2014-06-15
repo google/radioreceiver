@@ -93,6 +93,19 @@ var AuxWindows = (function() {
   }
 
   /**
+   * Shows the help window.
+   */
+  function help(msg) {
+    chrome.app.window.create('help.html', {
+        'bounds': {
+          'width': 500,
+          'height': 500
+        },
+        'resizable': false
+      });
+  }
+
+  /**
    * Resizes the current window to the given dimensions, compensating for zoom.
    * @param {number} width The desired width.
    * @param {number} height The desired height.
@@ -115,6 +128,7 @@ var AuxWindows = (function() {
     settings: settings,
     estimatePpm: estimatePpm,
     error: error,
+    help: help,
     resizeCurrentTo: resizeCurrentTo,
     closeCurrent: closeCurrent
   };

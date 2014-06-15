@@ -114,6 +114,18 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Turns the radio on if it's off and off if it's on.
+   * Called when the space bar shortcut is pressed.
+   */
+  function togglePower() {
+    if (powerOffButton.visibility == 'hidden') {
+      powerOff();
+    } else {
+      powerOn();
+    }
+  }
+
+  /**
    * Shows the frequency edit box.
    * Called when the frequency display is clicked.
    */
@@ -217,10 +229,24 @@ function Interface(fmRadio) {
    */
   function changeVolumeWheel(event) {
     if (event.wheelDelta < 0) {
-      setVolume(fmRadio.getVolume() - 0.1);
+      changeVolumeDown();
     } else if (event.wheelDelta > 0) {
-      setVolume(fmRadio.getVolume() + 0.1);
+      changeVolumeUp();
     }
+  }
+
+  /**
+   * Changes the volume 1 notch down.
+   */
+  function changeVolumeDown() {
+    setVolume(fmRadio.getVolume() - 0.1);
+  }
+
+  /**
+   * Changes the volume 1 notch up.
+   */
+  function changeVolumeUp() {
+    setVolume(fmRadio.getVolume() + 0.1);
   }
 
   /**
@@ -487,6 +513,75 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Handle a keyboard shortcut.
+   * @param {KeyboardEvent} e The keyboard event that was fired.
+   */
+  function handleShortcut(e) {
+    if (document.activeElement != document.body) {
+      if (e.type == 'keydown' && e.keyCode == 27) {
+        document.activeElement.blur();
+      }
+      return;
+    }
+    if (e.type == 'keydown') {
+      switch (e.keyCode) {
+        case 37:
+          frequencyMinus();
+          break;
+        case 39:
+          frequencyPlus();
+          break;
+        case 38:
+          changeVolumeUp();
+          break;
+        case 40:
+          changeVolumeDown();
+          break;
+        default:
+          return;
+      }
+    } else {
+      switch (e.charCode) {
+        case 33:  // !
+          showSettings();
+          break;
+        case 60:  // <
+          scanDown();
+          break;
+        case 62:  // >
+          scanUp();
+          break;
+        case 63:  // ?
+          AuxWindows.help();
+          break;
+        case 102: // f
+          showFrequencyEditor();
+          break;
+        case 80:  // P
+        case 112: // p
+          presetsBox.focus();
+          break;
+        case 115: // s
+          toggleStereo();
+          break;
+        case 83:  // S
+          savePreset();
+          break;
+        case 82:  // R
+          deletePreset();
+          break;
+        case 32:
+          togglePower();
+          break;
+        default:
+          return;
+      }
+    }
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  /**
    * Attaches all the event handlers, loads the presets, and updates the UI.
    */
   function attach() {
@@ -513,6 +608,8 @@ function Interface(fmRadio) {
     removePresetButton.addEventListener('click', deletePreset);
     savePresetButton.addEventListener('click', savePreset);
     window.addEventListener('message', getMessage);
+    window.addEventListener('keydown', handleShortcut);
+    window.addEventListener('keypress', handleShortcut);
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
     loadSettings();
