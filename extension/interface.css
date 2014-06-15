@@ -135,13 +135,19 @@ body {
   color: #ffa;
 }
 
-.volumeBox {
+.volumeBox, .volumeOccluder {
   position: absolute;
   right: 10px;
   top: 50px;
   width: 40px;
+  height: 19px;
   text-align: center;
   font-size: 16px;
+}
+
+.volumeOccluder {
+  visibility: hidden;
+  z-index: 1;
 }
 
 .volumeIcon {
@@ -159,7 +165,7 @@ body {
   box-shadow: 0px 0px 5px black;
   border-radius: 15px;
   visibility: hidden;
-  z-index: 1;
+  z-index: 2;
 }
 
 .volumeSlider {

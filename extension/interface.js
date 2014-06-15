@@ -207,6 +207,7 @@ function Interface(fmRadio) {
    */
   function changeVolume() {
     setVisible(volumeSliderBox, true);
+    setVisible(volumeOccluder, true);
     volumeSlider.focus();
   }
 
@@ -236,6 +237,7 @@ function Interface(fmRadio) {
    */
   function blurVolumeSlider() {
     setVisible(volumeSliderBox, false);
+    setVisible(volumeOccluder, false);
   }
 
   /**
@@ -476,6 +478,13 @@ function Interface(fmRadio) {
     }
   }
 
+  /**
+   * Stops event propagation.
+   * @param {Event} e The event to stop.
+   */
+  function stopEvent(e) {
+    e.stopPropagation();
+  }
 
   /**
    * Attaches all the event handlers, loads the presets, and updates the UI.
@@ -490,6 +499,7 @@ function Interface(fmRadio) {
     frequencyInput.addEventListener('change', changeFrequency);
     frequencyInput.addEventListener('blur', hideFrequencyEditor);
     stereoIndicatorBox.addEventListener('click', toggleStereo);
+    volumeOccluder.addEventListener('click', stopEvent, true);
     volumeBox.addEventListener('click', changeVolume);
     volumeBox.addEventListener('mousewheel', changeVolumeWheel);
     volumeSlider.addEventListener('change', changeVolumeSlider);
