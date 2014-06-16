@@ -118,7 +118,7 @@ function Interface(fmRadio) {
    * Called when the space bar shortcut is pressed.
    */
   function togglePower() {
-    if (powerOffButton.visibility == 'hidden') {
+    if (powerOnButton.style.visibility == 'hidden') {
       powerOff();
     } else {
       powerOn();
