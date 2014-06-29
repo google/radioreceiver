@@ -196,9 +196,9 @@ function FMDemodulator(inRate, outRate, maxF, kernelLen) {
       var sgn = angleSin < 0 ? -1 : 1;
       angleSin *= sgn;
       out[i] = sgn * (angleSin > 1 ? 1 :
-                      0.92200051775373 * angleSin
+                      (0.92200051775373 * angleSin
                       + 0.09688461195053477 / (1.1576100461486143 - angleSin)
-                      - 0.08369365165140999);
+                      - 0.08369365165140999) * AMPL_CONV);
       lI = I[i];
       lQ = Q[i];
       sigSqrSum += lI * lI;
