@@ -523,7 +523,7 @@ function RadioController() {
     var right = new Float32Array(msg.data[1]);
     player.play(left, right, msg.data[2]['rate']);
     if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
-      if (overload(left) < 0.075) {
+      if (msg.data[2]['carrier']) {
         setFrequency(msg.data[2].frequency);
       }
     } else if (estimatingPpm) {

@@ -176,6 +176,9 @@ function FMDemodulator(inRate, outRate, maxF, kernelLen) {
   var lI = 0;
   var lQ = 0;
 
+  var sigSqrSum = 0;
+  var sampleCount = 0;
+
   /**
    * Demodulates the given I/Q samples.
    * @param {Samples} samples The samples to demodulate.
@@ -186,17 +189,31 @@ function FMDemodulator(inRate, outRate, maxF, kernelLen) {
     var I = IQ[0].data;
     var Q = IQ[1].data;
     var out = new Float32Array(I.length);
+
+    sigSqrSum = 0;
     for (var i = 0; i < out.length; ++i) {
-      var deltaAngle = ((I[i] * (Q[i] - lQ) - Q[i] * (I[i] - lI)) / (I[i] * I[i] + Q[i] * Q[i])) || 0;
-      out[i] = (deltaAngle + deltaAngle * deltaAngle * deltaAngle / 3) * AMPL_CONV;
+      var angleSin = ((lI * Q[i] - I[i] * lQ) / (I[i] * I[i] + Q[i] * Q[i])) || 0;
+      var sgn = angleSin < 0 ? -1 : 1;
+      angleSin *= sgn;
+      out[i] = sgn * (angleSin > 1 ? 1 :
+                      0.92200051775373 * angleSin
+                      + 0.09688461195053477 / (1.1576100461486143 - angleSin)
+                      - 0.08369365165140999);
       lI = I[i];
       lQ = Q[i];
+      sigSqrSum += lI * lI;
     }
+    sampleCount = out.length;
     return new Samples(out, outRate);
+  }
+
+  function hasCarrier() {
+    return sigSqrSum > (0.002 * sampleCount);
   }
   
   return {
-    demodulateTuned: demodulateTuned
+    demodulateTuned: demodulateTuned,
+    hasCarrier: hasCarrier
   }
 }
 
