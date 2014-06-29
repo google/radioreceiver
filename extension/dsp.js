@@ -164,14 +164,15 @@ function IQDownsampler(inRate, outRate, coefficients) {
  * @param {number} inRate The sample rate for the input signal.
  * @param {number} outRate The sample rate for the output audio.
  * @param {number} maxF The maximum frequency deviation.
+ * @param {number} filterFreq The frequency of the low-pass filter.
  * @param {number} kernelLen The length of the filter kernel.
  * @constructor
  */
-function FMDemodulator(inRate, outRate, maxF, kernelLen) {
+function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
   var GAIN = 1;
   var AMPL_CONV = outRate * GAIN / (2 * Math.PI * maxF);
 
-  var coefs = getLowPassFIRCoeffs(inRate, maxF * 0.8, kernelLen);
+  var coefs = getLowPassFIRCoeffs(inRate, filterFreq, kernelLen);
   var downsampler = new IQDownsampler(inRate, outRate, coefs);
   var lI = 0;
   var lQ = 0;

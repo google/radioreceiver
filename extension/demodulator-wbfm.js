@@ -25,10 +25,11 @@
 function Demodulator_WBFM(inRate, outRate) {
   var INTER_RATE = 336000;
   var MAX_F = 75000;
+  var FILTER = MAX_F * 0.8;
   var PILOT_FREQ = 19000;
   var DEEMPH_TC = 50;
 
-  var demodulator = new FMDemodulator(inRate, INTER_RATE, MAX_F, 51);
+  var demodulator = new FMDemodulator(inRate, INTER_RATE, MAX_F, FILTER, 51);
   var filterCoefs = getLowPassFIRCoeffs(INTER_RATE, 10000, 41);
   var monoSampler = new Downsampler(INTER_RATE, outRate, filterCoefs);
   var stereoSampler = new Downsampler(INTER_RATE, outRate, filterCoefs);
