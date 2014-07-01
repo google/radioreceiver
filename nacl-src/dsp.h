@@ -154,6 +154,7 @@ class FMDemodulator {
   IQDownsampler downsampler_;
   float lI_;
   float lQ_;
+  boolean hasCarrier_;
  public:
   /**
    * Constructor for the given rates and maximum frequency deviation.
@@ -169,6 +170,12 @@ class FMDemodulator {
    * @return The demodulated sound.
    */
   Samples demodulateTuned(const Samples& samples);
+
+  /**
+   * Tells whether a carrier was detected in the last demodulated block.
+   * @return Whether a carrier was detected.
+   */
+  boolean hasCarrier();
 };
 
 

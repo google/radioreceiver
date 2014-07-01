@@ -37,6 +37,7 @@ struct StereoAudio {
   Samples left;
   Samples right;
   bool inStereo;
+  bool carrier;
 };
 
 /**

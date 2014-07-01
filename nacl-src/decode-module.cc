@@ -76,6 +76,7 @@ void DecodeInstance::HandleMessage(const pp::Var& message) {
   }
   dict.Set(pp::Var("rate"), pp::Var(kOutRate));
   dict.Set(pp::Var("stereo"), pp::Var(audio.inStereo));
+  dict.Set(pp::Var("carrier"), pp::Var(audio.carrier));
 
   pp::VarArray resp;
   resp.Set(0, left);

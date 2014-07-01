@@ -43,6 +43,7 @@ StereoAudio WBFMDecoder::decode(const Samples& samples, bool inStereo) {
   output.inStereo = false;
   output.left = monoSampler_.downsample(demodulated);
   output.right = output.left;
+  output.carrier = demodulator_.hasCarrier();
 
   if (inStereo) {
     StereoSignal stereo(stereoSeparator_.separate(demodulated));

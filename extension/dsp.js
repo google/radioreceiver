@@ -1,11 +1,11 @@
 // Copyright 2013 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -177,8 +177,7 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
   var lI = 0;
   var lQ = 0;
 
-  var sigSqrSum = 0;
-  var sampleCount = 0;
+  var carrier = false;
 
   /**
    * Demodulates the given I/Q samples.
@@ -191,7 +190,7 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
     var Q = IQ[1].data;
     var out = new Float32Array(I.length);
 
-    sigSqrSum = 0;
+    var sigSqrSum = 0;
     for (var i = 0; i < out.length; ++i) {
       var angleSin = ((lI * Q[i] - I[i] * lQ) / (I[i] * I[i] + Q[i] * Q[i])) || 0;
       var sgn = angleSin < 0 ? -1 : 1;
@@ -204,14 +203,14 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
       lQ = Q[i];
       sigSqrSum += lI * lI;
     }
-    sampleCount = out.length;
+    carrier = sigSqrSum > (0.002 * out.length);
     return new Samples(out, outRate);
   }
 
   function hasCarrier() {
-    return sigSqrSum > (0.002 * sampleCount);
+    return carrier;
   }
-  
+
   return {
     demodulateTuned: demodulateTuned,
     hasCarrier: hasCarrier
@@ -370,4 +369,3 @@ function samplesFromUint8(buffer, rate) {
   }
   return new Samples(out, rate);
 }
-

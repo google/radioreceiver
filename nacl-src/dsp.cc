@@ -142,18 +142,28 @@ Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   SamplesIQ iqSamples(downsampler_.downsample(samples));
   int outLen = iqSamples.I.size();
   Samples out(outLen);
+  int sigSqrSum = 0;
   for (int i = 0; i < outLen; ++i) {
     float I = iqSamples.I[i];
     float Q = iqSamples.Q[i];
     float divisor = (I * I + Q * Q);
-    float deltaAngle = divisor == 0
-        ? 0
-        : ((I * (Q - lQ_) - Q * (I - lI_)) / divisor);
-    out[i] = deltaAngle * (1 + deltaAngle * deltaAngle / 3) * amplConv_;
+    float angleSin = divisor == 0 ? 0 : (lI_ * Q - I * lQ_) / divisor;
+    float sgn = angleSin < 0 ? -1 : 1;
+    angleSin *= sgn;
+    out[i] = sgn * (angleSin > 1 ? 1 :
+                    (0.92200051775373 * angleSin
+                     + 0.09688461195053477 / (1.1576100461486143 - angleSin)
+                     - 0.08369365165140999) * amplConv_);
     lI_ = I;
     lQ_ = Q;
+    sigSqrSum += lI_ * lI_;
   }
+  hasCarrier_ = sigSqrSum > (0.002 * outLen);
   return out;
+}
+
+boolean FMDemodulator::hasCarrier() {
+  return hasCarrier_;
 }
 
 
