@@ -20,11 +20,12 @@ var AuxWindows = (function() {
   /**
    * Shows a window to save a preset.
    * @param {number} frequency The current frequency.
+   * @param {number} display The frequency's display name.
    * @param {number} name The current name for the station.
    * @param {string} band The name of the station's band.
    * @param {string} mode The station's mode.
    */
-  function savePreset(frequency, name, band, mode, presets) {
+  function savePreset(frequency, display, name, band, mode, presets) {
     chrome.app.window.create('savedialog.html', {
         'bounds': {
           'width': 300,
@@ -35,6 +36,7 @@ var AuxWindows = (function() {
         win.contentWindow['opener'] = window;
         var stationData = {
           'frequency': frequency,
+          'display': display,
           'band': band,
           'mode': mode,
           'name': name

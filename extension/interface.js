@@ -323,7 +323,7 @@ function Interface(fmRadio) {
     for (var i = 0; i < freqs.length; ++i) {
       var value = freqs[i];
       var preset = saved[value];
-      var label = band.toDisplayName(freqs[i]) + ' - ' + preset['name'];
+      var label = preset['display'] + ' - ' + preset['name'];
       if (presetsBox.options.length < i + 2) {
         presetsBox.options.add(createOption(value, label));
       } else {
@@ -367,7 +367,18 @@ function Interface(fmRadio) {
    * Called when a preset is selected by the user.
    */
   function selectPreset() {
-    setFrequency(presetsBox.value, false);
+    var preset = presets.get(presetsBox.value);
+    if (preset) {
+      if (preset['band']) {;
+        var newBand = Bands[settings.region][preset['band']];
+        if (newBand) {
+          selectBand(newBand);
+        }
+      } else if (preset['mode']) {
+        setMode(preset['mode']);
+      }
+      setFrequency(presetsBox.value, false);
+    }
   }
 
   /**
@@ -378,7 +389,8 @@ function Interface(fmRadio) {
     var freq = getFrequency();
     var preset = presets.get(freq);
     var name = preset ? preset['name'] : '';
-    AuxWindows.savePreset(freq, name, band.getName(), band.getMode());
+    var display = band.toDisplayName(freq, true);
+    AuxWindows.savePreset(freq, display, name, band.getName(), band.getMode());
   }
 
   /**
@@ -542,7 +554,7 @@ function Interface(fmRadio) {
     var type = event.data['type'];
     var data = event.data['data'];
     if (type == 'savepreset') {
-      presets.set(data['frequency'], data['name'], data['band'], data['mode']);
+      presets.set(data['frequency'], data['display'], data['name'], data['band'], data['mode']);
       presets.save(displayPresets);
     } else if (type == 'setsettings') {
       setSettings(data);

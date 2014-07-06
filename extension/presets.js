@@ -37,6 +37,7 @@ function Presets() {
           var freq = String(key * 1e6);
           presets[freq] = {
             name: info[key],
+            display: band.toDisplayName(freq, true),
             band: band.getName(),
             mode: band.getMode()
           };
@@ -78,13 +79,15 @@ function Presets() {
   /**
    * Sets the value of a preset.
    * @param {number} frequency The preset's frequency.
+   * @param {string} display The preset frequency's display name.
    * @param {string} name The station's name.
-   * @param {string} band The name of the band.
+   * @param {Band} band The name of the band.
    * @param {Object} mode The name of the modulation scheme.
    */
-  function set(frequency, name, band, mode) {
+  function set(frequency, display, name, band, mode) {
     presets[frequency] = {
       name: name,
+      display: display,
       band: band,
       mode: mode
     };

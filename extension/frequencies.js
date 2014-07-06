@@ -75,8 +75,8 @@ var Modes = {
 var Bands = (function() {
   var WBFM = {modulation: 'WBFM'};
 
-  function fmDisplay(freq) {
-    return Frequencies.humanReadable(freq, false, 2);
+  function fmDisplay(freq, opt_full) {
+    return Frequencies.humanReadable(freq, false, 2) + (opt_full ? ' FM' : '');
   }
 
   function fmInput(input) {
@@ -88,8 +88,8 @@ var Bands = (function() {
     maxF: 10000
   };
 
-  function wxDisplay(freq) {
-    return Math.floor(1 + (freq - 162400000) / 25000);
+  function wxDisplay(freq, opt_full) {
+    return (opt_full ? 'WX ' : '') + Math.floor(1 + (freq - 162400000) / 25000);
   }
 
   function wxInput(input) {
@@ -120,7 +120,7 @@ var Bands = (function() {
  * @param {number} maxF The maximum frequency in the band.
  * @param {number} stepF The step between channels in the band.
  * @param {Object} mode The band's modulation parameters.
- * @param {function(number):string} displayFn A function that takes a frequency
+ * @param {function(number, boolean=):string} displayFn A function that takes a frequency
  *     and returns its presentation for display.
  * @param {function(string):number} inputFn A function that take's a display
  *     representation and returns the corresponding frequency.
