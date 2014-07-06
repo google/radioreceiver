@@ -23,24 +23,13 @@ function Interface(fmRadio) {
    * Settings.
    */
   var settings = {
-    'region': 'WW',
-    'nerdSettings': false
+    'region': 'WW'
   };
 
   /**
-   * Minimum frequency in Hz.
+   * Current radio band.
    */
-  var minFreq = 87500000;
-
-  /**
-   * Maximum frequency in Hz.
-   */
-  var maxFreq = 108000000;
-
-  /**
-   * Minimum step between frequencies in Hz.
-   */
-  var freqStep = 100000;
+  var band = Bands[settings.region]['FM'];
 
   /**
    * The station presets.
@@ -53,8 +42,7 @@ function Interface(fmRadio) {
   function update() {
     setVisible(powerOffButton, fmRadio.isPlaying());
     setVisible(powerOnButton, !fmRadio.isPlaying());
-    frequencyDisplay.textContent = Frequencies.humanReadable(
-        getFrequency(), false, 2);
+    frequencyDisplay.textContent = band.toDisplayName(getFrequency());
 
     if (!fmRadio.isStereoEnabled()) {
       stereoIndicator.classList.add('stereoDisabled');
@@ -152,7 +140,7 @@ function Interface(fmRadio) {
    */
   function changeFrequency() {
     hideFrequencyEditor();
-    setFrequency(frequencyInput.value * 1e6, false);
+    setFrequency(band.fromDisplayName(frequencyInput.value), false);
   }
 
   /**
@@ -172,9 +160,9 @@ function Interface(fmRadio) {
    * Called when the '<' button is pressed.
    */
   function frequencyMinus() {
-    var newFreq = getFrequency() - freqStep;
-    if (newFreq < minFreq) {
-      newFreq = maxFreq;
+    var newFreq = getFrequency() - band.getStep();
+    if (newFreq < band.getMin()) {
+      newFreq = band.getMax();
     }
     setFrequency(newFreq, true);
   }
@@ -184,9 +172,9 @@ function Interface(fmRadio) {
    * Called when the '>' button is pressed.
    */
   function frequencyPlus() {
-    var newFreq = getFrequency() + freqStep;
-    if (newFreq > maxFreq) {
-      newFreq = minFreq;
+    var newFreq = getFrequency() + band.getStep();
+    if (newFreq > band.getMax()) {
+      newFreq = band.getMin();
     }
     setFrequency(newFreq, true);
   }
@@ -196,7 +184,7 @@ function Interface(fmRadio) {
    * Called when the 'Scan <<' button is pressed.
    */
   function scanDown() {
-    fmRadio.scan(minFreq, maxFreq, -freqStep);
+    fmRadio.scan(band.getMin(), band.getMax(), -band.getStep());
   }
 
   /**
@@ -204,7 +192,7 @@ function Interface(fmRadio) {
    * Called when the 'Scan >>' button is pressed.
    */
   function scanUp() {
-    fmRadio.scan(minFreq, maxFreq, freqStep);
+    fmRadio.scan(band.getMin(), band.getMax(), band.getStep());
   }
 
   /**
@@ -292,7 +280,7 @@ function Interface(fmRadio) {
     for (var i = 0; i < freqs.length; ++i) {
       var value = freqs[i];
       var preset = saved[value];
-      var label = Frequencies.withBand(freqs[i], preset['band']) + ' - ' + preset['name'];
+      var label = band.toDisplayName(freqs[i]) + ' - ' + preset['name'];
       if (presetsBox.options.length < i + 2) {
         presetsBox.options.add(createOption(value, label));
       } else {
@@ -347,7 +335,7 @@ function Interface(fmRadio) {
     var freq = getFrequency();
     var preset = presets.get(freq);
     var name = preset ? preset['name'] : '';
-    AuxWindows.savePreset(freq, name, 'FM', 'WBFM');
+    AuxWindows.savePreset(freq, name, band.getName(), band.getMode());
   }
 
   /**
@@ -424,18 +412,7 @@ function Interface(fmRadio) {
    */
   function setSettings(newSettings) {
     settings = newSettings;
-    if (settings['region'] == 'JP') {
-      minFreq = 76000000;
-      maxFreq = 90000000;
-    } else {
-      minFreq = 87500000;
-      maxFreq = 108000000;
-    }
-    if (settings['region'] == 'IT') {
-      freqStep = 50000;
-    } else {
-      freqStep = 100000;
-    }
+    band = (Bands[settings['region']] || Bands['WW'])['FM'];
     if (settings['autoGain'] || null == settings['autoGain']) {
       fmRadio.setAutoGain();
     } else {
@@ -453,13 +430,13 @@ function Interface(fmRadio) {
    *     it doesn't set a new frequency).
    */
   function setFrequency(newFreq, bounding) {
-    newFreq = freqStep * Math.round(newFreq / freqStep);
-    if (newFreq >= minFreq && newFreq <= maxFreq) {
+    newFreq = band.getStep() * Math.round(newFreq / band.getStep());
+    if (newFreq >= band.getMin() && newFreq <= band.getMax()) {
       fmRadio.setFrequency(newFreq);
-    } else if (bounding && newFreq < minFreq) {
-      fmRadio.setFrequency(minFreq);
-    } else if (bounding && newFreq > maxFreq) {
-      fmRadio.setFrequency(maxFreq);
+    } else if (bounding && newFreq < band.getMin()) {
+      fmRadio.setFrequency(band.getMin());
+    } else if (bounding && newFreq > band.getMax()) {
+      fmRadio.setFrequency(band.getMax());
     }
   }
 

@@ -31,13 +31,14 @@ function Presets() {
     chrome.storage.sync.get('presets', function(cfg) {
       var info = cfg['presets'] || {};
       if (info['version'] != 1) {
+        var band = Bands['WW']['FM'];
         presets = {};
         for (var key in info) {
           var freq = String(key * 1e6);
           presets[freq] = {
             name: info[key],
-            band: 'FM',
-            mode: 'WBFM'
+            band: band.getName(),
+            mode: band.getMode()
           };
         }
       } else {
@@ -79,7 +80,7 @@ function Presets() {
    * @param {number} frequency The preset's frequency.
    * @param {string} name The station's name.
    * @param {string} band The name of the band.
-   * @param {string} mode The name of the modulation scheme.
+   * @param {Object} mode The name of the modulation scheme.
    */
   function set(frequency, name, band, mode) {
     presets[frequency] = {

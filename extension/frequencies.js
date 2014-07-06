@@ -13,7 +13,12 @@
 // limitations under the License.
 
 /**
- * @fileoverview Functions to convert frequencies to human-readable strings.
+ * @fileoverview Functions and objects to manipulate single frequencies and
+ *     bands of frequencies.
+ */
+
+/**
+ * Functions to convert frequencies to human-readable strings.
  */
 var Frequencies = (function() {
 
@@ -51,24 +56,75 @@ var Frequencies = (function() {
     }
   }
 
-  /**
-   * Shows the human-readable frequency and its band.
-   * @param {number} frequency The frequency to convert.
-   * @param {string} band The band's name. If empty, shows the unit instead.
-   */
-  function withBand(frequency, band) {
-    var freq = humanReadable(frequency, !band);
-    if (band) {
-      return freq + ' ' + band;
-    } else {
-      return freq;
-    }
-  }
-
   return {
-    humanReadable: humanReadable,
-    withBand: withBand
+    humanReadable: humanReadable
   };
 
 })();
+
+/**
+ * Default modes.
+ */
+var Modes = {
+  
+};
+
+/**
+ * Known frequency bands.
+ */
+var Bands = (function() {
+  var WBFM = {modulation: 'WBFM'};
+
+  function fmDisplay(freq) {
+    return Frequencies.humanReadable(freq, false, 2);
+  }
+
+  function fmInput(input) {
+    return input * 1e6;
+  }
+
+  return {
+    'WW': {
+      'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput)
+    },
+    'JP': {
+      'FM': new Band('FM', 76000000, 90000000, 100000, WBFM, fmDisplay, fmInput)
+    },
+    'IT': {
+      'FM': new Band('FM', 87500000, 108000000, 50000, WBFM, fmDisplay, fmInput)
+    }
+  };
+})();
+
+/**
+ * A particular frequency band.
+ * @param {string} bandName The band's name
+ * @param {number} minF The minimum frequency in the band.
+ * @param {number} maxF The maximum frequency in the band.
+ * @param {number} stepF The step between channels in the band.
+ * @param {Object} mode The band's modulation parameters.
+ * @param {function(number):string} displayFn A function that takes a frequency
+ *     and returns its presentation for display.
+ * @param {function(string):number} inputFn A function that take's a display
+ *     representation and returns the corresponding frequency.
+ * @constructor
+ */
+function Band(bandName, minF, maxF, stepF, mode, displayFn, inputFn) {
+  var name = bandName;
+  var min = minF;
+  var max = maxF;
+  var step = stepF;
+  var mode = mode;
+  var toDisplayName
+
+  return {
+    getName: function() { return name; },
+    getMin: function() { return min; },
+    getMax: function() { return max; },
+    getStep: function() { return step; },
+    getMode: function() { return mode; },
+    toDisplayName: displayFn,
+    fromDisplayName: inputFn
+  };
+}
 
