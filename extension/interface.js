@@ -1,11 +1,11 @@
 // Copyright 2013 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,14 @@ function Interface(fmRadio) {
    * Current radio band.
    */
   var band = Bands[settings.region]['FM'];
+
+  /**
+   * Last-selected stations in each band.
+   */
+  var selectedStations = {
+    'currentBand': 'FM',
+    'bands': {}
+  };
 
   /**
    * The station presets.
@@ -265,6 +273,41 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Switches the selected band.
+   */
+  function switchBand() {
+    saveCurrentStation();
+    var bands = Bands[settings['region']];
+    var bandNames = [];
+    for (var n in bands) {
+      if (bands.hasOwnProperty(n)) {
+        bandNames.push(n);
+      }
+    }
+    if (bandNames.length == 1) {
+      return;
+    }
+    bandNames.sort();
+    for (var i = 0; i < bandNames.length; ++i) {
+      if (bandNames[i] == band.getName()) {
+        selectBand(bands[bandNames[(i + 1) % bandNames.length]]);
+        return;
+      }
+    }
+  }
+
+  /**
+   * Changes the radio's band.
+   * @param {Band} newBand The new band.
+   */
+  function selectBand(newBand) {
+    band = newBand;
+    bandLabel.textContent = band.getName();
+    setMode(band.getMode());
+    setFrequency(selectedStations['bands'][band.getName()], true);
+  }
+
+  /**
    * Updates the preset selection box.
    */
   function displayPresets() {
@@ -352,7 +395,21 @@ function Interface(fmRadio) {
    */
   function loadCurrentStation() {
     chrome.storage.local.get('currentStation', function(cfg) {
-      setFrequency(cfg['currentStation'], false);
+      if ('number' === typeof cfg['currentStation']) {
+        selectedStations = {
+          'currentBand': 'FM',
+          'bands': {
+            'FM': cfg['currentStation']
+          }
+        };
+      } else if (cfg['currentStation']) {
+        selectedStations = cfg['currentStation'];
+      }
+      selectBand(Bands[settings.region][selectedStations['currentBand']]);
+      var newFreq = selectedStations['bands'][band.getName()];
+      if (newFreq) {
+        setFrequency(newFreq, false);
+      }
     });
   }
 
@@ -360,7 +417,9 @@ function Interface(fmRadio) {
    * Saves the current station to be loaded on the next restart.
    */
   function saveCurrentStation() {
-    chrome.storage.local.set({'currentStation': getFrequency()});
+    selectedStations['currentBand'] = band.getName();
+    selectedStations['bands'][band.getName()] = getFrequency();
+    chrome.storage.local.set({'currentStation': selectedStations});
   }
 
   /**
@@ -419,6 +478,7 @@ function Interface(fmRadio) {
       fmRadio.setManualGain(settings['gain']);
     }
     fmRadio.setCorrectionPpm(settings['ppm'] || 0);
+    setMode(band.getMode());
     setFrequency(getFrequency(), true);
   }
 
@@ -446,6 +506,14 @@ function Interface(fmRadio) {
    */
   function getFrequency() {
     return fmRadio.getFrequency();
+  }
+
+  /**
+   * Internal function to change mode.
+   * @param {Object} mode The new mode.
+   */
+  function setMode(mode) {
+    fmRadio.setMode(mode);
   }
 
   /**
@@ -580,6 +648,7 @@ function Interface(fmRadio) {
     volumeSlider.addEventListener('change', changeVolumeSlider);
     volumeSlider.addEventListener('blur', blurVolumeSlider);
     volumeSlider.addEventListener('mousewheel', changeVolumeWheel);
+    bandLabel.addEventListener('click', switchBand);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);

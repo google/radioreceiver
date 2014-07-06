@@ -83,9 +83,26 @@ var Bands = (function() {
     return input * 1e6;
   }
 
+  var WXFM = {
+    modulation: 'NBFM',
+    maxF: 10000
+  };
+
+  function wxDisplay(freq) {
+    return Math.floor(1 + (freq - 162400000) / 25000);
+  }
+
+  function wxInput(input) {
+    return Math.floor((input - 1) * 25000) + 162400000;
+  }
+
   return {
     'WW': {
       'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput)
+    },
+    'NA': {
+      'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput),
+      'WX': new Band('WX', 162400000, 162550000, 25000, WXFM, wxDisplay, wxInput)
     },
     'JP': {
       'FM': new Band('FM', 76000000, 90000000, 100000, WBFM, fmDisplay, fmInput)

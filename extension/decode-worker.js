@@ -1,11 +1,11 @@
 // Copyright 2013 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,6 +18,7 @@
  */
 
 importScripts('dsp.js');
+importScripts('demodulator-nbfm.js');
 importScripts('demodulator-wbfm.js');
 
 var IN_RATE = 1024000;
@@ -47,14 +48,37 @@ function Decoder() {
     postMessage([out.left, out.right, data], [out.left, out.right]);
   }
 
+  /**
+   * Changes the modulation scheme.
+   * @param {Object} mode The new mode.
+   */
+  function setMode(mode) {
+    switch (mode.modulation) {
+      case 'NBFM':
+        demodulator = new Demodulator_NBFM(IN_RATE, OUT_RATE, mode.maxF);
+        break;
+      default:
+        demodulator = new Demodulator_WBFM(IN_RATE, OUT_RATE);
+        break;
+    }
+  }
+
   return {
-    process: process
+    process: process,
+    setMode: setMode
   };
 }
 
 var decoder = new Decoder();
 
 onmessage = function(event) {
-  decoder.process(event.data[0], event.data[1], event.data[2]);
+  switch (event.data[0]) {
+    case 1:
+      decoder.setMode(event.data[1]);
+      break;
+    default:
+      decoder.process(event.data[1], event.data[2], event.data[3]);
+      break;
+  }
 };
 

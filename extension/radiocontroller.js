@@ -1,11 +1,11 @@
 // Copyright 2013 Google Inc. All rights reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -119,6 +119,14 @@ function RadioController() {
    */
   function getFrequency() {
     return frequency;
+  }
+
+  /**
+   * Sets the modulation scheme.
+   * @param {Object} mode The new mode.
+   */
+  function setMode(mode) {
+    decoder.postMessage([1, mode]);
   }
 
   /**
@@ -391,7 +399,7 @@ function RadioController() {
       if (state.state == STATE.PLAYING) {
         if (playingBlocks <= 2) {
           ++playingBlocks;
-          decoder.postMessage([data, stereoEnabled], [data]);
+          decoder.postMessage([0, data, stereoEnabled], [data]);
         }
       }
       processState();
@@ -469,7 +477,7 @@ function RadioController() {
         --requestingBlocks;
         if (state.state == STATE.SCANNING) {
           ++playingBlocks;
-          decoder.postMessage([data, stereoEnabled, scanData], [data]);
+          decoder.postMessage([0, data, stereoEnabled, scanData], [data]);
         }
         processState();
       });
@@ -608,6 +616,7 @@ function RadioController() {
     stop: stop,
     setFrequency: setFrequency,
     getFrequency: getFrequency,
+    setMode: setMode,
     scan: scan,
     isScanning: isScanning,
     isPlaying: isPlaying,
