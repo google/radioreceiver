@@ -14,7 +14,7 @@
 
 var station = window['station'];
 
-frequencyLabel.textContent = station['frequency'];
+frequencyLabel.textContent = Frequencies.withBand(station['frequency'], station['band']);
 if (station['name']) {
   stationName.value = station['name'];
 }

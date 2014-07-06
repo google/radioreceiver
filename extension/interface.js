@@ -43,9 +43,9 @@ function Interface(fmRadio) {
   var freqStep = 100000;
 
   /**
-   * The station presets. Maps from frequency to station name.
+   * The station presets.
    */
-  var presets = {};
+  var presets = new Presets();
 
   /**
    * Updates the UI.
@@ -53,7 +53,8 @@ function Interface(fmRadio) {
   function update() {
     setVisible(powerOffButton, fmRadio.isPlaying());
     setVisible(powerOnButton, !fmRadio.isPlaying());
-    frequencyDisplay.textContent = getFrequencyMHz();
+    frequencyDisplay.textContent = Frequencies.humanReadable(
+        getFrequency(), false, 2);
 
     if (!fmRadio.isStereoEnabled()) {
       stereoIndicator.classList.add('stereoDisabled');
@@ -171,7 +172,7 @@ function Interface(fmRadio) {
    * Called when the '<' button is pressed.
    */
   function frequencyMinus() {
-    var newFreq = fmRadio.getFrequency() - freqStep;
+    var newFreq = getFrequency() - freqStep;
     if (newFreq < minFreq) {
       newFreq = maxFreq;
     }
@@ -183,7 +184,7 @@ function Interface(fmRadio) {
    * Called when the '>' button is pressed.
    */
   function frequencyPlus() {
-    var newFreq = fmRadio.getFrequency() + freqStep;
+    var newFreq = getFrequency() + freqStep;
     if (newFreq > maxFreq) {
       newFreq = minFreq;
     }
@@ -276,37 +277,31 @@ function Interface(fmRadio) {
   }
 
   /**
-   * Loads the presets from the cloud.
-   */
-  function loadPresets() {
-    chrome.storage.sync.get('presets', function(cfg) {
-      presets = cfg['presets'] || {};
-      displayPresets();
-    });
-  }
-
-  /**
-   * Saves the presets into the cloud.
-   */
-  function savePresets() {
-    chrome.storage.sync.set({'presets': presets}, displayPresets);
-  }
-
-  /**
    * Updates the preset selection box.
    */
   function displayPresets() {
+    var saved = presets.get();
     var freqs = [];
-    for (var freq in presets) {
+    for (var freq in saved) {
       freqs.push(freq);
     }
     freqs.sort(function(a,b) { return Number(a) - Number(b) });
-    while (presetsBox.options.length > 0) {
-      presetsBox.options.remove(0);
+    if (presetsBox.options.length == 0) {
+      presetsBox.options.add(createOption('', '\u2014 Saved stations \u2014'));
     }
-    presetsBox.options.add(createOption('', '\u2014 Saved stations \u2014'));
     for (var i = 0; i < freqs.length; ++i) {
-      presetsBox.options.add(createOption(freqs[i], freqs[i] + ' - ' + presets[freqs[i]]));
+      var value = freqs[i];
+      var preset = saved[value];
+      var label = Frequencies.withBand(freqs[i], preset['band']) + ' - ' + preset['name'];
+      if (presetsBox.options.length < i + 2) {
+        presetsBox.options.add(createOption(value, label));
+      } else {
+        presetsBox[i + 1].value = value;
+        presetsBox[i + 1].label = label;
+      }
+    }
+    while (presetsBox.options.length > freqs.length + 1) {
+      presetsBox.options.remove(presetsBox.options.length - 1);
     }
     selectCurrentPreset();
   }
@@ -315,9 +310,14 @@ function Interface(fmRadio) {
    * Makes the preset for the current frequency selected.
    */
   function selectCurrentPreset() {
-    var frequency = getFrequencyMHz();
-    for (var i = 0; i < presetsBox.options.length; ++i) {
-      presetsBox.options[i].selected = (presetsBox.options[i].value == frequency);
+    if (document.activeElement == presetsBox) {
+      return;
+    }
+    var frequency = getFrequency();
+    if (frequency in presets.get()) {
+      presetsBox.value = frequency;
+    } else {
+      presetsBox.value = '';
     }
   }
 
@@ -336,7 +336,7 @@ function Interface(fmRadio) {
    * Called when a preset is selected by the user.
    */
   function selectPreset() {
-    setFrequency(presetsBox.value * 1e6, false);
+    setFrequency(presetsBox.value, false);
   }
 
   /**
@@ -344,7 +344,10 @@ function Interface(fmRadio) {
    * Called when the 'Save' button is pressed.
    */
   function savePreset() {
-    AuxWindows.savePreset(getFrequencyMHz(), presets);
+    var freq = getFrequency();
+    var preset = presets.get(freq);
+    var name = preset ? preset['name'] : '';
+    AuxWindows.savePreset(freq, name, 'FM', 'WBFM');
   }
 
   /**
@@ -352,8 +355,8 @@ function Interface(fmRadio) {
    * Called when the 'Remove' button is pressed.
    */
   function deletePreset() {
-    delete presets[getFrequencyMHz()];
-    savePresets();
+    presets.delete(getFrequency());
+    presets.save(displayPresets);
   }
 
   /**
@@ -369,7 +372,7 @@ function Interface(fmRadio) {
    * Saves the current station to be loaded on the next restart.
    */
   function saveCurrentStation() {
-    chrome.storage.local.set({'currentStation': fmRadio.getFrequency()});
+    chrome.storage.local.set({'currentStation': getFrequency()});
   }
 
   /**
@@ -439,7 +442,7 @@ function Interface(fmRadio) {
       fmRadio.setManualGain(settings['gain']);
     }
     fmRadio.setCorrectionPpm(settings['ppm'] || 0);
-    setFrequency(fmRadio.getFrequency(), true);
+    setFrequency(getFrequency(), true);
   }
 
   /**
@@ -461,11 +464,11 @@ function Interface(fmRadio) {
   }
 
   /**
-   * Returns the current frequency in MHz.
-   * @return {string} The frequency in MHz with 2 significant digits.
+   * Returns the current frequency.
+   * @return {number} The current frequency.
    */
-  function getFrequencyMHz() {
-    return (fmRadio.getFrequency() / 1e6).toFixed(2);
+  function getFrequency() {
+    return fmRadio.getFrequency();
   }
 
   /**
@@ -494,8 +497,8 @@ function Interface(fmRadio) {
     var type = event.data['type'];
     var data = event.data['data'];
     if (type == 'savepreset') {
-      presets[data['frequency']] = data['name'];
-      savePresets();
+      presets.set(data['frequency'], data['name'], data['band'], data['mode']);
+      presets.save(displayPresets);
     } else if (type == 'setsettings') {
       setSettings(data);
       saveSettings(data);
@@ -613,7 +616,7 @@ function Interface(fmRadio) {
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
     loadSettings();
-    loadPresets();
+    presets.load(displayPresets);
     loadCurrentStation();
     loadVolume();
     update();
