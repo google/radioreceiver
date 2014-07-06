@@ -355,7 +355,7 @@ function Interface(fmRadio) {
    * Called when the 'Remove' button is pressed.
    */
   function deletePreset() {
-    presets.delete(getFrequency());
+    presets.remove(getFrequency());
     presets.save(displayPresets);
   }
 
