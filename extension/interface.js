@@ -573,6 +573,13 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Shows the help window.
+   */
+  function showHelp() {
+    AuxWindows.help();
+  }
+
+  /**
    * Handle a keyboard shortcut.
    * @param {KeyboardEvent} e The keyboard event that was fired.
    */
@@ -612,7 +619,7 @@ function Interface(fmRadio) {
           scanUp();
           break;
         case 63:  // ?
-          AuxWindows.help();
+          AuxWindows.help('shortcuts');
           break;
         case 102: // f
           showFrequencyEditor();
@@ -648,6 +655,7 @@ function Interface(fmRadio) {
     powerOnButton.addEventListener('click', powerOn);
     powerOffButton.addEventListener('click', powerOff);
     settingsButton.addEventListener('click', showSettings);
+    helpButton.addEventListener('click', showHelp);
     closeButton.addEventListener('click', close);
     frequencyDisplay.addEventListener('focus', showFrequencyEditor);
     frequencyDisplay.addEventListener('mousewheel', changeFrequencyWheel);

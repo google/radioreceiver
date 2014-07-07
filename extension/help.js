@@ -18,4 +18,4 @@ function exit() {
 
 exitButton.addEventListener('click', exit);
 
-AuxWindows.resizeCurrentTo(500, document.body.offsetHeight + 40);
+AuxWindows.resizeCurrentTo(700, Math.min(800, document.body.offsetHeight + 40));

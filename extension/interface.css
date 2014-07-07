@@ -53,7 +53,7 @@ body {
   font-weight: bold;
 }
 
-.closeButton, .settingsButton {
+.closeButton, .settingsButton, .helpButton {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -64,7 +64,7 @@ body {
   -webkit-app-region: no-drag;
 }
 
-.settingsButton:focus {
+.settingsButton:focus, .helpButton:focus {
   outline: 0;
 }
 
@@ -73,6 +73,11 @@ body {
 }
 
 .settingsButton {
+  right: 80px;
+  width: 30px;
+}
+
+.helpButton {
   right: 50px;
   width: 30px;
 }

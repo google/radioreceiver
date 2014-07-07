@@ -98,14 +98,15 @@ var AuxWindows = (function() {
 
   /**
    * Shows the help window.
+   * @param {string} anchor An optional anchor to jump to.
    */
-  function help(msg) {
-    chrome.app.window.create('help.html', {
+  function help(anchor) {
+    chrome.app.window.create('help.html' + (anchor ? '#' + anchor : ''), {
         'bounds': {
-          'width': 500,
-          'height': 500
+          'width': 700,
+          'height': 600
         },
-        'resizable': false
+        'resizable': true
       });
   }
 
