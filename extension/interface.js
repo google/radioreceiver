@@ -304,7 +304,7 @@ function Interface(fmRadio) {
     band = newBand;
     bandLabel.textContent = band.getName();
     setMode(band.getMode());
-    setFrequency(selectedStations['bands'][band.getName()], true);
+    setFrequency(selectedStations['bands'][band.getName()] || 1, true);
   }
 
   /**
@@ -502,7 +502,8 @@ function Interface(fmRadio) {
    *     it doesn't set a new frequency).
    */
   function setFrequency(newFreq, bounding) {
-    newFreq = band.getStep() * Math.round(newFreq / band.getStep());
+    newFreq = band.getMin() + band.getStep() * Math.round(
+        (newFreq - band.getMin()) / band.getStep());
     if (newFreq >= band.getMin() && newFreq <= band.getMax()) {
       fmRadio.setFrequency(newFreq);
     } else if (bounding && newFreq < band.getMin()) {
