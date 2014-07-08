@@ -19,7 +19,7 @@ function exit() {
     'type': 'exit'
   };
   window['opener'].postMessage(msg, '*');
-  AuxWindows.closeCurrent();
+  AuxWindows.closeAll();
 }
 
 exitButton.addEventListener('click', exit);

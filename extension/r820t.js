@@ -311,7 +311,7 @@ function R820T(com, xtalFreq, throwError) {
     }
     if (firstTry) {
       writeRegMask(0x12, 0x60, 0xe0, function() {
-        return tryLock(false, kont);
+        return getPllLock(false, kont);
       });
     } else {
       throwError("PLL did not lock");

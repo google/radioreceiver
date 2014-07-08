@@ -128,6 +128,20 @@ var AuxWindows = (function() {
     chrome.app.window.current().close();
   }
 
+  /**
+   * Closes all windows.
+   */
+  function closeAll() {
+    var current = chrome.app.window.current();
+    var all = chrome.app.window.getAll();
+    for (var i = 0; i < all.length; ++i) {
+      if (all[i] !== current) {
+        all[i].close();
+      }
+    }
+    current.close();
+  }
+
   return {
     savePreset: savePreset,
     settings: settings,
@@ -135,7 +149,8 @@ var AuxWindows = (function() {
     error: error,
     help: help,
     resizeCurrentTo: resizeCurrentTo,
-    closeCurrent: closeCurrent
+    closeCurrent: closeCurrent,
+    closeAll: closeAll
   };
 
 })();

@@ -110,7 +110,7 @@ function RTL2832U(conn, ppm, opt_gain) {
     com.i2c.open(function() {
     R820T.check(com, function(found) {
     if (found) {
-      tuner = new R820T(com, xtalFreq);
+      tuner = new R820T(com, xtalFreq, throwError);
     }
     if (!tuner) {
       throwError('Sorry, your USB dongle has an unsupported tuner chip. ' +
