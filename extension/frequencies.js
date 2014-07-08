@@ -96,19 +96,41 @@ var Bands = (function() {
     return Math.floor((input - 1) * 25000) + 162400000;
   }
 
+  var AM = {
+    modulation: 'AM',
+    bandwidth: 10000,
+    upconvert: true
+  };
+
+  function amDisplay(freq, opt_full) {
+    return Frequencies.humanReadable(freq, false, 0) + (opt_full ? ' AM' : '');
+  }
+
+  function amInput(input) {
+    return input * 1e3;
+  }
+
   return {
     'WW': {
-      'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput)
+      'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput),
+      'AM': new Band('AM', 531000, 1611000, 9000, AM, amDisplay, amInput)
     },
     'NA': {
       'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput),
-      'WX': new Band('WX', 162400000, 162550000, 25000, WXFM, wxDisplay, wxInput)
+      'WX': new Band('WX', 162400000, 162550000, 25000, WXFM, wxDisplay, wxInput),
+      'AM': new Band('AM', 540000, 1710000, 10000, AM, amDisplay, amInput)
+    },
+    'AM': {
+      'FM': new Band('FM', 87500000, 108000000, 100000, WBFM, fmDisplay, fmInput),
+      'AM': new Band('AM', 540000, 1710000, 10000, AM, amDisplay, amInput)
     },
     'JP': {
-      'FM': new Band('FM', 76000000, 90000000, 100000, WBFM, fmDisplay, fmInput)
+      'FM': new Band('FM', 76000000, 90000000, 100000, WBFM, fmDisplay, fmInput),
+      'AM': new Band('AM', 531000, 1611000, 9000, AM, amDisplay, amInput)
     },
     'IT': {
-      'FM': new Band('FM', 87500000, 108000000, 50000, WBFM, fmDisplay, fmInput)
+      'FM': new Band('FM', 87500000, 108000000, 50000, WBFM, fmDisplay, fmInput),
+      'AM': new Band('AM', 531000, 1611000, 9000, AM, amDisplay, amInput)
     }
   };
 })();

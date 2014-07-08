@@ -18,6 +18,7 @@
  */
 
 importScripts('dsp.js');
+importScripts('demodulator-am.js');
 importScripts('demodulator-nbfm.js');
 importScripts('demodulator-wbfm.js');
 
@@ -54,6 +55,9 @@ function Decoder() {
    */
   function setMode(mode) {
     switch (mode.modulation) {
+      case 'AM':
+        demodulator = new Demodulator_AM(IN_RATE, OUT_RATE, mode.bandwidth);
+        break;
       case 'NBFM':
         demodulator = new Demodulator_NBFM(IN_RATE, OUT_RATE, mode.maxF);
         break;

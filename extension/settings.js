@@ -26,6 +26,10 @@ ppm.value = (settings && settings['ppm']) || 0;
 autoGain.checked = settings && settings['autoGain'];
 gain.value = (settings && settings['gain']) || 0;
 gain.disabled = autoGain.checked;
+useUpconverter.checked = settings && settings['useUpconverter'];
+upconverterFreq.value = (settings && settings['upconverterFreq']) || 125000000;
+upconverterFreqInput.className = useUpconverter.checked ? '' : 'invisible';
+upconverterFreq.disabled = !useUpconverter.checked;
 
 function save() {
   var msg = {
@@ -34,7 +38,9 @@ function save() {
       'region': region.options[region.selectedIndex].value || 'WW',
       'ppm': ppm.value || 0,
       'autoGain': autoGain.checked,
-      'gain': gain.value
+      'gain': gain.value,
+      'useUpconverter': useUpconverter.checked,
+      'upconverterFreq': upconverterFreq.value
     }
   };
   window['opener'].postMessage(msg, '*');
@@ -53,6 +59,10 @@ estimatePpmLink.addEventListener('click', function() {
 autoGain.addEventListener('change', function() {
   gain.disabled = autoGain.checked;
 });
+useUpconverter.addEventListener('change', function() {
+  upconverterFreq.disabled = !useUpconverter.checked;
+  upconverterFreqInput.className = useUpconverter.checked ? '' : 'invisible';
+});
 
-AuxWindows.resizeCurrentTo(350, 220);  
+AuxWindows.resizeCurrentTo(350, 260);  
 

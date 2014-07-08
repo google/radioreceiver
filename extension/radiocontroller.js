@@ -45,6 +45,7 @@ function RadioController() {
   var state = new State(STATE.OFF);
   var requestingBlocks = 0;
   var playingBlocks = 0;
+  var mode = {};
   var frequency = 88500000;
   var stereo = true;
   var stereoEnabled = true;
@@ -123,10 +124,19 @@ function RadioController() {
 
   /**
    * Sets the modulation scheme.
-   * @param {Object} mode The new mode.
+   * @param {Object} newMode The new mode.
    */
-  function setMode(mode) {
-    decoder.postMessage([1, mode]);
+  function setMode(newMode) {
+    mode = newMode;
+    decoder.postMessage([1, newMode]);
+  }
+
+  /**
+   * Returns the current modulation scheme.
+   * @return {Object} The current mode.
+   */
+  function getMode() {
+    return mode;
   }
 
   /**
@@ -617,6 +627,7 @@ function RadioController() {
     setFrequency: setFrequency,
     getFrequency: getFrequency,
     setMode: setMode,
+    getMode: getMode,
     scan: scan,
     isScanning: isScanning,
     isPlaying: isPlaying,

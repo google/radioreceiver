@@ -192,7 +192,10 @@ function Interface(fmRadio) {
    * Called when the 'Scan <<' button is pressed.
    */
   function scanDown() {
-    fmRadio.scan(band.getMin(), band.getMax(), -band.getStep());
+    fmRadio.scan(
+        upconvert(band.getMin()),
+        upconvert(band.getMax()),
+        -band.getStep());
   }
 
   /**
@@ -200,7 +203,10 @@ function Interface(fmRadio) {
    * Called when the 'Scan >>' button is pressed.
    */
   function scanUp() {
-    fmRadio.scan(band.getMin(), band.getMax(), band.getStep());
+    fmRadio.scan(
+        upconvert(band.getMin()),
+        upconvert(band.getMax()),
+        band.getStep());
   }
 
   /**
@@ -289,7 +295,7 @@ function Interface(fmRadio) {
     }
     bandNames.sort();
     for (var i = 0; i < bandNames.length; ++i) {
-      if (bandNames[i] == band.getName()) {
+      if (!band || bandNames[i] == band.getName()) {
         selectBand(bands[bandNames[(i + 1) % bandNames.length]]);
         return;
       }
@@ -429,9 +435,11 @@ function Interface(fmRadio) {
    * Saves the current station to be loaded on the next restart.
    */
   function saveCurrentStation() {
-    selectedStations['currentBand'] = band.getName();
-    selectedStations['bands'][band.getName()] = getFrequency();
-    chrome.storage.local.set({'currentStation': selectedStations});
+    if (band) {
+      selectedStations['currentBand'] = band.getName();
+      selectedStations['bands'][band.getName()] = getFrequency();
+      chrome.storage.local.set({'currentStation': selectedStations});
+    }
   }
 
   /**
@@ -490,8 +498,33 @@ function Interface(fmRadio) {
       fmRadio.setManualGain(settings['gain']);
     }
     fmRadio.setCorrectionPpm(settings['ppm'] || 0);
-    setMode(band.getMode());
-    setFrequency(getFrequency(), true);
+    selectBand(band);
+  }
+
+  /**
+   * Upconverts the given frequency, if warranted for the current mode.
+   * @param {number} freq The original frequency.
+   * @return {number} The upconverted frequency.
+   */
+  function upconvert(freq) {
+    var mode = getMode();
+    if (mode['upconvert'] && settings['useUpconverter']) {
+      return Number(freq) + Number(settings['upconverterFreq']);
+    }
+    return freq;
+  }
+
+  /**
+   * Downconverts the given frequency, if warranted for the current mode.
+   * @param {number} freq The original frequency.
+   * @return {number} The downconverted frequency.
+   */
+  function downconvert(freq) {
+    var mode = getMode();
+    if (mode['upconvert'] && settings['useUpconverter']) {
+      return Number(freq) - Number(settings['upconverterFreq']);
+    }
+    return freq;
   }
 
   /**
@@ -505,11 +538,11 @@ function Interface(fmRadio) {
     newFreq = band.getMin() + band.getStep() * Math.round(
         (newFreq - band.getMin()) / band.getStep());
     if (newFreq >= band.getMin() && newFreq <= band.getMax()) {
-      fmRadio.setFrequency(newFreq);
+      fmRadio.setFrequency(upconvert(newFreq));
     } else if (bounding && newFreq < band.getMin()) {
-      fmRadio.setFrequency(band.getMin());
+      fmRadio.setFrequency(upconvert(band.getMin()));
     } else if (bounding && newFreq > band.getMax()) {
-      fmRadio.setFrequency(band.getMax());
+      fmRadio.setFrequency(upconvert(band.getMax()));
     }
   }
 
@@ -518,7 +551,7 @@ function Interface(fmRadio) {
    * @return {number} The current frequency.
    */
   function getFrequency() {
-    return fmRadio.getFrequency();
+    return downconvert(fmRadio.getFrequency());
   }
 
   /**
@@ -527,6 +560,14 @@ function Interface(fmRadio) {
    */
   function setMode(mode) {
     fmRadio.setMode(mode);
+  }
+
+  /**
+   * Internal function to get the current mode.
+   * @return {Object} The current mode.
+   */
+  function getMode() {
+    return fmRadio.getMode();
   }
 
   /**
