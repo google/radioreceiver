@@ -323,22 +323,15 @@ function Interface(fmRadio) {
       freqs.push(freq);
     }
     freqs.sort(function(a,b) { return Number(a) - Number(b) });
-    if (presetsBox.options.length == 0) {
-      presetsBox.options.add(createOption('', '\u2014 Saved stations \u2014'));
+    while (presetsBox.options.length > 0) {
+      presetsBox.options.remove(0);
     }
+    presetsBox.options.add(createOption('', '\u2014 Saved stations \u2014'));
     for (var i = 0; i < freqs.length; ++i) {
       var value = freqs[i];
       var preset = saved[value];
       var label = preset['display'] + ' - ' + preset['name'];
-      if (presetsBox.options.length < i + 2) {
-        presetsBox.options.add(createOption(value, label));
-      } else {
-        presetsBox[i + 1].value = value;
-        presetsBox[i + 1].label = label;
-      }
-    }
-    while (presetsBox.options.length > freqs.length + 1) {
-      presetsBox.options.remove(presetsBox.options.length - 1);
+      presetsBox.options.add(createOption(value, label));
     }
     selectCurrentPreset();
   }
