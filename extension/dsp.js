@@ -202,7 +202,6 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
       sigSum += ampl;
     }
     var halfPoint = sigSum / out.length;
-    console.log(halfPoint);
     for (var i = 0; i < out.length; ++i) {
       out[i] = (out[i] - halfPoint) / halfPoint;
     }
