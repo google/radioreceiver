@@ -63,9 +63,9 @@ function Interface(fmRadio) {
       stereoIndicator.classList.remove('stereoUnavailable');
     }
     if (fmRadio.isScanning()) {
-      bandLabel.classList.add('scanning');
+      bandBox.classList.add('scanning');
     } else {
-      bandLabel.classList.remove('scanning');
+      bandBox.classList.remove('scanning');
     }
     var volume = Math.round(fmRadio.getVolume() * 100);
     volumeLabel.textContent = volume;
@@ -308,7 +308,7 @@ function Interface(fmRadio) {
    */
   function selectBand(newBand) {
     band = newBand;
-    bandLabel.textContent = band.getName();
+    bandBox.textContent = band.getName();
     setMode(band.getMode());
     setFrequency(selectedStations['bands'][band.getName()] || 1, true);
   }
@@ -656,6 +656,9 @@ function Interface(fmRadio) {
         case 63:  // ?
           AuxWindows.help('shortcuts');
           break;
+        case 98:  // b
+          switchBand();
+          break;
         case 102: // f
           showFrequencyEditor();
           break;
@@ -703,7 +706,7 @@ function Interface(fmRadio) {
     volumeSlider.addEventListener('change', changeVolumeSlider);
     volumeSlider.addEventListener('blur', blurVolumeSlider);
     volumeSlider.addEventListener('mousewheel', changeVolumeWheel);
-    bandLabel.addEventListener('click', switchBand);
+    bandBox.addEventListener('click', switchBand);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);

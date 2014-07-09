@@ -192,11 +192,11 @@ body {
   color: #c54;
 }
 
-.bandLabel {
+.bandBox {
   position: absolute;
-  right: 10px;
+  right: 5px;
   top: 75px;
-  width: 40px;
+  width: 50px;
   text-align: center;
   font-size: 25px;
 }
