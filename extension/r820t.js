@@ -204,7 +204,7 @@ function R820T(com, xtalFreq, throwError) {
     ], function() {
     setPll(56000000, function() {
     if (!hasPllLock) {
-      throwError("PLL could not achieve lock.");
+      throwError("PLL not locked -- cannot tune to the selected frequency.");
       return;
     }
     writeEach([
@@ -314,7 +314,7 @@ function R820T(com, xtalFreq, throwError) {
         return getPllLock(false, kont);
       });
     } else {
-      throwError("PLL did not lock");
+      throwError("PLL not locked -- cannot tune to the selected frequency.");
       return;
     }
     });
