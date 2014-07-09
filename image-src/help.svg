@@ -71,7 +71,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -225,7 +225,7 @@
          sodipodi:role="line"
          id="tspan4450"
          x="460"
-         y="980.36218">5</tspan></text>
+         y="980.36218">6</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -236,7 +236,7 @@
          sodipodi:role="line"
          id="tspan4454"
          x="298"
-         y="976.36218">6</tspan></text>
+         y="976.36218">7</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -247,7 +247,7 @@
          sodipodi:role="line"
          id="tspan4458"
          x="548"
-         y="980.36218">7</tspan></text>
+         y="980.36218">8</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
@@ -258,7 +258,7 @@
          sodipodi:role="line"
          id="tspan4462"
          x="623"
-         y="798.36218">8</tspan></text>
+         y="798.36218">9</tspan></text>
     <path
        sodipodi:nodetypes="cc"
        inkscape:connector-curvature="0"
@@ -268,14 +268,14 @@
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="437"
-       y="672.36218"
+       x="628"
+       y="904.36218"
        id="text4466"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4468"
-         x="437"
-         y="672.36218">9</tspan></text>
+         x="628"
+         y="904.36218">5</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
        d="m 509,686.36218 9,-29"
@@ -285,14 +285,32 @@
     <text
        xml:space="preserve"
        style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
-       x="496"
+       x="497"
        y="653.36218"
        id="text4472"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4474"
-         x="496"
+         x="497"
          y="653.36218"
-         dx="0 -4">10</tspan></text>
+         dx="0 -6">11</tspan></text>
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3031"
+       d="m 522,819.36218 105,70"
+       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text3033"
+       y="668.36218"
+       x="433"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"><tspan
+         dx="0 -4"
+         y="668.36218"
+         x="433"
+         id="tspan3035"
+         sodipodi:role="line">10</tspan></text>
   </g>
 </svg>
