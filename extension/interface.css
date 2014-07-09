@@ -283,6 +283,9 @@ body {
   top: 0;
   bottom: 0;
   width: 205px;
+  -webkit-appearance: menulist-button;
+  border-color: #a9a9a9;
+  background: white;
 }
 
 .savePresetButton {
