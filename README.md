@@ -23,7 +23,7 @@ Radio Receiver was written to work with an RTL-2832U-based DVB-T (European digit
 
 You can use this application on a ChromeBook, or on any other computer running a Chrome browser. Just [install it using the Chrome Web Store](https://chrome.google.com/webstore/detail/radio-receiver/miieomcelenidlleokajkghmifldohpo) or any other mechanism, plug in your USB dongle, and click on the icon to start the Radio Receiver application.
 
-To listen to Medium Wave AM radio, you need additional hardware. An upconverter needs to be installed between your antenna and the USB dongle. This upconverter shifts the signals up in frequency so that they can be tuned by your dongle. You can find upconverters for sale by searching for [SDR upconverter] on your favorite online store or web search engine.
+To listen to Medium Wave AM radio, you need an upconverter connected between your antenna and the USB dongle. This upconverter shifts the signals up in frequency so that they can be tuned by your dongle. You can find upconverters for sale by searching for [SDR upconverter] on your favorite online store or web search engine.
 
 ## Support
 
