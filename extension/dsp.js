@@ -182,6 +182,8 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
     var IQ = downsampler.downsample(samples);
     var I = IQ[0].data;
     var Q = IQ[1].data;
+    var iAvg = average(I);
+    var qAvg = average(Q);
     var out = new Float32Array(I.length);
     var maxAmpl = 0;
     var minAmpl = 1;
@@ -189,7 +191,9 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
     var sigSqrSum = 0;
     var sigSum = 0;
     for (var i = 0; i < out.length; ++i) {
-      var power = I[i] * I[i] + Q[i] * Q[i];
+      var iv = I[i] - iAvg;
+      var qv = Q[i] - qAvg;
+      var power = iv * iv + qv * qv;
       var ampl = Math.sqrt(power);
       if (maxAmpl < ampl) {
         maxAmpl = ampl;
@@ -339,7 +343,7 @@ function StereoSeparator(sampleRate, pilotFreq) {
 
 /**
  * A de-emphasis filter with the given time constant.
- * @param {number} inRate The signal's sample rate.
+ * @param {number} sampleRate The signal's sample rate.
  * @param {number} timeConstant_uS The filter's time constant in microseconds.
  * @constructor
  */
@@ -398,6 +402,19 @@ function ExpAverage(weight, opt_std) {
     add: add,
     getStd: getStd
   };
+}
+
+/**
+ * Calculates the average of an array.
+ * @param {Float32Array} arr The array to calculate its average.
+ * @return {number} The average value.
+ */
+function average(arr) {
+  var sum = 0;
+  for (var i = 0; i < arr.length; ++i) {
+    sum += arr[i];
+  }
+  return sum / arr.length;
 }
 
 /**
