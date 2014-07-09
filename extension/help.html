@@ -31,7 +31,7 @@ body {
 <h2>Start and stop</h2>
 <p>Press the "Power On" button (<b>1</b>) to start playing the radio. You'll see that the label changes to "Power Off"; if you press it again, the radio will stop.</p>
 
-<h2>Changing frequency</h2>
+<h2>Changing frequency and band</h2>
 <p>You can change frequency in several ways:</p>
 <ul>
 <li>Click on the frequency display (<b>2</b>), type your new frequency directly, and press Enter.</li>
@@ -39,23 +39,30 @@ body {
 <li>Use the "Scan &lt;&lt;" and "Scan &gt;&gt;" buttons (<b>4</b>) to search for a station automatically.</li>
 <li>Use the mouse wheel on the frequency display.</li>
 </ul>
+<p>To change the band you are listening to, click on the band indicator (<b>5</b>). Note that, before you can listen to AM radio, you'll need to <a href="#settings">set up an upconverter in the settings window</a>.</p>
 
 <h2>Using presets</h2>
-<p>Click the "Save" button (<b>5</b>) to save the station you are listening to as a preset. Enter a name for the preset and press "Save".</p>
-<p>To switch to a preset, click the preset selection box (<b>6</b>) and choose your new preset. The radio will switch to it immediately.</p>
-<p>To delete a preset, switch to it and press the "Remove" button (<b>7</b>).</p>
-<p>To change a preset's name, switch to it and click the "Save" button (<b>5</b>). Type the new name and press "Save".</p>
+<p>Click the "Save" button (<b>6</b>) to save the station you are listening to as a preset. Enter a name for the preset and press "Save".</p>
+<p>To switch to a preset, click the preset selection box (<b>7</b>) and choose your new preset. The radio will switch to it immediately.</p>
+<p>To delete a preset, switch to it and press the "Remove" button (<b>8</b>).</p>
+<p>To change a preset's name, switch to it and click the "Save" button (<b>6</b>). Type the new name and press "Save".</p>
 
 <h2>Changing volume and stereo</h2>
-<p>To change the volume, click on the "loudspeaker" icon (<b>8</b>) and move the slider left and right to decrease or increase the volume. You can also use your mouse wheel on the icon to change volume directly.</p>
-<p>To disable stereo click on the stereo indicator (<b>9</b>).</p>
+<p>To change the volume, click on the "loudspeaker" icon (<b>9</b>) and move the slider left and right to decrease or increase the volume. You can also use your mouse wheel on the icon to change volume directly.</p>
+<p>To disable stereo click on the stereo indicator (<b>10</b>).</p>
 
+<a name="settings"></a>
 <h2>Settings</h2>
-<p>You can change a lot of settings by clicking on the "wrench" icon (<b>10</b>). There you can change several settings:</p>
+<p>You can change a lot of settings by clicking on the "wrench" icon (<b>11</b>). There you can change several settings:</p>
+
+<p style="text-align:center"><img src="help-settings.png" width="381" height="291" title="Radio Receiver settings window"></p>
+
 <ul>
 <li><b>Region</b>: Radios use different frequencies in different parts of the world. For best results, you should select the part of the world you live in.</li>
 <li><b>Frequency correction</b>: Corrects for clock imprecision in the dongle. Most of the time you can leave it at 0 unless you know you need a different value. If you already know it, enter it here. Otherwise, you can try the "suggest a value" feature.</li>
 <li><b>Tuner gain</b>: Allows you to use automatic gain or set a custom fixed gain. Most people can use automatic gain.</li>
+<li><b>Use upconverter for AM</b>: Enables or disables AM radio via an upconverter.</li>
+<li><b>Upconverter frequency</b>: The frequency the upconverter shifts all signals up by.</li>
 </ul>
 
 <a name="shortcuts"></a>
@@ -69,7 +76,8 @@ body {
 <tr><td><tt>Right Arrow</tt></td><td>Increase Frequency</td></tr>
 <tr><td><tt>&lt;</tt></td><td>Scan for stations by decreasing frequency</td></tr>
 <tr><td><tt>&gt;</tt></td><td>Scan for stations by increasing frequency</td></tr>
-<tr><td><tt>f</ttd></td><td>Edit frequency</td></tr>
+<tr><td><tt>f</tt></td><td>Edit frequency</td></tr>
+<tr><td><tt>b</tt></td><td>Change band</td></tr>
 <tr><td><tt>s</tt></td><td>Toggle stereo off/on</td></tr>
 <tr><td><tt>p</tt></td><td>Go to preset selector</td></tr>
 <tr><td><tt>Shift</tt> + <tt>S</tt></td><td>Save preset</td></tr>
