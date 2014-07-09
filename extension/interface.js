@@ -287,7 +287,11 @@ function Interface(fmRadio) {
     var bandNames = [];
     for (var n in bands) {
       if (bands.hasOwnProperty(n)) {
-        bandNames.push(n);
+        if (!bands[n].getMode()['upconvert']
+            || settings['useUpconverter']
+            || n == band.getName()) {
+          bandNames.push(n);
+        }
       }
     }
     if (bandNames.length == 1) {
