@@ -4,6 +4,6 @@ I started Radio Receiver as an experiment to see if I could grab samples from a 
 
 The initial experiment was successful, but as I wanted to add more features, it felt like I was running against the limits of what I could do with JavaScript, so I started a reimplementation in C++ for NaCl.
 
-However, it turned out that I figured a couple of ways to extract some more performance from the JavaScript code, so I'm still working primarily on that.
+However, in the meantime I figured out a couple of ways to extract some more performance from the JavaScript code, so I'm still working primarily on that.
 
-However, I'm keeping this C++ code here, because it's useful to try out algorithms and formulas, and it may become actually necessary in the future. And, even if I never get to use it, at least I'll have learnt NaCl and relearnt C++ :-)
+So, for now I'm keeping this C++ code here, because it's useful to try out algorithms and formulas, and it may become actually necessary in the future. And, even if I never get to use it, at least I'll have learnt NaCl and relearnt C++ :-)
