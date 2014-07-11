@@ -185,8 +185,6 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
     var iAvg = average(I);
     var qAvg = average(Q);
     var out = new Float32Array(I.length);
-    var maxAmpl = 0;
-    var minAmpl = 1;
 
     var sigSqrSum = 0;
     var sigSum = 0;
@@ -195,12 +193,6 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
       var qv = Q[i] - qAvg;
       var power = iv * iv + qv * qv;
       var ampl = Math.sqrt(power);
-      if (maxAmpl < ampl) {
-        maxAmpl = ampl;
-      }
-      if (minAmpl > ampl) {
-        minAmpl = ampl;
-      }
       out[i] = ampl;
       sigSqrSum += power;
       sigSum += ampl;
