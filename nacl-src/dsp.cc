@@ -129,20 +129,53 @@ SamplesIQ IQDownsampler::downsample(const Samples& samples) {
 }
 
 
-const float FMDemodulator::kGain = 1;
-const float FMDemodulator::kMaxFFactor = 0.9;
+AMDemodulator::AMDemodulator(int inRate, int outRate, float filterFreq,
+                             int kernelLen)
+    : downsampler_(inRate, outRate,
+                   getLowPassFIRCoeffs(inRate, filterFreq, kernelLen)) {}
 
-FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF)
-  : amplConv_(outRate * kGain / (k2Pi * maxF)),
+Samples AMDemodulator::demodulateTuned(const Samples& samples) {
+  SamplesIQ iqSamples(downsampler_.downsample(samples));
+  int outLen = iqSamples.I.size();
+  float iAvg = accumulate(iqSamples.I.begin(), iqSamples.I.end(), 0) / outLen;
+  float qAvg = accumulate(iqSamples.Q.begin(), iqSamples.Q.end(), 0) / outLen;
+  Samples out(outLen);
+  float sigSqrSum = 0;
+  float sigSum = 0;
+  for (int i = 0; i < outLen; ++i) {
+    float I = iqSamples.I[i] - iAvg;
+    float Q = iqSamples.Q[i] - qAvg;
+    float power = I * I + Q * Q;
+    float ampl = sqrt(power);
+    out[i] = ampl;
+    sigSum += ampl;
+    sigSqrSum += power;
+  }
+  float halfPoint = sigSum / outLen;
+  for (auto &o : out) {
+    o = (o - halfPoint) / halfPoint;
+  }
+  hasCarrier_ = sigSqrSum > (0.002 * outLen);
+  return out;
+}
+
+bool AMDemodulator::hasCarrier() {
+  return hasCarrier_;
+}
+
+
+FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF,
+                             float filterFreq, int kernelLen)
+  : amplConv_(outRate / (k2Pi * maxF)),
     downsampler_(inRate, outRate,
-                 getLowPassFIRCoeffs(inRate, maxF * kMaxFFactor, kFilterLen)),
+                 getLowPassFIRCoeffs(inRate, filterFreq, kernelLen)),
     lI_(0), lQ_(0) {}
 
 Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   SamplesIQ iqSamples(downsampler_.downsample(samples));
   int outLen = iqSamples.I.size();
   Samples out(outLen);
-  int sigSqrSum = 0;
+  float sigSqrSum = 0;
   for (int i = 0; i < outLen; ++i) {
     float I = iqSamples.I[i];
     float Q = iqSamples.Q[i];
@@ -162,7 +195,7 @@ Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   return out;
 }
 
-boolean FMDemodulator::hasCarrier() {
+bool FMDemodulator::hasCarrier() {
   return hasCarrier_;
 }
 

@@ -28,7 +28,7 @@ using namespace std;
 namespace radioreceiver {
 
 WBFMDecoder::WBFMDecoder(int inRate, int outRate)
-    : demodulator_(inRate, kInterRate, kMaxF),
+    : demodulator_(inRate, kInterRate, kMaxF, kMaxF * 0.9, 101),
       filterCoefs_(getLowPassFIRCoeffs(kInterRate, kFilterFreq, kFilterLen)),
       monoSampler_(kInterRate, outRate, filterCoefs_),
       stereoSampler_(kInterRate, outRate, filterCoefs_),

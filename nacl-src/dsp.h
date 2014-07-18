@@ -143,26 +143,21 @@ class IQDownsampler {
 };
 
 /**
- * A class to demodulate IQ-interleaved samples into a raw audio signal.
+ * A class to demodulate IQ-interleaved samples representing an amplitude
+ * modulated signal into a raw audio signal.
  */
-class FMDemodulator {
-  static const float kGain;
-  static const float kMaxFFactor;
-  static const int kFilterLen = 101;
-
-  float amplConv_;
+class AMDemodulator {
   IQDownsampler downsampler_;
-  float lI_;
-  float lQ_;
-  boolean hasCarrier_;
+  bool hasCarrier_;
  public:
   /**
    * Constructor for the given rates and maximum frequency deviation.
    * @param inRate The sample rate for the input signal.
    * @param outRate The sample rate for the output audio.
-   * @param maxF The maximum frequency deviation.
+   * @param filterFreq The frequeny of the low-pass filter.
+   * @param kernelLen The length of the filter kernel.
    */
-  FMDemodulator(int inRate, int outRate, int maxF);
+  AMDemodulator(int inRate, int outRate, float filterFreq, int kernelLen);
 
   /**
    * Demodulates the given I/Q samples.
@@ -175,7 +170,44 @@ class FMDemodulator {
    * Tells whether a carrier was detected in the last demodulated block.
    * @return Whether a carrier was detected.
    */
-  boolean hasCarrier();
+  bool hasCarrier();
+};
+
+
+/**
+ * A class to demodulate IQ-interleaved samples representing a frequency
+ * modulated signal into a raw audio signal.
+ */
+class FMDemodulator {
+  float amplConv_;
+  IQDownsampler downsampler_;
+  float lI_;
+  float lQ_;
+  bool hasCarrier_;
+ public:
+  /**
+   * Constructor for the given rates and maximum frequency deviation.
+   * @param inRate The sample rate for the input signal.
+   * @param outRate The sample rate for the output audio.
+   * @param maxF The maximum frequency deviation.
+   * @param filterFreq The frequeny of the low-pass filter.
+   * @param kernelLen The length of the filter kernel.
+   */
+  FMDemodulator(int inRate, int outRate, int maxF, float filterFreq,
+                int kernelLen);
+
+  /**
+   * Demodulates the given I/Q samples.
+   * @param samples The samples to demodulate.
+   * @return The demodulated sound.
+   */
+  Samples demodulateTuned(const Samples& samples);
+
+  /**
+   * Tells whether a carrier was detected in the last demodulated block.
+   * @return Whether a carrier was detected.
+   */
+  bool hasCarrier();
 };
 
 
