@@ -26,7 +26,6 @@ using namespace radioreceiver;
 using namespace std;
 
 const int kBufLen = 65536;
-const float k2Pi = 2 * 3.14159265358979;
 
 struct Config {
   bool stereo;

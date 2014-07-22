@@ -24,39 +24,39 @@
 using namespace std;
 
 const int kBufLen = 65536;
-const float k2Pi = 2 * 3.14159265358979;
+const double k2Pi = 2 * 3.14159265358979;
 
 struct Config {
   bool stereo;
   int leftFreq;
   int rightFreq;
   int rate;
-  float duration;
+  double duration;
 };
 
 void generate(Config cfg, uint8_t* buffer, int length) {
-  static float phase = 0;
+  static double phase = 0;
   static int sample = 0;
   int pilotFreq = 19000;
   int maxF = 75000;
   for (int i = 0; i < length / 2; ++i) {
     ++sample;
-    float samplePre = 0;
+    double samplePre = 0;
     if (cfg.stereo) {
-      float sampleLeft = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
-      float sampleRight = sin(k2Pi * cfg.rightFreq * sample / cfg.rate);
-      float samplePilot = sin(k2Pi * pilotFreq * sample / cfg.rate);
-      float sampleSum = sampleLeft + sampleRight;
-      float sampleDiff = sampleLeft - sampleRight;
-      float sampleTop = sampleDiff *
+      double sampleLeft = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
+      double sampleRight = sin(k2Pi * cfg.rightFreq * sample / cfg.rate);
+      double samplePilot = sin(k2Pi * pilotFreq * sample / cfg.rate);
+      double sampleSum = sampleLeft + sampleRight;
+      double sampleDiff = sampleLeft - sampleRight;
+      double sampleTop = sampleDiff *
           sin(k2Pi * 2 * pilotFreq * sample / cfg.rate);
       samplePre = sampleSum * .45 + samplePilot * .1 + sampleTop * .45;
     } else {
       samplePre = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
     }
     phase += k2Pi * samplePre * maxF / cfg.rate;
-    float sampleI = cos(phase);
-    float sampleQ = sin(phase);
+    double sampleI = cos(phase);
+    double sampleQ = sin(phase);
     buffer[2 * i] = 255 * (sampleI + 1) / 2;
     buffer[2 * i + 1] = 255 * (sampleQ + 1) / 2;
   }
