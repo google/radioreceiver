@@ -39,7 +39,7 @@ struct Config {
   int outRate;
 };
 
-void* makeDecoder(const Config& cfg) {
+Decoder* makeDecoder(const Config& cfg) {
   switch (cfg.mod) {
   case 0:
     return new AMDecoder(cfg.inRate, cfg.outRate, cfg.bandwidth);
@@ -47,19 +47,6 @@ void* makeDecoder(const Config& cfg) {
     return new WBFMDecoder(cfg.inRate, cfg.outRate);
   case 2:
     return new NBFMDecoder(cfg.inRate, cfg.outRate, cfg.maxf);
-  }
-}
-
-StereoAudio decode(void* decoder, char* buffer, int bufLen, const Config& cfg) {
-  Samples samples =
-    samplesFromUint8(reinterpret_cast<uint8_t*>(buffer), bufLen);
-  switch (cfg.mod) {
-  case 0:
-    return reinterpret_cast<AMDecoder*>(decoder)->decode(samples);
-  case 1:
-    return reinterpret_cast<WBFMDecoder*>(decoder)->decode(samples, cfg.stereo);
-  case 2:
-    return reinterpret_cast<NBFMDecoder*>(decoder)->decode(samples);
   }
 }
 
@@ -101,11 +88,14 @@ int main(int argc, char* argv[]) {
 
   char outBlock[4];
   char* buffer = new char[cfg.blockSize];
-  void* decoder = makeDecoder(cfg);
+  Decoder* decoder = makeDecoder(cfg);
   while (!cin.eof()) {
     cin.read(buffer, cfg.blockSize);
     int read = cin.gcount();
-    StereoAudio audio = decode(decoder, buffer, read, cfg);
+    StereoAudio audio =
+      decoder->decode(samplesFromUint8(reinterpret_cast<uint8_t*>(buffer),
+				       read),
+		      cfg.stereo);
     for (int i = 0; i < audio.left.size(); ++i) {
       int left = audio.left[i] * 32767;
       if (left > 32767) left = 32767;

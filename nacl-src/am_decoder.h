@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <vector>
 
+#include "decoder.h"
 #include "dsp.h"
 
 using namespace std;
@@ -33,7 +34,7 @@ namespace radioreceiver {
 /**
  * A decoder for an AM sample stream.
  */
-class AMDecoder {
+class AMDecoder : public Decoder {
   static const int kInterRate = 336000;
   static const int kFilterFreq = 10000;
   static const int kFilterLen = 41;
@@ -55,9 +56,10 @@ class AMDecoder {
    * Demodulates a block of floating-point samples, producing a block of
    * stereo audio.
    * @param samples The samples to decode.
+   * @param inStereo Whether to try decoding the stereo signal.
    * @return The generated stereo audio block.
    */
-  StereoAudio decode(const Samples& samples);
+  virtual StereoAudio decode(const Samples& samples, bool inStereo);
 };
 
 }  // namespace radioreceiver

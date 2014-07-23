@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <vector>
 
+#include "decoder.h"
 #include "dsp.h"
 
 using namespace std;
@@ -33,7 +34,7 @@ namespace radioreceiver {
 /**
  * A decoder for a Wideband FM sample stream.
  */
-class WBFMDecoder {
+class WBFMDecoder : public Decoder {
   static const int kInterRate = 336000;
   static const int kMaxF = 75000;
   static const int kPilotFreq = 19000;
@@ -65,7 +66,7 @@ class WBFMDecoder {
    * @param inStereo Whether to try decoding the stereo signal.
    * @return The generated stereo audio block.
    */
-  StereoAudio decode(const Samples& samples, bool inStereo);
+  virtual StereoAudio decode(const Samples& samples, bool inStereo);
 };
 
 }  // namespace radioreceiver

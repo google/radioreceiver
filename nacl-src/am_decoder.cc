@@ -32,7 +32,7 @@ AMDecoder::AMDecoder(int inRate, int outRate, int bandwidth)
       filterCoefs_(getLowPassFIRCoeffs(kInterRate, kFilterFreq, kFilterLen)),
       downSampler_(kInterRate, outRate, filterCoefs_) {}
 
-StereoAudio AMDecoder::decode(const Samples& samples) {
+StereoAudio AMDecoder::decode(const Samples& samples, bool inStereo) {
   Samples demodulated(demodulator_.demodulateTuned(samples));
 
   StereoAudio output;

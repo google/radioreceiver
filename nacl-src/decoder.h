@@ -13,34 +13,37 @@
 // limitations under the License.
 
 /**
- * Receives samples captured by the tuner, demodulates them, extracts the
- * audio signals, and sends them back.
+ * Base class for decoders.
  */
 
+#ifndef DECODER_H_
+#define DECODER_H_
+
 #include <memory>
+#include <stdint.h>
 #include <vector>
 
 #include "dsp.h"
-#include "nbfm_decoder.h"
 
 using namespace std;
 
 namespace radioreceiver {
 
-NBFMDecoder::NBFMDecoder(int inRate, int outRate, int maxF)
-    : demodulator_(inRate, kInterRate, maxF, maxF * 0.8, 351),
-      filterCoefs_(getLowPassFIRCoeffs(kInterRate, kFilterFreq, kFilterLen)),
-      downSampler_(kInterRate, outRate, filterCoefs_) {}
-
-StereoAudio NBFMDecoder::decode(const Samples& samples, bool inStereo) {
-  Samples demodulated(demodulator_.demodulateTuned(samples));
-
-  StereoAudio output;
-  output.inStereo = false;
-  output.left = downSampler_.downsample(demodulated);
-  output.right = output.left;
-  output.carrier = demodulator_.hasCarrier();
-  return output;
-}
+/**
+ * Base class for decoders.
+ */
+class Decoder {
+ public:
+  /**
+   * Demodulates a block of floating-point samples, producing a block of
+   * stereo audio.
+   * @param samples The samples to decode.
+   * @param inStereo Whether to try decoding a stereo signal.
+   * @return The generated stereo audio block.
+   */
+  virtual StereoAudio decode(const Samples& samples, bool inStereo) = 0;
+};
 
 }  // namespace radioreceiver
+
+#endif  // DECODER_BASE_H_
