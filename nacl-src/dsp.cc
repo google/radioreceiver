@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstring>
 #include <memory>
+#include <numeric>
 #include <stdint.h>
 #include <vector>
 
