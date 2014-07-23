@@ -34,6 +34,8 @@ namespace radioreceiver {
  */
 class Decoder {
  public:
+  virtual ~Decoder() {}
+
   /**
    * Demodulates a block of floating-point samples, producing a block of
    * stereo audio.
