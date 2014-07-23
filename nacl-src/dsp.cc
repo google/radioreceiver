@@ -30,7 +30,9 @@ using namespace std;
 
 namespace radioreceiver {
 
-const double k2Pi = 2 * 3.14159265358979;
+const double kPi = 3.141592653989793238;
+const double k2Pi = 2 * kPi;
+const double kPi2 = kPi / 2;
 
 vector<float> getLowPassFIRCoeffs(int sampleRate, float halfAmplFreq,
                                   int length) {
@@ -164,6 +166,32 @@ bool AMDemodulator::hasCarrier() {
 }
 
 
+static float myatan2(float y, float x) {
+  float sgn = 1;
+  if (y < 0) {
+    sgn *= -1;
+    y *= -1;
+  }
+  float ang = 0;
+  float div;
+  if (x == y) {
+    div = 1;
+  } else if (x > y) {
+    div = y / x;
+  } else {
+    ang = -kPi2;
+    div = x / y;
+    sgn *= -1;
+  }
+  ang +=
+    div /
+    (0.98419158358617365
+     + div * (0.093485702629671305
+	      + div * 0.19556307900617517));
+  return sgn * ang;
+}
+
+
 FMDemodulator::FMDemodulator(int inRate, int outRate, int maxF,
                              float filterFreq, int kernelLen)
   : amplConv_(outRate / (k2Pi * maxF)),
@@ -179,14 +207,9 @@ Samples FMDemodulator::demodulateTuned(const Samples& samples) {
   for (int i = 0; i < outLen; ++i) {
     float I = iqSamples.I[i];
     float Q = iqSamples.Q[i];
-    float divisor = (I * I + Q * Q);
-    float angleSin = divisor == 0 ? 0 : (lI_ * Q - I * lQ_) / divisor;
-    float sgn = angleSin < 0 ? -1 : 1;
-    angleSin *= sgn;
-    out[i] = sgn * (angleSin > 1 ? 1 :
-                    (0.92200051775373 * angleSin
-                     + 0.09688461195053477 / (1.1576100461486143 - angleSin)
-                     - 0.08369365165140999) * amplConv_);
+    float real = lI_ * I + lQ_ * Q;
+    float imag = lI_ * Q - I * lQ_;
+    out[i] = myatan2(imag, real) * amplConv_;
     lI_ = I;
     lQ_ = Q;
     sigSqrSum += lI_ * lI_;
