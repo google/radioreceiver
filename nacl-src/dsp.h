@@ -42,6 +42,16 @@ struct SamplesIQ {
 };
 
 /**
+ * A small structure to contain stereo audio.
+ */
+struct StereoAudio {
+  Samples left;
+  Samples right;
+  bool inStereo;
+  bool carrier;
+};
+
+/**
  * Converts the given buffer of unsigned 8-bit samples into a samples object.
  * @param buffer A buffer containing the unsigned 8-bit samples.
  * @param length The buffer's length.
