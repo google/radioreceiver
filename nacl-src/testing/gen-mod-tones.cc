@@ -19,6 +19,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <string>
 
 using namespace std;
@@ -39,9 +40,15 @@ struct Config {
   double carrierPhase;
   int rate;
   double duration;
+  double leftGain;
+  double rightGain;
+  double carrierLevel;
+  double noise;
 };
 
 void generate(Config cfg, uint8_t* buffer, int length) {
+  default_random_engine engine;
+  uniform_real_distribution<double> noise(-1.0, 1.0);
   static double phase = cfg.carrierPhase;
   static int sample = 0;
   int pilotFreq = 19000;
@@ -49,7 +56,7 @@ void generate(Config cfg, uint8_t* buffer, int length) {
     ++sample;
     double sampleI;
     double sampleQ;
-    double samplePre =
+    double samplePre = cfg.leftGain *
       sin(cfg.leftPhase + k2Pi * cfg.leftFreq * sample / cfg.rate);
     switch (cfg.mod) {
     case 0:
@@ -58,9 +65,9 @@ void generate(Config cfg, uint8_t* buffer, int length) {
       break;
     case 1:
       if (cfg.stereo) {
-	double sampleLeft =
+	double sampleLeft = cfg.leftGain *
 	  sin(cfg.leftPhase + k2Pi * cfg.leftFreq * sample / cfg.rate);
-	double sampleRight =
+	double sampleRight = cfg.rightGain *
 	  sin(cfg.rightPhase + k2Pi * cfg.rightFreq * sample / cfg.rate);
 	double samplePilot = sin(k2Pi * pilotFreq * sample / cfg.rate);
 	double sampleSum = sampleLeft + sampleRight;
@@ -75,13 +82,20 @@ void generate(Config cfg, uint8_t* buffer, int length) {
       sampleQ = sin(phase);
       break;
     }
+    sampleI *= cfg.carrierLevel;
+    sampleQ *= cfg.carrierLevel;
+    if (cfg.noise > 0) {
+      double buzz = noise(engine);
+      sampleI = sampleI * (1 - cfg.noise) + buzz * cfg.noise;
+      sampleQ = sampleQ * (1 - cfg.noise) + buzz * cfg.noise;
+    }
     buffer[2 * i] = 1 + 254 * (sampleI + 1) / 2;
     buffer[2 * i + 1] = 1 + 254 * (sampleQ + 1) / 2;
   }
 }
 
 int main(int argc, char* argv[]) {
-  Config cfg { 1, true, 0, 997, 1499, 0, 0, 0, 1024000, 1.0 };
+  Config cfg { 1, true, 0, 997, 1499, 0, 0, 0, 1024000, 1.0, 1, 1, 1, 0 };
 
   for (int i = 1; i < argc; ++i) {
     if (string("-mod") == argv[i]) {
@@ -122,6 +136,14 @@ int main(int argc, char* argv[]) {
       cfg.rate = stoi(argv[++i]);
     } else if (string("-duration") == argv[i]) {
       cfg.duration = stof(argv[++i]);
+    } else if (string("-leftgain") == argv[i]) {
+      cfg.leftGain = stod(argv[++i]);
+    } else if (string("-rightgain") == argv[i]) {
+      cfg.rightGain = stod(argv[++i]);
+    } else if (string("-carrierlevel") == argv[i]) {
+      cfg.carrierLevel = stod(argv[++i]);
+    } else if (string("-noise") == argv[i]) {
+      cfg.noise = stod(argv[++i]);
     } else {
       cerr << "Unknown flag: " << argv[i] << endl;
       return 1;
