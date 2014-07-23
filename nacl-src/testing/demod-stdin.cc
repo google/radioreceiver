@@ -20,25 +20,71 @@
 #include <string>
 
 #include "dsp.h"
+#include "am_decoder.h"
+#include "nbfm_decoder.h"
 #include "wbfm_decoder.h"
 
 using namespace radioreceiver;
 using namespace std;
 
-const int kBufLen = 65536;
+const char *kMods[] = { "AM", "WBFM", "NBFM", 0 };
 
 struct Config {
+  int mod;
   bool stereo;
+  int maxf;
+  int bandwidth;
   int blockSize;
   int inRate;
   int outRate;
 };
 
+void* makeDecoder(const Config& cfg) {
+  switch (cfg.mod) {
+  case 0:
+    return new AMDecoder(cfg.inRate, cfg.outRate, cfg.bandwidth);
+  case 1:
+    return new WBFMDecoder(cfg.inRate, cfg.outRate);
+  case 2:
+    return new NBFMDecoder(cfg.inRate, cfg.outRate, cfg.maxf);
+  }
+}
+
+StereoAudio decode(void* decoder, char* buffer, int bufLen, const Config& cfg) {
+  Samples samples =
+    samplesFromUint8(reinterpret_cast<uint8_t*>(buffer), bufLen);
+  switch (cfg.mod) {
+  case 0:
+    return reinterpret_cast<AMDecoder*>(decoder)->decode(samples);
+  case 1:
+    return reinterpret_cast<WBFMDecoder*>(decoder)->decode(samples, cfg.stereo);
+  case 2:
+    return reinterpret_cast<NBFMDecoder*>(decoder)->decode(samples);
+  }
+}
+
 int main(int argc, char* argv[]) {
-  Config cfg { true, 65536, 1024000, 48000 };
+  Config cfg { 1, true, 10000, 10000, 65536, 1024000, 48000 };
 
   for (int i = 1; i < argc; ++i) {
-    if (string("-mono") == argv[i]) {
+    if (string("-mod") == argv[i]) {
+      string modName = string(argv[++i]);
+      int mod = -1;
+      for (int i = 0; kMods[i]; ++i) {
+	if (modName == string(kMods[i])) {
+	  mod = i;
+	}
+      }
+      if (mod == -1) {
+	cerr << "Unknown modulation: " << modName << endl;
+	return 1;
+      }
+      cfg.mod = mod;
+    } else if (string("-maxf") == argv[i]) {
+      cfg.maxf = stoi(argv[++i]);
+    } else if (string("-bandwidth") == argv[i]) {
+      cfg.bandwidth = stoi(argv[++i]);
+    } else if (string("-mono") == argv[i]) {
       cfg.stereo = false;
     } else if (string("-blocksize") == argv[i]) {
       cfg.blockSize = stoi(argv[++i]);
@@ -55,13 +101,11 @@ int main(int argc, char* argv[]) {
 
   char outBlock[4];
   char* buffer = new char[cfg.blockSize];
-  WBFMDecoder decoder(cfg.inRate, cfg.outRate);
+  void* decoder = makeDecoder(cfg);
   while (!cin.eof()) {
     cin.read(buffer, cfg.blockSize);
     int read = cin.gcount();
-    StereoAudio audio = decoder.decode(
-        samplesFromUint8(reinterpret_cast<uint8_t*>(buffer), read),
-        cfg.stereo);
+    StereoAudio audio = decode(decoder, buffer, read, cfg);
     for (int i = 0; i < audio.left.size(); ++i) {
       int left = audio.left[i] * 32767;
       if (left > 32767) left = 32767;

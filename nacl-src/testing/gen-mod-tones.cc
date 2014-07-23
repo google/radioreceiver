@@ -26,53 +26,96 @@ using namespace std;
 const int kBufLen = 65536;
 const double k2Pi = 2 * 3.14159265358979;
 
+const char *kMods[] = { "AM", "WBFM", "NBFM", 0 };
+
 struct Config {
+  int mod;
   bool stereo;
+  int maxf;
   int leftFreq;
   int rightFreq;
+  double leftPhase;
+  double rightPhase;
+  double carrierPhase;
   int rate;
   double duration;
 };
 
 void generate(Config cfg, uint8_t* buffer, int length) {
-  static double phase = 0;
+  static double phase = cfg.carrierPhase;
   static int sample = 0;
   int pilotFreq = 19000;
-  int maxF = 75000;
   for (int i = 0; i < length / 2; ++i) {
     ++sample;
-    double samplePre = 0;
-    if (cfg.stereo) {
-      double sampleLeft = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
-      double sampleRight = sin(k2Pi * cfg.rightFreq * sample / cfg.rate);
-      double samplePilot = sin(k2Pi * pilotFreq * sample / cfg.rate);
-      double sampleSum = sampleLeft + sampleRight;
-      double sampleDiff = sampleLeft - sampleRight;
-      double sampleTop = sampleDiff *
+    double sampleI;
+    double sampleQ;
+    double samplePre =
+      sin(cfg.leftPhase + k2Pi * cfg.leftFreq * sample / cfg.rate);
+    switch (cfg.mod) {
+    case 0:
+      sampleI = cos(cfg.carrierPhase) * (1 + samplePre) / 4;
+      sampleQ = sin(cfg.carrierPhase) * (1 + samplePre) / 4;
+      break;
+    case 1:
+      if (cfg.stereo) {
+	double sampleLeft =
+	  sin(cfg.leftPhase + k2Pi * cfg.leftFreq * sample / cfg.rate);
+	double sampleRight =
+	  sin(cfg.rightPhase + k2Pi * cfg.rightFreq * sample / cfg.rate);
+	double samplePilot = sin(k2Pi * pilotFreq * sample / cfg.rate);
+	double sampleSum = sampleLeft + sampleRight;
+	double sampleDiff = sampleLeft - sampleRight;
+	double sampleTop = sampleDiff *
           sin(k2Pi * 2 * pilotFreq * sample / cfg.rate);
-      samplePre = sampleSum * .45 + samplePilot * .1 + sampleTop * .45;
-    } else {
-      samplePre = sin(k2Pi * cfg.leftFreq * sample / cfg.rate);
+	samplePre = sampleSum * .45 + samplePilot * .1 + sampleTop * .45;
+      }
+    case 2:
+      phase += k2Pi * samplePre * cfg.maxf / cfg.rate;
+      sampleI = cos(phase);
+      sampleQ = sin(phase);
+      break;
     }
-    phase += k2Pi * samplePre * maxF / cfg.rate;
-    double sampleI = cos(phase);
-    double sampleQ = sin(phase);
-    buffer[2 * i] = 255 * (sampleI + 1) / 2;
-    buffer[2 * i + 1] = 255 * (sampleQ + 1) / 2;
+    buffer[2 * i] = 1 + 254 * (sampleI + 1) / 2;
+    buffer[2 * i + 1] = 1 + 254 * (sampleQ + 1) / 2;
   }
 }
 
 int main(int argc, char* argv[]) {
-  Config cfg { true, 997, 1499, 1024000, 1.0 };
+  Config cfg { 1, true, 0, 997, 1499, 0, 0, 0, 1024000, 1.0 };
 
   for (int i = 1; i < argc; ++i) {
-    if (string("-freq") == argv[i]) {
+    if (string("-mod") == argv[i]) {
+      string modName = string(argv[++i]);
+      int mod = -1;
+      for (int i = 0; kMods[i]; ++i) {
+	if (modName == string(kMods[i])) {
+	  mod = i;
+	}
+      }
+      if (mod == -1) {
+	cerr << "Unknown modulation: " << modName << endl;
+	return 1;
+      }
+      cfg.mod = mod;
+      if (cfg.maxf == 0) {
+	cfg.maxf = mod == 1 ? 75000 : 10000;
+      }
+    } else if (string("-maxf") == argv[i]) {
+      cfg.maxf = stoi(argv[++i]);
+      cfg.mod = 2;
+    } else if (string("-freq") == argv[i]) {
       cfg.leftFreq = stoi(argv[++i]);
       cfg.stereo = false;
     } else if (string("-left") == argv[i]) {
       cfg.leftFreq = stoi(argv[++i]);
     } else if (string("-right") == argv[i]) {
       cfg.rightFreq = stoi(argv[++i]);
+    } else if (string("-leftphase") == argv[i]) {
+      cfg.leftPhase = stod(argv[++i]);
+    } else if (string("-rightphase") == argv[i]) {
+      cfg.rightPhase = stod(argv[++i]);
+    } else if (string("-carrierphase") == argv[i]) {
+      cfg.carrierPhase = stod(argv[++i]);
     } else if (string("-mono") == argv[i]) {
       cfg.stereo = false;
     } else if (string("-rate") == argv[i]) {
