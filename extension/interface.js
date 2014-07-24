@@ -724,9 +724,9 @@ function Interface(fmRadio) {
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
     loadSettings();
-    presets.load(displayPresets);
     loadCurrentStation();
     loadVolume();
+    presets.load(displayPresets);
     update();
   }
 
