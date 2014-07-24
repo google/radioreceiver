@@ -27,6 +27,9 @@
 #include <ppapi/cpp/var_dictionary.h>
 
 #include "decode-module.h"
+#include "decoder.h"
+#include "am_decoder.h"
+#include "nbfm_decoder.h"
 #include "wbfm_decoder.h"
 
 using namespace std;
@@ -37,7 +40,11 @@ static const int kInRate = 1024000;
 static const int kOutRate = 48000;
 
 DecodeInstance::DecodeInstance(PP_Instance instance)
-    : pp::Instance(instance), decoder_(kInRate, kOutRate) {}
+    : pp::Instance(instance), decoder_(new WBFMDecoder(kInRate, kOutRate)) {}
+
+DecodeInstance::~DecodeInstance() {
+  delete decoder_;
+}
 
 void DecodeInstance::HandleMessage(const pp::Var& message) {
   if (!message.is_array()) {
@@ -45,21 +52,58 @@ void DecodeInstance::HandleMessage(const pp::Var& message) {
   }
 
   const pp::VarArray& arr = static_cast<pp::VarArray>(message);
-  if (!arr.Get(0).is_array_buffer()) {
+  if (!arr.Get(0).is_int()) {
     return;
   }
-  if (!arr.Get(1).is_bool()) {
+
+  switch(arr.Get(0).AsInt()) {
+    case 1:
+      setMode(arr);
+      break;
+    default:
+      process(arr);
+  }
+}
+
+void DecodeInstance::setMode(const pp::VarArray& arr) {
+  if (!arr.Get(1).is_dictionary()) {
+    return;
+  }
+
+  pp::VarDictionary mode(arr.Get(1));
+  string modulation("");
+  if (mode.Get("modulation").is_string()) {
+    modulation = mode.Get("modulation").AsString();
+  }
+
+  delete decoder_;
+  if (modulation == "AM") {
+    pp::Var bandwidth = mode.Get("bandwidth");
+    decoder_ = new AMDecoder(kInRate, kOutRate, bandwidth.is_int() ? bandwidth.AsInt() : 10000);
+  } else if (modulation == "NBFM") {
+    pp::Var maxf = mode.Get("maxF");
+    decoder_ = new NBFMDecoder(kInRate, kOutRate, maxf.is_int() ? maxf.AsInt() : 8000);
+  } else {
+    decoder_ = new WBFMDecoder(kInRate, kOutRate);
+  }
+}
+
+void DecodeInstance::process(const pp::VarArray& arr) {
+  if (!arr.Get(1).is_array_buffer()) {
+    return;
+  }
+  if (!arr.Get(2).is_bool()) {
     return;
   }
 
   const pp::VarArrayBuffer& constBuffer = static_cast<pp::VarArrayBuffer>(
-      arr.Get(0));
+      arr.Get(1));
   pp::VarArrayBuffer& buffer = const_cast<pp::VarArrayBuffer&>(constBuffer);
-  bool inStereo = arr.Get(1).AsBool();
+  bool inStereo = arr.Get(2).AsBool();
 
   uint8_t* buf = reinterpret_cast<uint8_t*>(buffer.Map());
   int bufLen = buffer.ByteLength();
-  StereoAudio audio = decoder_.decode(samplesFromUint8(buf, bufLen), inStereo);
+  StereoAudio audio = decoder_->decode(samplesFromUint8(buf, bufLen), inStereo);
   buffer.Unmap();
 
   int bufSize = sizeof(float) * audio.left.size();
@@ -71,8 +115,8 @@ void DecodeInstance::HandleMessage(const pp::Var& message) {
   right.Unmap();
 
   pp::VarDictionary dict;
-  if (arr.Get(2).is_dictionary()) {
-    dict = arr.Get(2);
+  if (arr.Get(3).is_dictionary()) {
+    dict = arr.Get(3);
   }
   dict.Set(pp::Var("rate"), pp::Var(kOutRate));
   dict.Set(pp::Var("stereo"), pp::Var(audio.inStereo));

@@ -27,13 +27,15 @@
 namespace radioreceiver {
 
 class DecodeInstance : public pp::Instance {
-  WBFMDecoder decoder_;
+  Decoder* decoder_;
 
  public:
   explicit DecodeInstance(PP_Instance instance);
-  virtual ~DecodeInstance() {}
+  virtual ~DecodeInstance();
 
   virtual void HandleMessage(const pp::Var& message);
+  void process(const pp::VarArray& arr);
+  void setMode(const pp::VarArray& arr);
 };
 
 class DecodeModule : public pp::Module {

@@ -6,7 +6,7 @@ TARGET = radio-decoder
 LIBS = ppapi_cpp ppapi
 
 CFLAGS = -Wall -std=gnu++11
-SOURCES = decode-module.cc dsp.cc wbfm_decoder.cc
+SOURCES = decode-module.cc dsp.cc am_decoder.cc nbfm_decoder.cc wbfm_decoder.cc
 
 $(foreach src,$(SOURCES),$(eval $(call COMPILE_RULE,$(src),$(CFLAGS))))
 
