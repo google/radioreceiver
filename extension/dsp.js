@@ -247,13 +247,29 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
 
     var sigSqrSum = 0;
     for (var i = 0; i < out.length; ++i) {
-      var angleSin = ((lI * Q[i] - I[i] * lQ) / (I[i] * I[i] + Q[i] * Q[i])) || 0;
-      var sgn = angleSin < 0 ? -1 : 1;
-      angleSin *= sgn;
-      out[i] = sgn * (angleSin > 1 ? 1 :
-                      (0.92200051775373 * angleSin
-                      + 0.09688461195053477 / (1.1576100461486143 - angleSin)
-                      - 0.08369365165140999) * AMPL_CONV);
+      var real = lI * I[i] + lQ * Q[i];
+      var imag = lI * Q[i] - I[i] * lQ;
+      var sgn = 1;
+      if (imag < 0) {
+        sgn *= -1;
+        imag *= -1;
+      }
+      var ang = 0;
+      var div;
+      if (real == imag) {
+        div = 1;
+      } else if (real > imag) {
+        div = imag / real;
+      } else {
+        ang = -Math.PI / 2;
+        div = real / imag;
+        sgn *= -1;
+      }
+      out[i] = sgn *
+        (ang + div
+               / (0.98419158358617365
+                  + div * (0.093485702629671305
+                           + div * 0.19556307900617517))) * AMPL_CONV;
       lI = I[i];
       lQ = Q[i];
       sigSqrSum += lI * lI;
