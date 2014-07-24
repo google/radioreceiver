@@ -23,6 +23,8 @@ function Player() {
   var lastPlayedAt = -1;
   var frameno = 0;
 
+  var wavWriter = null;
+
   var ac = new (window.AudioContext || window.webkitAudioContext)();
   var gainNode = ac.createGain ? ac.createGain() : ac.createGainNode();
   gainNode.connect(ac.destination);
@@ -44,6 +46,38 @@ function Player() {
         lastPlayedAt + leftSamples.length / rate,
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
+    if (wavWriter != null) {
+      writeSamples(leftSamples, rightSamples);
+    }
+  }
+
+  /**
+   * Starts recording a WAV file into the given file writer.
+   * @param {FileWriter} writer The file writer.
+   */
+  function startWriting(writer) {
+    wavWriter = writer;
+  }
+
+  /**
+   * Stops recording a WAV file.
+   */
+  function stopWriting() {
+    wavWriter = null;
+  }
+
+  /**
+   * Records the given samples into a file.
+   * @param {Float32Array} leftSamples The samples for the left speaker.
+   * @param {Float32Array} rightSamples The samples for the right speaker.
+   */
+  function writeSamples(leftSamples, rightSamples) {
+    var out = new Int16Array(leftSamples.length * 2);
+    for (var i = 0; i < leftSamples.length; ++i) {
+      out[i * 2] = Math.floor(leftSamples[i] * 32767);
+      out[i * 2 + 1] = Math.floor(rightSamples[i] * 32767);
+    }
+    wavWriter.write(new Blob([out.buffer]));
   }
 
   /**
@@ -56,7 +90,9 @@ function Player() {
 
   return {
     play: play,
-    setVolume: setVolume
+    setVolume: setVolume,
+    startWriting: startWriting,
+    stopWriting: stopWriting
   };
 }
 

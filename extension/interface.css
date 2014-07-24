@@ -270,9 +270,17 @@ body {
   width: 90px;
 }
 
-.presets {
+.recordingButton {
   position: absolute;
   left: 100px;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+}
+
+.presets {
+  position: absolute;
+  left: 170px;
   right: 0;
   top: 0;
   bottom: 0;
@@ -283,7 +291,7 @@ body {
   left: 0px;
   top: 0;
   bottom: 0;
-  width: 205px;
+  width: 250px;
   -webkit-appearance: menulist-button;
   border-color: #a9a9a9;
   background: white;
@@ -291,17 +299,17 @@ body {
 
 .savePresetButton {
   position: absolute;
-  right: 90px;
+  right: 0;
   top: 0;
-  bottom: 0;
-  width: 90px;
+  bottom: 25px;
+  width: 70px;
 }
 
 .removePresetButton {
   position: absolute;
   right: 0;
-  top: 0;
+  top: 25px;
   bottom: 0;
-  width: 90px;
+  width: 70px;
 }
 

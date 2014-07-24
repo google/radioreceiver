@@ -57,6 +57,7 @@ function RadioController() {
   var offsetSum = 0;
   var autoGain = true;
   var gain = 0;
+  var recordFile = null;
   var errorHandler;
   var tuner;
   var connection;
@@ -593,18 +594,30 @@ function RadioController() {
   }
 
   /**
-   * Calculates the proportion of samples above maximum amplitude.
-   * @param {Float32Array} samples The audio stream.
-   * @param {number} The proportion of samples above the maximum amplitude.
+   * Starts recording into the given file entry.
    */
-  function overload(samples) {
-    var count = 0;
-    for (var i = 0; i < samples.length; ++i) {
-      if (samples[i] > 1 || samples[i] < -1) {
-        ++count;
-      }
-    }
-    return count / samples.length;
+  function startRecording(fileEntry) {
+    fileEntry.createWriter(function(writer) {
+      player.startWriting(writer);
+      recordFile = fileEntry;
+      ui && ui.update();
+    });
+  }
+
+  /**
+   * Stops recording.
+   */
+  function stopRecording() {
+    recordFile = null;
+    player.stopWriting();
+    ui && ui.update();
+  }
+
+  /**
+   * Tells whether the radio is currently recording.
+   */
+  function isRecording() {
+    return recordFile != null;
   }
 
   /**
@@ -646,6 +659,9 @@ function RadioController() {
     estimatePpm: estimatePpm,
     isEstimatingPpm: isEstimatingPpm,
     getPpmEstimate: getPpmEstimate,
+    startRecording: startRecording,
+    stopRecording: stopRecording,
+    isRecording: isRecording,
     setInterface: setInterface,
     setOnError: setOnError
   };

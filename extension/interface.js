@@ -76,6 +76,9 @@ function Interface(fmRadio) {
       volumeLabel.classList.remove('volumeMuted');
     }
 
+    setVisible(recordButton, !fmRadio.isRecording());
+    setVisible(stopButton, fmRadio.isRecording());
+
     selectCurrentPreset();
   }
 
@@ -579,6 +582,34 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Asks the user for the file to record audio into.
+   */
+  function startRecording() {
+    var opt = {
+      type: 'saveFile',
+      suggestedName: (band.toDisplayName(getFrequency(), true)
+                      + " - "
+                      + new Date().toLocaleString() + ".48k.s16.raw")
+                     .replace(/[:/\\]/g, '_'),
+    };
+    chrome.fileSystem.chooseEntry(opt, doRecord);
+  }
+
+  /**
+   * Starts recording audio into a file.
+   */
+  function doRecord(entry) {
+    fmRadio.startRecording(entry);
+  }
+
+  /**
+   * Stops recording audio from the radio.
+   */
+  function stopRecording() {
+    fmRadio.stopRecording();
+  }
+
+  /**
    * Shows an error window with the given message.
    * @param {string} msg The message to show.
    */
@@ -718,6 +749,8 @@ function Interface(fmRadio) {
     presetsBox.addEventListener('change', selectPreset);
     removePresetButton.addEventListener('click', deletePreset);
     savePresetButton.addEventListener('click', savePreset);
+    recordButton.addEventListener('click', startRecording);
+    stopButton.addEventListener('click', stopRecording);
     window.addEventListener('message', getMessage);
     window.addEventListener('keydown', handleShortcut);
     window.addEventListener('keypress', handleShortcut);

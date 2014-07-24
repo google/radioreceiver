@@ -14,7 +14,8 @@
   },
   "permissions": [
     "storage",
-    "usb"
+    "usb",
+    {"fileSystem": ["write"]}
   ],
   "optional_permissions": [
     {
