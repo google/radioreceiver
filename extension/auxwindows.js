@@ -122,6 +122,13 @@ var AuxWindows = (function() {
   }
 
   /**
+   * Maximizes the current window.
+   */
+  function maximizeCurrent() {
+    chrome.app.window.current().maximize();
+  }
+
+  /**
    * Closes the current window.
    */
   function closeCurrent() {
@@ -149,6 +156,7 @@ var AuxWindows = (function() {
     error: error,
     help: help,
     resizeCurrentTo: resizeCurrentTo,
+    maximizeCurrent: maximizeCurrent,
     closeCurrent: closeCurrent,
     closeAll: closeAll
   };

@@ -19,6 +19,11 @@ limitations under the License.
 <script src="auxwindows.js"></script>
 <style>
 body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
   overflow-y: scroll;
 }
 </style>
@@ -26,7 +31,7 @@ body {
 <body>
 <h1>Using Radio Receiver</h1>
 
-<p style="text-align:center"><img src="help-iface.png" width="624" height="376" title="Radio Receiver main interface"></p>
+<p style="text-align:center"><img src="help-iface.png" width="615" height="350" title="Radio Receiver main interface"></p>
 
 <h2>Start and stop</h2>
 <p>Press the "Power On" button (<b>1</b>) to start playing the radio. You'll see that the label changes to "Power Off"; if you press it again, the radio will stop.</p>
@@ -35,8 +40,8 @@ body {
 <p>You can change frequency in several ways:</p>
 <ul>
 <li>Click on the frequency display (<b>2</b>), type your new frequency directly, and press Enter.</li>
-<li>Use the "&lt;" and "&gt;" buttons (<b>3</b>) to change the frequency 1 step up or down.</li>
-<li>Use the "Scan &lt;&lt;" and "Scan &gt;&gt;" buttons (<b>4</b>) to search for a station automatically.</li>
+<li>Use the "Freq-" and "Freq+" buttons (<b>3</b>) to change the frequency 1 step up or down.</li>
+<li>Use the "Scan-" and "Scan+" buttons (<b>4</b>) to search for a station automatically.</li>
 <li>Use the mouse wheel on the frequency display.</li>
 </ul>
 <p>To change the band you are listening to, click on the band indicator (<b>5</b>). Note that, before you can listen to AM radio, you'll need to <a href="#settings">set up an upconverter in the settings window</a>.</p>
@@ -51,9 +56,12 @@ body {
 <p>To change the volume, click on the "loudspeaker" icon (<b>9</b>) and move the slider left and right to decrease or increase the volume. You can also use your mouse wheel on the icon to change volume directly.</p>
 <p>To disable stereo click on the stereo indicator (<b>10</b>).</p>
 
+<h2>Recording from the radio</h2>
+<p>You can record what you hear on the radio into a WAV file. Just click the "Record" button (<b>11</b>) to start, and type a name for the file. You'll see that the button's label changes to "Stop"; if you press it again, the radio will stop recording.</p>
+
 <a name="settings"></a>
 <h2>Settings</h2>
-<p>You can change a lot of settings by clicking on the "wrench" icon (<b>11</b>). There you can change several settings:</p>
+<p>You can change a lot of settings by clicking on the "wrench" icon (<b>12</b>). There you can change several settings:</p>
 
 <p style="text-align:center"><img src="help-settings.png" width="381" height="291" title="Radio Receiver settings window"></p>
 

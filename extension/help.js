@@ -18,4 +18,7 @@ function exit() {
 
 exitButton.addEventListener('click', exit);
 
-AuxWindows.resizeCurrentTo(700, Math.min(800, document.body.offsetHeight + 40));
+AuxWindows.maximizeCurrent();
+exitButton.focus();
+document.body.firstElementChild.scrollIntoView();
+
