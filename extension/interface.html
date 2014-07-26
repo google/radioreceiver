@@ -37,8 +37,8 @@ limitations under the License.
 <div id="closeButton" class="closeButton" title="Close"><svg class="closeIcon" xmlns="http://www.w3.org/2000/svg" version="1.1" width="8" height="8" viewBox="0 0 8 8"><path d="M0,0h1l3,3l3,-3,h1v1l-3,3l3,3v1h-1l-3,-3l-3,3h-1v-1l3,-3l-3,-3z" /></svg></div>
 </div>
 <div class="top">
-  <button id="freqMinusButton" class="freqMinusButton" title="Decrease frequency" tabindex="12">&lt;</button>
-  <button id="scanDownButton" class="scanDownButton" title="Scan decreasing" tabindex="14">Scan &lt;&lt;</button>
+  <button id="freqMinusButton" class="freqMinusButton" title="Decrease frequency" tabindex="12"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M2.5,6l5,5l2,-2l-3,-3l3,-3l-2,-2z" /></svg><br/>Freq-</button>
+  <button id="scanDownButton" class="scanDownButton" title="Scan decreasing" tabindex="14">Scan-<br/><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M0.5,6l5,5l2,-2l-3,-3l3,-3l-2,-2z" /><path d="M6.5,6l4,4l1,-1l-3,-3l3,-3l-1,-1z" /></svg></button>
   <div class="display">
     <div id="frequencyDisplay" class="frequencyDisplay" title="Current frequency" tabindex="11">103.70</div>
     <input type="text" id="frequencyInput" class="frequencyInput" maxlength="6" pattern="\d\d\d?(\.\d\d?)" autocomplete="off" title="Edit frequency" tabindex="2"></input>
@@ -48,14 +48,14 @@ limitations under the License.
     <div id="volumeSliderBox" class="volumeSliderBox"><input id="volumeSlider" class="volumeSlider" type="range" min="0" max="100" step="1"></input></div>
     <button id="bandBox" class="bandBox invisibleButton" title="Change band" tabindex="23">FM</button>
   </div>
-  <button id="freqPlusButton" class="freqPlusButton" title="Increase frequency" tabindex="13">&gt;</button>  
-  <button id="scanUpButton" class="scanUpButton" title="Scan increasing" tabindex="15">Scan &gt;&gt;</button>
+  <button id="freqPlusButton" class="freqPlusButton" title="Increase frequency" tabindex="13"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M9.5,6l-5,5l-2,-2l3,-3l-3,-3l2,-2z" /></svg><br/>Freq+</button>  
+  <button id="scanUpButton" class="scanUpButton" title="Scan increasing" tabindex="15">Scan+<br/><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M5.5,6l-4,4l-1,-1l3,-3l-3,-3l1,-1z" /><path d="M11.5,6l-5,5l-2,-2l3,-3l-3,-3l2,-2z" /></svg></button>
 </div>
 <div class="bottom">
-  <button id="powerOnButton" class="powerButton" title="Start radio" tabindex="1">Power On</button>
-  <button id="powerOffButton" class="powerButton" title="Stop radio" style="visibility:hidden" tabindex="1">Power Off</button>
-  <button id="recordButton" class="recordingButton" title="Record" tabindex="41">Record</button>
-  <button id="stopButton" class="recordingButton" title="Stop" style="visibility: hidden" tabindex="41">Stop</button>
+  <button id="powerOnButton" class="powerButton" title="Start radio" tabindex="1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M4,0.8765a5.5,5.5,0,1,0,4,0v2.2512a3.5,3.5,0,1,1,-4,0z" style="fill: #555" /><rect x="5" y="0" width="2" height="8" rx="1" ry="1" /></svg><br/>Power On</button>
+  <button id="powerOffButton" class="powerButton" title="Stop radio" style="visibility:hidden" tabindex="1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M4,0.8765a5.5,5.5,0,1,0,4,0v2.2512a3.5,3.5,0,1,1,-4,0z" /><rect x="5" y="0" width="2" height="8" rx="1" ry="1" style="fill: #555" /></svg><br/>Power Off</button>
+  <button id="recordButton" class="recordingButton" title="Record" tabindex="41"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><circle cx="6" cy="6" r="5" style="fill: #b00" /></svg><br/>Record</button>
+  <button id="stopButton" class="recordingButton" title="Stop" style="visibility: hidden" tabindex="41"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><rect x="1" y="1" width="8" height="8" style="fill: #005" /></svg><br/>Stop</button>
   <div class="presets">
     <select id="presetsBox" class="presetsBox" name="preset" title="Select preset station" tabindex="31">
     </select>
