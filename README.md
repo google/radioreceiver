@@ -2,6 +2,8 @@
 
 An application to listen to broadcast FM and AM radio from your Chrome browser or your ChromeBook computer using a $15 USB digital TV tuner.
 
+![Radio Receiver screenshot](image-src/interface.png)
+
 ## What is this
 
 Radio Receiver is a Chrome application that uses an USB digital TV receiver to capture radio signals, does FM and AM demodulation in the browser, and plays them through your computer's speakers or headphones. This is called SDR (Software-Defined Radio), because all the radio signal processing is done by software running in the computer.
@@ -13,9 +15,11 @@ Radio Receiver is 100% written in JavaScript, but is nevertheless fast enough th
 * Stereo FM.
 * Scan for stations.
 * Unlimited slots for presets.
-* Supports the International and Japanese FM bands.
-* Weather band (US and Canada).
-* Medium Wave AM (requires an upconverter).
+* Record what you hear on the radio.
+* Supported bands:
+  * International and Japanese FM bands.
+  * Weather band (US and Canada).
+  * Medium Wave AM (requires an upconverter).
 
 ## Compatible hardware and software
 
@@ -31,6 +35,6 @@ If you'd like to talk about Radio Receiver, or have any bug reports or suggestio
 
 ## Acknowledgements
 
-Kudos to the [RTL-SDR project](http://sdr.osmocom.org/trac/wiki/rtl-sdr) for figuring out the magic numbers needed to drive the USB tuner.
+Kudos and thanks to the [RTL-SDR project](http://sdr.osmocom.org/trac/wiki/rtl-sdr) for figuring out the magic numbers needed to drive the USB tuner.
 
 If you want to experiment further with Software-Defined Radio and listen to more things using your $15 tuner, you can try [the various programs listed on rtl-sdr.com](http://www.rtl-sdr.com/big-list-rtl-sdr-supported-software/).
