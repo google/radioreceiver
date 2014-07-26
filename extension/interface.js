@@ -710,6 +710,12 @@ function Interface(fmRadio) {
         case 82:  // R
           deletePreset();
           break;
+        case 119: // w
+          startRecording();
+          break;
+        case 87:  // W
+          stopRecording();
+          break;
         case 32:
           togglePower();
           break;

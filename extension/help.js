@@ -18,7 +18,6 @@ function exit() {
 
 exitButton.addEventListener('click', exit);
 
-AuxWindows.maximizeCurrent();
 exitButton.focus();
 document.body.firstElementChild.scrollIntoView();
 

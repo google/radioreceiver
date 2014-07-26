@@ -106,6 +106,7 @@ var AuxWindows = (function() {
           'width': 700,
           'height': 600
         },
+        'state': 'maximized',
         'resizable': true
       });
   }
@@ -119,13 +120,6 @@ var AuxWindows = (function() {
     // If the user has set a custom zoom level, resize the window to fit
     var zoom = chrome.app.window.current().getBounds().width / window.innerWidth;
     chrome.app.window.current().resizeTo(width * zoom, height * zoom);
-  }
-
-  /**
-   * Maximizes the current window.
-   */
-  function maximizeCurrent() {
-    chrome.app.window.current().maximize();
   }
 
   /**
@@ -156,7 +150,6 @@ var AuxWindows = (function() {
     error: error,
     help: help,
     resizeCurrentTo: resizeCurrentTo,
-    maximizeCurrent: maximizeCurrent,
     closeCurrent: closeCurrent,
     closeAll: closeAll
   };
