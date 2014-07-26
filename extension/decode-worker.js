@@ -44,7 +44,6 @@ function Decoder() {
     var samples = samplesFromUint8(buffer, IN_RATE);
     var out = demodulator.demodulate(samples, inStereo);
     data['stereo'] = out['stereo'];
-    data['rate'] = OUT_RATE;
     data['carrier'] = out['carrier'];
     postMessage([out.left, out.right, data], [out.left, out.right]);
   }

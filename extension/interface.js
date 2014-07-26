@@ -589,7 +589,7 @@ function Interface(fmRadio) {
       type: 'saveFile',
       suggestedName: (band.toDisplayName(getFrequency(), true)
                       + " - "
-                      + new Date().toLocaleString() + ".48k.s16.raw")
+                      + new Date().toLocaleString() + ".wav")
                      .replace(/[:/\\]/g, '_'),
     };
     chrome.fileSystem.chooseEntry(opt, doRecord);

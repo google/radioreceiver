@@ -57,7 +57,6 @@ function RadioController() {
   var offsetSum = 0;
   var autoGain = true;
   var gain = 0;
-  var recordFile = null;
   var errorHandler;
   var tuner;
   var connection;
@@ -540,7 +539,7 @@ function RadioController() {
     }
     var left = new Float32Array(msg.data[0]);
     var right = new Float32Array(msg.data[1]);
-    player.play(left, right, msg.data[2]['rate']);
+    player.play(left, right);
     if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
       if (msg.data[2]['carrier']) {
         setFrequency(msg.data[2].frequency);
@@ -597,18 +596,14 @@ function RadioController() {
    * Starts recording into the given file entry.
    */
   function startRecording(fileEntry) {
-    fileEntry.createWriter(function(writer) {
-      player.startWriting(writer);
-      recordFile = fileEntry;
-      ui && ui.update();
-    });
+    player.startWriting(fileEntry);
+    ui && ui.update();
   }
 
   /**
    * Stops recording.
    */
   function stopRecording() {
-    recordFile = null;
     player.stopWriting();
     ui && ui.update();
   }
@@ -617,7 +612,7 @@ function RadioController() {
    * Tells whether the radio is currently recording.
    */
   function isRecording() {
-    return recordFile != null;
+    return player.isWriting();
   }
 
   /**
