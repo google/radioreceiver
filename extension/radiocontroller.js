@@ -442,15 +442,13 @@ function RadioController() {
    * SCANNING state. Scans for a station.
    *
    * First it waits until all in-flight blocks have been dealt with.
-   * Afterwards, it transitions between these two substates: TUNING (when it
+   * Afterwards, it switches between these two substates: TUNING (when it
    * needs to change to the next frequency), DETECTING (when it needs to
    * capture one block of samples and detect a station).
    *
-   * From the DETECTING substate it can transition either to the TUNING
-   * substate to go to the next frequency or to the PLAYING state if it got
-   * back to the starting frequency. Not included in this function but
-   * relevant: if the decoder detects a station, it will call the
-   * setFrequency() function, causing a transition to the TUNING state.
+   * Not included in this function but relevant: if the decoder detects a
+   * station, it will call the setFrequency() function, causing a transition
+   * to the TUNING state.
    */
   function stateScanning() {
     if (requestingBlocks > 0) {
@@ -472,11 +470,6 @@ function RadioController() {
       tuner.resetBuffer(processState);
       });
     } else if (state.substate == SUBSTATE.DETECTING) {
-      if (frequency == param.start) {
-        state = new State(STATE.PLAYING);
-        startPipeline();
-        return;
-      }
       state = new State(STATE.SCANNING, SUBSTATE.TUNING, param);
       var scanData = {
         'scanning': true,
