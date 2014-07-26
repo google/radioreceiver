@@ -79,7 +79,8 @@ function R820T(com, xtalFreq, throwError) {
   /**
    * Sets the tuner's frequency.
    * @param {number} freq The frequency to tune to.
-   * @param {Function} kont The continuation for this function.
+   * @param {function(boolean)} kont The continuation for this function, which
+   *     receives whether the tuner could be set to this frequency.
    */
   function setFrequency(freq, kont) {
     setMux(freq, function() {
@@ -252,7 +253,8 @@ function R820T(com, xtalFreq, throwError) {
   /**
    * Sets the PLL's frequency.
    * @param {number} freq The frequency to set.
-   * @param {Function} kont The continuation for this function.
+   * @param {function(boolean)} kont The continuation for this function, which
+   *     receives whether the PLL could be locked.
    */
   function setPll(freq, kont) {
     var freqKhz = Math.round(freq / 1000);
@@ -278,8 +280,7 @@ function R820T(com, xtalFreq, throwError) {
     var nint = Math.floor(vcoFreq / (2 * pllRef));
     var vcoFra = Math.floor((vcoFreq - 2 * pllRef * nint) / 1000);
     if (nint > 63) {
-      throwError("No valid PLL values for " + freq + " Hz");
-      return;
+      return kont(false);
     }
     var ni = Math.floor((nint - 13) / 4);
     var si = nint - 4 * ni - 13;
@@ -292,30 +293,31 @@ function R820T(com, xtalFreq, throwError) {
       [0x16, sdm >> 8, 0xff],
       [0x15, sdm & 0xff, 0xff]
     ], function() {
-    getPllLock(true, function() {
-    writeRegMask(0x1a, 0x08, 0x08, kont);
-    })})})})})});
+    getPllLock(true, function(locked) {
+    writeRegMask(0x1a, 0x08, 0x08, function() {
+    kont(locked);
+    })})})})})})});
   }
 
   /**
    * Checks whether the PLL has achieved lock.
    * @param {boolean} firstTry Whether this is the first try to achieve lock.
-   * @param {Function} kont The continuation for this function.
+   * @param {function(boolean)} kont The continuation for this function, which
+   *     receives whether the PLL could be locked.
    */
   function getPllLock(firstTry, kont) {
     readRegBuffer(0x00, 3, function(data) {
     var arr = new Uint8Array(data);
     if (arr[2] & 0x40) {
       hasPllLock = true;
-      return kont();
+      return kont(true);
     }
     if (firstTry) {
       writeRegMask(0x12, 0x60, 0xe0, function() {
         return getPllLock(false, kont);
       });
     } else {
-      throwError("PLL not locked -- cannot tune to the selected frequency.");
-      return;
+      kont(false);
     }
     });
   }

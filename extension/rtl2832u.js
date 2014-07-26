@@ -182,13 +182,15 @@ function RTL2832U(conn, ppm, opt_gain) {
   /**
    * Tunes the device to the given frequency.
    * @param {number} freq The frequency to tune to, in Hertz.
-   * @param {Function} kont The continuation for this function.
+   * @param {function(boolean)} kont The continuation for this function,
+   *     which receives whether the device could be tuned.
    */
   function setCenterFrequency(freq, kont) {
     com.i2c.open(function() {
-    tuner.setFrequency(freq + IF_FREQ, function() {
-    com.i2c.close(kont);
-    })});
+    tuner.setFrequency(freq + IF_FREQ, function(tuned) {
+    com.i2c.close(function() {
+    kont(tuned);
+    })})});
   }
 
   /**

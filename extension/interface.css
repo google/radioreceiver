@@ -141,6 +141,10 @@ body {
   color: #ffa;
 }
 
+.outOfTune {
+  color: #f66;
+}
+
 .volumeBox, .volumeOccluder {
   position: absolute;
   right: 5px;
