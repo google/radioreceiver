@@ -143,9 +143,9 @@ body {
 
 .volumeBox, .volumeOccluder {
   position: absolute;
-  right: 10px;
+  right: 5px;
   top: 50px;
-  width: 40px;
+  width: 50px;
   height: 19px;
   text-align: center;
   font-size: 16px;
