@@ -29,7 +29,7 @@ var AuxWindows = (function() {
     chrome.app.window.create('savedialog.html', {
         'bounds': {
           'width': 300,
-          'height': 120
+          'height': 1
         },
         'resizable': false
       }, function(win) {
@@ -53,7 +53,7 @@ var AuxWindows = (function() {
     chrome.app.window.create('settings.html', {
         'bounds': {
           'width': 350,
-          'height': 220
+          'height': 1
         },
         'resizable': false
       }, function(win) {
@@ -70,7 +70,7 @@ var AuxWindows = (function() {
     chrome.app.window.create('estimateppm.html', {
         'bounds': {
           'width': 350,
-          'height': 250
+          'height': 1
         },
         'resizable': false
       }, function(win) {
@@ -87,7 +87,7 @@ var AuxWindows = (function() {
     chrome.app.window.create('error.html', {
         'bounds': {
           'width': 500,
-          'height': 125
+          'height': 1
         },
         'resizable': false
       }, function(win) {
@@ -114,12 +114,18 @@ var AuxWindows = (function() {
   /**
    * Resizes the current window to the given dimensions, compensating for zoom.
    * @param {number} width The desired width.
-   * @param {number} height The desired height.
+   * @param {number} height The desired height. 0 to set it automagically.
    */
   function resizeCurrentTo(width, height) {
     // If the user has set a custom zoom level, resize the window to fit
-    var zoom = chrome.app.window.current().getBounds().width / window.innerWidth;
-    chrome.app.window.current().resizeTo(width * zoom, height * zoom);
+    var bounds = chrome.app.window.current().innerBounds;
+    var zoom = bounds.width / window.innerWidth;
+    bounds.width = Math.round(width * zoom);
+    if (height) {
+      bounds.height = Math.round(height * zoom);
+    } else {
+      bounds.height = Math.round(document.body.scrollHeight * zoom);
+    }
   }
 
   /**

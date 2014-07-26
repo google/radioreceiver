@@ -64,5 +64,5 @@ useUpconverter.addEventListener('change', function() {
   upconverterFreqInput.className = useUpconverter.checked ? '' : 'invisible';
 });
 
-AuxWindows.resizeCurrentTo(350, 260);  
+AuxWindows.resizeCurrentTo(350, 0);  
 

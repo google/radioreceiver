@@ -24,4 +24,4 @@ function exit() {
 
 exitButton.addEventListener('click', exit);
 
-AuxWindows.resizeCurrentTo(500, 125);
+AuxWindows.resizeCurrentTo(500, 0);
