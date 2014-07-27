@@ -497,7 +497,8 @@ function Interface(fmRadio) {
    */
   function setSettings(newSettings) {
     settings = newSettings;
-    band = (Bands[settings['region']] || Bands['WW'])['FM'];
+    var availableBands = (Bands[settings['region']] || Bands['WW']);
+    band = availableBands[band.getName()] || availableBands['FM'];
     if (settings['autoGain'] || null == settings['autoGain']) {
       fmRadio.setAutoGain();
     } else {
