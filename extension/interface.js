@@ -23,7 +23,13 @@ function Interface(fmRadio) {
    * Settings.
    */
   var settings = {
-    'region': 'WW'
+    'region': 'WW',
+    'ppm': 0,
+    'autoGain': true,
+    'gain': 0,
+    'useUpconverter': false,
+    'upconverterFreq': 125000000,
+    'enableFreeTuning': false
   };
 
   /**
@@ -32,11 +38,20 @@ function Interface(fmRadio) {
   var band = Bands[settings.region]['FM'];
 
   /**
+   * The free-tuning pseudoband.
+   */
+  var freeTuningBand = new Band('', 0, 2400000000, 10000, {modulation: 'WBFM'}, null, null);
+
+  /**
    * Last-selected stations in each band.
    */
   var selectedStations = {
     'currentBand': 'FM',
-    'bands': {}
+    'bands': {
+      '': 90000000
+    },
+    'currentMode': 'WBFM',
+    'modes': DefaultModes
   };
 
   /**
@@ -73,6 +88,29 @@ function Interface(fmRadio) {
     } else {
       bandBox.classList.remove('scanning');
     }
+
+    if (isFreeTuning()) {
+      bandBox.textContent = 'ft';
+      bandBox.classList.add('freeTuning');
+      frequencyDisplay.classList.add('freeTuning');
+      frequencyInput.classList.add('freeTuning');
+      freeTuningStuff.classList.add('freeTuning');
+      var modulation = getMode().modulation;
+      modulationDisplay.textContent = modulation;
+      freqStepDisplay.textContent = band.getStep();
+      setVisible(bandwidthBox, modulation == 'AM');
+      bandwidthDisplay.textContent = Number(getMode().bandwidth);
+      setVisible(maxfBox, modulation == 'NBFM');
+      maxfDisplay.textContent = Number(getMode().maxF);
+      upconverterDisplay.textContent = isUpconverterEnabled() ? 'On' : 'Off';
+    } else {
+      bandBox.textContent = band.getName();
+      bandBox.classList.remove('freeTuning');
+      frequencyDisplay.classList.remove('freeTuning');
+      frequencyInput.classList.remove('freeTuning');
+      freeTuningStuff.classList.remove('freeTuning');
+    }
+    
     var volume = Math.round(fmRadio.getVolume() * 100);
     volumeLabel.textContent = volume;
     volumeSlider.value = volume;
@@ -92,7 +130,11 @@ function Interface(fmRadio) {
    * Makes an element visible or invisible.
    */
   function setVisible(element, visible) {
-    element.style.visibility = visible ? 'visible' : 'hidden';
+    if (visible) {
+      element.classList.remove('invisible');
+    } else {
+      element.classList.add('invisible');
+    }
   }
 
   /**
@@ -132,32 +174,10 @@ function Interface(fmRadio) {
   }
 
   /**
-   * Shows the frequency edit box.
-   * Called when the frequency display is clicked.
-   */
-  function showFrequencyEditor() {
-    frequencyInput.value = frequencyDisplay.textContent;
-    setVisible(frequencyDisplay, false);
-    setVisible(frequencyInput, true);
-    frequencyInput.focus();
-    frequencyInput.select();
-  }
-
-  /**
-   * Hides the frequency edit box.
-   * Called when the frequency is changed or the user clicks outside.
-   */
-  function hideFrequencyEditor() {
-    setVisible(frequencyDisplay, true);
-    setVisible(frequencyInput, false);
-  }  
-
-  /**
    * Tunes to another frequency.
    */
-  function changeFrequency() {
-    hideFrequencyEditor();
-    setFrequency(band.fromDisplayName(frequencyInput.value), false);
+  function changeFrequency(value) {
+    setFrequency(band.fromDisplayName(value), false);
   }
 
   /**
@@ -303,13 +323,21 @@ function Interface(fmRadio) {
         }
       }
     }
+    if (settings['enableFreeTuning'] || !band.getName()) {
+      bandNames.push('');
+    }
     if (bandNames.length == 1) {
       return;
     }
     bandNames.sort();
     for (var i = 0; i < bandNames.length; ++i) {
       if (!band || bandNames[i] == band.getName()) {
-        selectBand(bands[bandNames[(i + 1) % bandNames.length]]);
+        var nextName = bandNames[(i + 1) % bandNames.length];
+        if (nextName) {
+          selectBand(bands[nextName]);
+        } else {
+          selectBand(freeTuningBand);
+        }
         return;
       }
     }
@@ -321,9 +349,9 @@ function Interface(fmRadio) {
    */
   function selectBand(newBand) {
     band = newBand;
-    bandBox.textContent = band.getName();
     setMode(band.getMode());
     setFrequency(selectedStations['bands'][band.getName()] || 1, true);
+    update();
   }
 
   /**
@@ -381,13 +409,17 @@ function Interface(fmRadio) {
   function selectPreset() {
     var preset = presets.get(presetsBox.value);
     if (preset) {
-      if (preset['band']) {;
-        var newBand = Bands[settings.region][preset['band']];
-        if (newBand) {
-          selectBand(newBand);
-        }
-      } else if (preset['mode']) {
-        setMode(preset['mode']);
+      if (preset['mode']) {
+        freeTuningBand.setMode(preset['mode']);
+      }
+      var bandPreset = preset['band'];
+      if (!bandPreset && settings['enableFreeTuning']) {
+        var newBand = freeTuningBand;
+      } else {
+        var newBand = Bands[settings.region][bandPreset || 'FM'];
+      }
+      if (newBand) {
+        selectBand(newBand);
       }
       setFrequency(presetsBox.value, false);
     }
@@ -429,7 +461,20 @@ function Interface(fmRadio) {
       } else if (cfg['currentStation']) {
         selectedStations = cfg['currentStation'];
       }
-      selectBand(Bands[settings.region][selectedStations['currentBand']]);
+      if (!selectedStations['modes']) {
+        selectedStations['modes'] = DefaultModes;
+      }
+      if (!selectedStations['currentMode']) {
+        selectedStations['currentMode'] = 'WBFM';
+      }
+      freeTuningBand.setMode(selectedStations['modes'][selectedStations['currentMode']]);
+      var bandPreset = selectedStations['currentBand'];
+      if (!bandPreset && settings['enableFreeTuning']) {
+        var newBand = freeTuningBand;
+      } else {
+        var newBand = Bands[settings.region][bandPreset || 'FM'];
+      }
+      selectBand(newBand);
       var newFreq = selectedStations['bands'][band.getName()];
       if (newFreq) {
         setFrequency(newFreq, false);
@@ -444,6 +489,9 @@ function Interface(fmRadio) {
     if (band) {
       selectedStations['currentBand'] = band.getName();
       selectedStations['bands'][band.getName()] = getFrequency();
+      if (isFreeTuning()) {
+        selectedStations['currentMode'] = getMode().modulation;
+      }
       chrome.storage.local.set({'currentStation': selectedStations});
     }
   }
@@ -497,8 +545,10 @@ function Interface(fmRadio) {
    */
   function setSettings(newSettings) {
     settings = newSettings;
-    var availableBands = (Bands[settings['region']] || Bands['WW']);
-    band = availableBands[band.getName()] || availableBands['FM'];
+    if (!isFreeTuning()) {
+      var availableBands = (Bands[settings['region']] || Bands['WW']);
+      band = availableBands[band.getName()] || availableBands['FM'];
+    }
     if (settings['autoGain'] || null == settings['autoGain']) {
       fmRadio.setAutoGain();
     } else {
@@ -509,13 +559,20 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Returns whether the upconverter is enabled.
+   * @return {boolean} Whether the upconverter is enabled.
+   */
+  function isUpconverterEnabled() {
+    return getMode()['upconvert'] && settings['useUpconverter'];
+  }
+
+  /**
    * Upconverts the given frequency, if warranted for the current mode.
    * @param {number} freq The original frequency.
    * @return {number} The upconverted frequency.
    */
   function upconvert(freq) {
-    var mode = getMode();
-    if (mode['upconvert'] && settings['useUpconverter']) {
+    if (isUpconverterEnabled()) {
       return Number(freq) + Number(settings['upconverterFreq']);
     }
     return freq;
@@ -527,8 +584,7 @@ function Interface(fmRadio) {
    * @return {number} The downconverted frequency.
    */
   function downconvert(freq) {
-    var mode = getMode();
-    if (mode['upconvert'] && settings['useUpconverter']) {
+    if (isUpconverterEnabled()) {
       return Number(freq) - Number(settings['upconverterFreq']);
     }
     return freq;
@@ -578,6 +634,105 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Changes modulation in free-tuning mode.
+   */
+  function switchModulation() {
+    saveCurrentStation();
+    var modes = selectedStations['modes'];
+    var modeNames = [];
+    for (var n in modes) {
+      if (modes.hasOwnProperty(n)) {
+        modeNames.push(n);
+      }
+    }
+    if (modeNames.length == 1) {
+      return;
+    }
+    modeNames.sort();
+    var currentMode = modulationDisplay.textContent;
+    for (var i = 0; i < modeNames.length; ++i) {
+      if (modeNames[i] == currentMode) {
+        var nextName = modeNames[(i + 1) % modeNames.length];
+        freeTuningBand.setMode(modes[nextName]);
+        setMode(modes[nextName]);
+        update();
+        return;
+      }
+    }
+  }
+
+  /**
+   * Attaches events to a pair of display/input elements.
+   * @param {Element} displayElem The display element.
+   * @param {Element} inputElem The input element.
+   * @param {Function} changeFn The change function.
+   */
+  function attachDisplayInputEvents(displayElem, inputElem, changeFn) {
+    displayElem.addEventListener('click', function() {
+      inputElem.value = displayElem.textContent;
+      setVisible(displayElem, false);
+      setVisible(inputElem, true);
+      inputElem.focus();
+      inputElem.select();
+    });
+
+    inputElem.addEventListener('blur', function() {
+      setVisible(displayElem, true);
+      setVisible(inputElem, false);
+    });
+
+    inputElem.addEventListener('change', function() {
+      setVisible(displayElem, true);
+      setVisible(inputElem, false);
+      changeFn(inputElem.value);
+    });
+  }
+
+  /**
+   * Changes the frequency step.
+   */
+  function changeFreqStep(value) {
+    var newStep = Math.floor(value);
+    if (newStep >= 1 && newStep <= 999999) {
+      band.setStep(newStep);
+      update();
+    }
+  }
+
+  /**
+   * Changes the bandwidth.
+   */
+  function changeBandwidth(value) {
+    var newBandwidth = Math.floor(value);
+    if (newBandwidth >= 1 && newBandwidth <= 20000) {
+      band.getMode().bandwidth = newBandwidth;
+      setMode(band.getMode());
+      update();
+    }
+  }
+
+  /**
+   * Changes the maximum frequency deviation in FM.
+   */
+  function changeMaxf(value) {
+    var newMaxf = Math.floor(value);
+    if (newMaxf >= 1 && newMaxf <= 10000) {
+      band.getMode().maxF = newMaxf;
+      setMode(band.getMode());
+      update();
+    }
+  }
+
+  /**
+   * Toggles the upconverter on and off.
+   */
+  function toggleUpconverter() {
+    band.getMode().upconvert = !band.getMode().upconvert;
+    setMode(band.getMode());
+    update();
+  }
+
+  /**
    * Closes the window.
    */
   function close() {
@@ -586,6 +741,14 @@ function Interface(fmRadio) {
     fmRadio.stop(function() {
       AuxWindows.closeCurrent();
     });
+  }
+
+  /**
+   * Tells whether we are in free tuning mode.
+   * @return {boolean} Whether we are in free tuning mode.
+   */
+  function isFreeTuning() {
+    return band.getName() == '' && settings['enableFreeTuning'];
   }
 
   /**
@@ -743,10 +906,9 @@ function Interface(fmRadio) {
     settingsButton.addEventListener('click', showSettings);
     helpButton.addEventListener('click', showHelp);
     closeButton.addEventListener('click', close);
-    frequencyDisplay.addEventListener('focus', showFrequencyEditor);
+    attachDisplayInputEvents(
+        frequencyDisplay, frequencyInput, changeFrequency);
     frequencyDisplay.addEventListener('mousewheel', changeFrequencyWheel);
-    frequencyInput.addEventListener('change', changeFrequency);
-    frequencyInput.addEventListener('blur', hideFrequencyEditor);
     stereoIndicatorBox.addEventListener('click', toggleStereo);
     volumeOccluder.addEventListener('click', stopEvent, true);
     volumeBox.addEventListener('click', changeVolume);
@@ -755,6 +917,11 @@ function Interface(fmRadio) {
     volumeSlider.addEventListener('blur', blurVolumeSlider);
     volumeSlider.addEventListener('mousewheel', changeVolumeWheel);
     bandBox.addEventListener('click', switchBand);
+    modulationDisplay.addEventListener('click', switchModulation);
+    attachDisplayInputEvents(freqStepDisplay, freqStepInput, changeFreqStep);
+    attachDisplayInputEvents(bandwidthDisplay, bandwidthInput, changeBandwidth);
+    attachDisplayInputEvents(maxfDisplay, maxfInput, changeMaxf);
+    upconverterDisplay.addEventListener('click', toggleUpconverter);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);

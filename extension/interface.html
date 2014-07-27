@@ -37,30 +37,59 @@ limitations under the License.
 <div id="closeButton" class="closeButton" title="Close"><svg class="closeIcon" xmlns="http://www.w3.org/2000/svg" version="1.1" width="8" height="8" viewBox="0 0 8 8"><path d="M0,0h1l3,3l3,-3,h1v1l-3,3l3,3v1h-1l-3,-3l-3,3h-1v-1l3,-3l-3,-3z" /></svg></div>
 </div>
 <div class="top">
-  <button id="freqMinusButton" class="freqMinusButton" title="Decrease frequency" tabindex="12"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M2.5,6l5,5l2,-2l-3,-3l3,-3l-2,-2z" /></svg><br/>Freq-</button>
-  <button id="scanDownButton" class="scanDownButton" title="Scan decreasing frequency" tabindex="14">Scan-<br/><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M0.5,6l5,5l2,-2l-3,-3l3,-3l-2,-2z" /><path d="M6.5,6l4,4l1,-1l-3,-3l3,-3l-1,-1z" /></svg></button>
+  <button id="freqMinusButton" class="freqMinusButton" title="Decrease frequency" tabindex="22"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M2.5,6l5,5l2,-2l-3,-3l3,-3l-2,-2z" /></svg><br/>Freq-</button>
+  <button id="scanDownButton" class="scanDownButton" title="Scan decreasing frequency" tabindex="24">Scan-<br/><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M0.5,6l5,5l2,-2l-3,-3l3,-3l-2,-2z" /><path d="M6.5,6l4,4l1,-1l-3,-3l3,-3l-1,-1z" /></svg></button>
   <div class="display">
-    <div id="frequencyDisplay" class="frequencyDisplay" title="Current frequency" tabindex="11">103.70</div>
-    <input type="text" id="frequencyInput" class="frequencyInput" maxlength="6" pattern="\d\d\d?(\.\d\d?)" autocomplete="off" title="Edit frequency" tabindex="2"></input>
-    <button id="stereoIndicatorBox" class="stereoIndicatorBox invisibleButton" title="Toggle stereo" tabindex="21"><svg id="stereoIndicator" class="stereoIndicator" xmlns="http://www.w3.org/2000/svg" width="40" height="22" viewbox="0 0 40 22" version="1.1"><path d="M 11,0 C 4.9248678,0 0,4.9248678 0,11 c 0,6.075132 4.9248678,11 11,11 3.724651,0 7.009976,-1.854976 9,-4.6875 C 21.990024,20.145024 25.275349,22 29,22 35.075132,22 40,17.075132 40,11 40,4.9248678 35.075132,0 29,0 25.275349,0 21.990024,1.8549755 20,4.6875 18.009976,1.8549755 14.724651,0 11,0 z m 1,2 c 2.715088,0 5.130662,1.2235326 6.78125,3.125 0.0043,0.00495 0.02696,-0.00496 0.03125,0 C 19.193746,5.0490282 19.596422,5 20,5 20.424895,5 20.850076,5.0410084 21.25,5.125 22.898226,3.2226785 25.316973,2 28.03125,2 c 4.970563,0 9,4.0294372 9,9 0,4.970563 -4.029437,9 -9,9 C 25.316973,20 22.898226,18.777322 21.25,16.875 20.850076,16.958992 20.424895,17 20,17 c -0.403578,0 -0.806254,-0.04903 -1.1875,-0.125 -0.0043,0.005 -0.02695,-0.005 -0.03125,0 C 17.130662,18.776467 14.715088,20 12,20 7.0294372,20 3,15.970563 3,11 3,6.0294372 7.0294372,2 12,2 z m 1,3 c -3.3137085,0 -6,2.6862915 -6,6 0,3.313709 2.6862915,6 6,6 1.306909,0 2.517172,-0.417256 3.5,-1.125 C 16.061817,15.559444 15.682243,15.169754 15.34375,14.75 14.923422,14.900039 14.471872,15 14,15 11.790861,15 10,13.209139 10,11 10,8.790861 11.790861,7 14,7 14.471872,7 14.923422,7.099961 15.34375,7.25 15.682243,6.830246 16.061817,6.4405563 16.5,6.125 15.517172,5.4172559 14.306909,5 13,5 z M 27,5 C 25.693091,5 24.482828,5.4172559 23.5,6.125 23.938183,6.4405563 24.317757,6.830246 24.65625,7.25 25.076578,7.0999606 25.528128,7 26,7 c 2.209139,0 4,1.790861 4,4 0,2.209139 -1.790861,4 -4,4 -0.471872,0 -0.923422,-0.09996 -1.34375,-0.25 C 24.317757,15.169754 23.938183,15.559444 23.5,15.875 24.482828,16.582744 25.693091,17 27,17 c 3.313709,0 6,-2.686291 6,-6 0,-3.3137085 -2.686291,-6 -6,-6 z" /><path d="m 25,11 a 5,5 0 1 1 -10,0 5,5 0 1 1 10,0 z" fill="#275"/></svg></button>
-    <div id="volumeOccluder" class="volumeOccluder"></div>
-    <button id="volumeBox" class="volumeBox invisibleButton" title="Change volume" tabindex="22"><svg class="volumeIcon" xmlns="http://www.w3.org/2000/svg" width="9" height="18" viewbox="0 0 9 18" version="1.1"><path d="M0,6v6h3l6,6v-18l-6,6z" /></svg> <span id="volumeLabel" class="volumeLabel">100</span></button>
-    <div id="volumeSliderBox" class="volumeSliderBox"><input id="volumeSlider" class="volumeSlider" type="range" min="0" max="100" step="1"></input></div>
-    <button id="bandBox" class="bandBox invisibleButton" title="Change band" tabindex="23">FM</button>
+    <div id="frequencyDisplay" class="frequencyDisplay" title="Current frequency" tabindex="11"></div>
+    <input type="text" id="frequencyInput" class="frequencyInput invisible" autocomplete="off" title="Edit frequency" tabindex="11"></input>
+    <button id="stereoIndicatorBox" class="stereoIndicatorBox invisibleButton" title="Toggle stereo" tabindex="31"><svg id="stereoIndicator" class="stereoIndicator" xmlns="http://www.w3.org/2000/svg" width="40" height="22" viewbox="0 0 40 22" version="1.1"><path d="M 11,0 C 4.9248678,0 0,4.9248678 0,11 c 0,6.075132 4.9248678,11 11,11 3.724651,0 7.009976,-1.854976 9,-4.6875 C 21.990024,20.145024 25.275349,22 29,22 35.075132,22 40,17.075132 40,11 40,4.9248678 35.075132,0 29,0 25.275349,0 21.990024,1.8549755 20,4.6875 18.009976,1.8549755 14.724651,0 11,0 z m 1,2 c 2.715088,0 5.130662,1.2235326 6.78125,3.125 0.0043,0.00495 0.02696,-0.00496 0.03125,0 C 19.193746,5.0490282 19.596422,5 20,5 20.424895,5 20.850076,5.0410084 21.25,5.125 22.898226,3.2226785 25.316973,2 28.03125,2 c 4.970563,0 9,4.0294372 9,9 0,4.970563 -4.029437,9 -9,9 C 25.316973,20 22.898226,18.777322 21.25,16.875 20.850076,16.958992 20.424895,17 20,17 c -0.403578,0 -0.806254,-0.04903 -1.1875,-0.125 -0.0043,0.005 -0.02695,-0.005 -0.03125,0 C 17.130662,18.776467 14.715088,20 12,20 7.0294372,20 3,15.970563 3,11 3,6.0294372 7.0294372,2 12,2 z m 1,3 c -3.3137085,0 -6,2.6862915 -6,6 0,3.313709 2.6862915,6 6,6 1.306909,0 2.517172,-0.417256 3.5,-1.125 C 16.061817,15.559444 15.682243,15.169754 15.34375,14.75 14.923422,14.900039 14.471872,15 14,15 11.790861,15 10,13.209139 10,11 10,8.790861 11.790861,7 14,7 14.471872,7 14.923422,7.099961 15.34375,7.25 15.682243,6.830246 16.061817,6.4405563 16.5,6.125 15.517172,5.4172559 14.306909,5 13,5 z M 27,5 C 25.693091,5 24.482828,5.4172559 23.5,6.125 23.938183,6.4405563 24.317757,6.830246 24.65625,7.25 25.076578,7.0999606 25.528128,7 26,7 c 2.209139,0 4,1.790861 4,4 0,2.209139 -1.790861,4 -4,4 -0.471872,0 -0.923422,-0.09996 -1.34375,-0.25 C 24.317757,15.169754 23.938183,15.559444 23.5,15.875 24.482828,16.582744 25.693091,17 27,17 c 3.313709,0 6,-2.686291 6,-6 0,-3.3137085 -2.686291,-6 -6,-6 z" /><path d="m 25,11 a 5,5 0 1 1 -10,0 5,5 0 1 1 10,0 z" fill="#275"/></svg></button>
+    <div id="volumeOccluder" class="volumeOccluder invisible"></div>
+    <button id="volumeBox" class="volumeBox invisibleButton" title="Change volume" tabindex="32"><svg class="volumeIcon" xmlns="http://www.w3.org/2000/svg" width="9" height="18" viewbox="0 0 9 18" version="1.1"><path d="M0,6v6h3l6,6v-18l-6,6z" /></svg> <span id="volumeLabel" class="volumeLabel">100</span></button>
+    <div id="volumeSliderBox" class="volumeSliderBox invisible"><input id="volumeSlider" class="volumeSlider" type="range" min="0" max="100" step="1"></input></div>
+    <button id="bandBox" class="bandBox invisibleButton" title="Change band" tabindex="33">ft</button>
+    <div id="freeTuningStuff" class="freeTuningStuff">
+      <div id="modulationBox" class="modulationBox freeTuningBox">
+        <div class="freeTuningLabel"><label for="modulationDisplay">Modulation:</label></div>
+        <button id="modulationDisplay" class="modulationDisplay invisibleButton freeTuningButton" tabindex="12"></button>
+        </select>
+      </div>
+      <div id="freqStepBox" class="freqStepBox freeTuningBox">
+        <div class="freeTuningLabel"><label for="freqStepInput">Step:</label></div>
+        <div id="freqStepDisplay" class="freqStepDisplay freeTuningDisplay" tabindex="13"></div>
+        <input type="text" id="freqStepInput" class="freqStepInput freeTuningInput invisible" autocomplete="off" tabindex="13"></input>
+        <div class="freeTuningHz">Hz</div>
+      </div>
+      <div id="bandwidthBox" class="bandwidthBox freeTuningBox">
+        <div class="freeTuningLabel"><label for="bandwidthInput">Bandwidth:</label></div>
+        <div id="bandwidthDisplay" class="bandwidthDisplay freeTuningDisplay" tabindex="14"></div>
+        <input type="text" id="bandwidthInput" class="bandwidthInput freeTuningInput invisible" autocomplete="off" tabindex="14"></input>
+        <div class="freeTuningHz">Hz</div>
+      </div>
+      <div id="maxfBox" class="maxfBox freeTuningBox">
+        <div class="freeTuningLabel"><label for="maxfInput">Max <span style="font-family:serif;font-style:italic">f</span>:</label></div>
+        <div id="maxfDisplay" class="maxfDisplay freeTuningDisplay" tabindex="15"></div>
+        <input type="text" id="maxfInput" class="maxfInput freeTuningInput invisible" autocomplete="off" tabindex="15"></input>
+        <div class="freeTuningHz">Hz</div>
+      </div>
+      <div id="upconverterBox" class="upconverterBox freeTuningBox">
+        <div class="freeTuningLabel">Upconverter:</div>
+        <button id="upconverterDisplay" class="upconverterDisplay invisibleButton freeTuningButton" tabindex="16"></button>
+      </div>
+    </div>
   </div>
-  <button id="freqPlusButton" class="freqPlusButton" title="Increase frequency" tabindex="13"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M9.5,6l-5,5l-2,-2l3,-3l-3,-3l2,-2z" /></svg><br/>Freq+</button>  
-  <button id="scanUpButton" class="scanUpButton" title="Scan increasing frequency" tabindex="15">Scan+<br/><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M5.5,6l-4,4l-1,-1l3,-3l-3,-3l1,-1z" /><path d="M11.5,6l-5,5l-2,-2l3,-3l-3,-3l2,-2z" /></svg></button>
+  <button id="freqPlusButton" class="freqPlusButton" title="Increase frequency" tabindex="23"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M9.5,6l-5,5l-2,-2l3,-3l-3,-3l2,-2z" /></svg><br/>Freq+</button>  
+  <button id="scanUpButton" class="scanUpButton" title="Scan increasing frequency" tabindex="25">Scan+<br/><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M5.5,6l-4,4l-1,-1l3,-3l-3,-3l1,-1z" /><path d="M11.5,6l-5,5l-2,-2l3,-3l-3,-3l2,-2z" /></svg></button>
 </div>
 <div class="bottom">
   <button id="powerOnButton" class="powerButton" title="Start radio" tabindex="1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M4,0.8765a5.5,5.5,0,1,0,4,0v2.2512a3.5,3.5,0,1,1,-4,0z" style="fill: #555" /><rect x="5" y="0" width="2" height="8" rx="1" ry="1" /></svg><br/>Power On</button>
-  <button id="powerOffButton" class="powerButton" title="Stop radio" style="visibility:hidden" tabindex="1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M4,0.8765a5.5,5.5,0,1,0,4,0v2.2512a3.5,3.5,0,1,1,-4,0z" /><rect x="5" y="0" width="2" height="8" rx="1" ry="1" style="fill: #555" /></svg><br/>Power Off</button>
-  <button id="recordButton" class="recordingButton" title="Record from the radio" tabindex="41"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><circle cx="6" cy="6" r="5" style="fill: #b00" /></svg><br/>Record</button>
-  <button id="stopButton" class="recordingButton" title="Stop recording" style="visibility: hidden" tabindex="41"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><rect x="1" y="1" width="8" height="8" style="fill: #005" /></svg><br/>Stop</button>
+  <button id="powerOffButton" class="powerButton invisible" title="Stop radio" tabindex="1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><path d="M4,0.8765a5.5,5.5,0,1,0,4,0v2.2512a3.5,3.5,0,1,1,-4,0z" /><rect x="5" y="0" width="2" height="8" rx="1" ry="1" style="fill: #555" /></svg><br/>Power Off</button>
+  <button id="recordButton" class="recordingButton" title="Record from the radio" tabindex="51"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><circle cx="6" cy="6" r="5" style="fill: #b00" /></svg><br/>Record</button>
+  <button id="stopButton" class="recordingButton invisible" title="Stop recording" tabindex="51"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewbox="0 0 12 12" version="1.1"><rect x="1" y="1" width="8" height="8" style="fill: #005" /></svg><br/>Stop</button>
   <div class="presets">
-    <select id="presetsBox" class="presetsBox" name="preset" title="Select preset station" tabindex="31">
+    <select id="presetsBox" class="presetsBox" name="preset" title="Select preset station" tabindex="41">
     </select>
-    <button id="savePresetButton" class="savePresetButton" title="Create or edit present for current frequency" tabindex="32">Save</button>
-    <button id="removePresetButton" class="removePresetButton" title="Remove current preset" tabindex="33">Remove</button>
+    <button id="savePresetButton" class="savePresetButton" title="Create or edit present for current frequency" tabindex="42">Save</button>
+    <button id="removePresetButton" class="removePresetButton" title="Remove current preset" tabindex="43">Remove</button>
   </div>
 </div>
 </body>

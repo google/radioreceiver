@@ -65,8 +65,19 @@ var Frequencies = (function() {
 /**
  * Default modes.
  */
-var Modes = {
-  
+var DefaultModes = {
+  'AM': {
+    modulation: 'AM',
+    bandwidth: 10000,
+    upconvert: true
+  },
+  'NBFM': {
+    modulation: 'NBFM',
+    maxF: 10000
+  },
+  'WBFM': {
+    modulation: 'WBFM'
+  }
 };
 
 /**
@@ -154,7 +165,14 @@ function Band(bandName, minF, maxF, stepF, mode, displayFn, inputFn) {
   var max = maxF;
   var step = stepF;
   var mode = mode;
-  var toDisplayName
+
+  function freeDisplayFn(freq) {
+    return freq;
+  }
+
+  function freeInputFn(input) {
+    return Math.floor(Number(input));
+  }
 
   return {
     getName: function() { return name; },
@@ -162,8 +180,10 @@ function Band(bandName, minF, maxF, stepF, mode, displayFn, inputFn) {
     getMax: function() { return max; },
     getStep: function() { return step; },
     getMode: function() { return mode; },
-    toDisplayName: displayFn,
-    fromDisplayName: inputFn
+    setStep: function(newStep) { step = newStep; },
+    setMode: function(newMode) { mode = newMode; },
+    toDisplayName: displayFn || freeDisplayFn,
+    fromDisplayName: inputFn || freeInputFn
   };
 }
 

@@ -30,6 +30,7 @@ useUpconverter.checked = settings && settings['useUpconverter'];
 upconverterFreq.value = (settings && settings['upconverterFreq']) || 125000000;
 upconverterFreqInput.className = useUpconverter.checked ? '' : 'invisible';
 upconverterFreq.disabled = !useUpconverter.checked;
+enableFreeTuning.checked = settings && settings['enableFreeTuning'];
 
 function save() {
   var msg = {
@@ -40,7 +41,8 @@ function save() {
       'autoGain': autoGain.checked,
       'gain': gain.value,
       'useUpconverter': useUpconverter.checked,
-      'upconverterFreq': upconverterFreq.value
+      'upconverterFreq': upconverterFreq.value,
+      'enableFreeTuning': enableFreeTuning.checked
     }
   };
   window['opener'].postMessage(msg, '*');

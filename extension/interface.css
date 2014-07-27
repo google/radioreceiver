@@ -18,6 +18,10 @@ body {
   background-color: #ddd;
 }
 
+.invisible {
+  visibility: hidden;
+}
+
 .invisibleButton {
   cursor: pointer;
   margin: 0;
@@ -136,9 +140,12 @@ body {
   top: 2px;
   background: transparent;
   border: none;
-  visibility: hidden;
   font-family: sans-serif;
   color: #ffa;
+}
+
+.frequencyDisplay.freeTuning, .frequencyInput.freeTuning {
+  font-size: 54px;
 }
 
 .outOfTune {
@@ -156,7 +163,6 @@ body {
 }
 
 .volumeOccluder {
-  visibility: hidden;
   z-index: 1;
 }
 
@@ -174,7 +180,6 @@ body {
   background-color: rgba(0, 0, 0, 0.85);
   box-shadow: 0px 0px 5px black;
   border-radius: 15px;
-  visibility: hidden;
   z-index: 2;
 }
 
@@ -204,6 +209,10 @@ body {
   width: 50px;
   text-align: center;
   font-size: 25px;
+}
+
+.bandBox.freeTuning {
+  font-style: italic;
 }
 
 .scanning {
@@ -238,6 +247,109 @@ body {
 
 .stereoUnavailable {
   fill: transparent;
+}
+
+.freeTuningStuff {
+  visibility: hidden;
+  font-size: 16px;
+}
+
+.freeTuningStuff.freeTuning {
+  visibility: visible;
+}
+
+.freeTuningBox {
+  position: absolute;
+  width: 165px;
+}
+
+.freeTuningLabel {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 80px;
+  text-align: right;
+  color: #7a9;
+}
+
+.freeTuningDisplay, .freeTuningInput {
+  position: absolute;
+  right: 25px;
+  bottom: 0;
+  text-align: right;
+}
+
+.freeTuningDisplay {
+  cursor: text;
+}
+
+.freeTuningInput {
+  bottom: -3px;
+  background: transparent;
+  border: none;
+  font-family: sans-serif;
+  font-size: 16px;
+  color: #ffa;
+}
+
+.freeTuningButton {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 60px;
+  text-align: right;
+}
+
+.freeTuningHz {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  color: #7a9;
+}
+
+.modulationBox {
+  bottom: 35px;
+  left: 10px;
+  width: 140px;
+}
+
+.freqStepBox {
+  bottom: 35px;
+  right: 60px;
+}
+
+.freqStepDisplay, .freqStepInput {
+  width: 55px;
+}
+
+.bandwidthBox {
+  bottom: 15px;
+  left: 10px;
+}
+
+.bandwidthDisplay, .bandwidthInput {
+  width: 45px;
+}
+
+.maxfBox {
+  bottom: 15px;
+  left: 10px;
+}
+
+.maxfDisplay, .maxfInput {
+  width: 45px;
+}
+
+.upconverterBox {
+  bottom: 15px;
+  right: 60px;
+  width: 115px;
+}
+
+.upconverterDisplay {
+  width: 25px;
+  text-align: right;
 }
 
 .freqMinusButton, .freqPlusButton {
