@@ -148,10 +148,6 @@ body {
   font-size: 54px;
 }
 
-.outOfTune {
-  color: #f66;
-}
-
 .volumeBox, .volumeOccluder {
   position: absolute;
   right: 5px;

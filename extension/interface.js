@@ -42,12 +42,6 @@ function Interface(fmRadio) {
     setVisible(powerOnButton, !fmRadio.isPlaying());
     frequencyDisplay.textContent = currentBand.toDisplayName(getFrequency());
 
-    if (fmRadio.isFrequencyTuned()) {
-      frequencyDisplay.classList.remove('outOfTune');
-    } else {
-      frequencyDisplay.classList.add('outOfTune');
-    }
-
     if (!fmRadio.isStereoEnabled()) {
       stereoIndicator.classList.add('stereoDisabled');
       stereoIndicator.classList.remove('stereoUnavailable');

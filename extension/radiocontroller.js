@@ -47,7 +47,6 @@ function RadioController() {
   var playingBlocks = 0;
   var mode = {};
   var frequency = 88500000;
-  var isTuned = true;
   var stereo = true;
   var stereoEnabled = true;
   var volume = 1;
@@ -121,14 +120,6 @@ function RadioController() {
    */
   function getFrequency() {
     return frequency;
-  }
-
-  /**
-   * Returns whether the radio is tuned to a frequency.
-   * @return {boolean} Whether the radio is tuned.
-   */
-  function isFrequencyTuned() {
-    return isTuned;
   }
 
   /**
@@ -367,8 +358,7 @@ function RadioController() {
       tuner.setSampleRate(SAMPLE_RATE, function(rate) {
       offsetSum = 0;
       offsetCount = -1;
-      tuner.setCenterFrequency(frequency, function(tuned) {
-      isTuned = tuned;
+      tuner.setCenterFrequency(frequency, function() {
       processState();
       })})});
     } else if (state.substate == SUBSTATE.ALL_ON) {
@@ -441,8 +431,7 @@ function RadioController() {
     ui && ui.update();
     offsetSum = 0;
     offsetCount = -1;
-    tuner.setCenterFrequency(frequency, function(tuned) {
-    isTuned = tuned;
+    tuner.setCenterFrequency(frequency, function() {
     tuner.resetBuffer(function() {
     state = new State(STATE.PLAYING);
     startPipeline();
@@ -477,8 +466,7 @@ function RadioController() {
       state = new State(STATE.SCANNING, SUBSTATE.DETECTING, param);
       offsetSum = 0;
       offsetCount = -1;
-      tuner.setCenterFrequency(frequency, function(tuned) {
-      isTuned = tuned;
+      tuner.setCenterFrequency(frequency, function() {
       tuner.resetBuffer(processState);
       });
     } else if (state.substate == SUBSTATE.DETECTING) {
@@ -639,7 +627,6 @@ function RadioController() {
     stop: stop,
     setFrequency: setFrequency,
     getFrequency: getFrequency,
-    isFrequencyTuned: isFrequencyTuned,
     setMode: setMode,
     getMode: getMode,
     scan: scan,
