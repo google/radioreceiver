@@ -68,8 +68,7 @@ var Frequencies = (function() {
 var DefaultModes = {
   'AM': {
     modulation: 'AM',
-    bandwidth: 10000,
-    upconvert: true
+    bandwidth: 10000
   },
   'NBFM': {
     modulation: 'NBFM',

@@ -115,10 +115,10 @@ function AppConfig() {
   }
 
   function getBandName() {
-    if (isFreeTuningEnabled()) {
+    if (isAllowedBand(config.state.bandName)) {
       return config.state.bandName;
     } else {
-      return config.state.bandName || 'FM';
+      return 'FM';
     }
   }
 

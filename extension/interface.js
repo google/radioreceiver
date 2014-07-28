@@ -350,9 +350,11 @@ function Interface(fmRadio) {
     var frequency = getFrequency();
     if (frequency in presets.get()) {
       presetsBox.value = frequency;
-    } else {
-      presetsBox.value = '';
+      if (presetsBox.selectedIndex > 0) {
+        return;
+      }
     }
+    presetsBox.value = '';
   }
 
   /**

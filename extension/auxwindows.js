@@ -134,7 +134,7 @@ var AuxWindows = (function() {
   function resizeCurrentTo(width, height) {
     // If the user has set a custom zoom level, resize the window to fit
     var bounds = chrome.app.window.current().innerBounds;
-    var zoom = bounds.width / window.innerWidth;
+    var zoom = (bounds.width / window.innerWidth) || 1;
     bounds.width = Math.round(width * zoom);
     if (height) {
       bounds.height = Math.round(height * zoom);
