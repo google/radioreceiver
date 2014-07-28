@@ -25,56 +25,97 @@ body {
   top: 0;
   bottom: 0;
   overflow-y: scroll;
+  font-size: 14pt;
+}
+
+h1 {
+  clear: both;
+}
+
+.image {
+  float: left;
+  margin: 1em 2em 1em 0;
 }
 </style>
 </head>
 <body>
-<h1>Using Radio Receiver</h1>
+<h1>Radio Receiver help</h1>
 
-<p style="text-align:center"><img src="help-iface.png" width="615" height="350" title="Radio Receiver main interface"></p>
+<p>Radio Receiver is a Chrome application to listen to radio signals on your computer using a USB digital TV tuner. You can <a href="#standard">use it as a regular AM/FM radio</a>, or you can <a href="#freetuning">use it in Free Tuning mode</a> to listen to all kinds of radio signals, like amateur radio, marine radio, aviation radio, public safety radio, or short wave radio (using an upconverter).</p>
+
+<p>You can <a href="#settings">use the settings window</a> to set Radio Receiver up for your country's radio bands, configure an upconverter, set custom tuner gain, adjust your tuner's oscillators, etc.</p>
+
+<p>Radio Receiver also has a lot of <a href="#shortcuts">keyboard shortcuts</a> so you don't even need to use a mouse!
+
+<h1 id="standard">Using Radio Receiver</h1>
+
+<div class="image"><img src="help-iface.png" width="615" height="350" title="Radio Receiver main interface"></div>
 
 <h2>Start and stop</h2>
-<p>Press the "Power On" button (<b>1</b>) to start playing the radio. You'll see that the label changes to "Power Off"; if you press it again, the radio will stop.</p>
+<p>Press the &ldquo;Power On&rdquo; button (<b>1</b>) to start playing the radio. You'll see that the label changes to &ldquo;Power Off&rdquo;; if you press it again, the radio will stop.</p>
 
 <h2>Changing frequency and band</h2>
 <p>You can change frequency in several ways:</p>
 <ul>
 <li>Click on the frequency display (<b>2</b>), type your new frequency directly, and press Enter.</li>
-<li>Use the "Freq-" and "Freq+" buttons (<b>3</b>) to change the frequency 1 step up or down.</li>
-<li>Use the "Scan-" and "Scan+" buttons (<b>4</b>) to search for a station automatically.</li>
+<li>Use the &ldquo;Freq-&rdquo; and &ldquo;Freq+&rdquo; buttons (<b>3</b>) to change the frequency 1 step up or down.</li>
+<li>Use the &ldquo;Scan-&rdquo; and &ldquo;Scan+&rdquo; buttons (<b>4</b>) to search for a station automatically.</li>
 <li>Use the mouse wheel on the frequency display.</li>
 </ul>
 <p>To change the band you are listening to, click on the band indicator (<b>5</b>). Note that, before you can listen to AM radio, you'll need to <a href="#settings">set up an upconverter in the settings window</a>.</p>
 
 <h2>Using presets</h2>
-<p>Click the "Save" button (<b>6</b>) to save the station you are listening to as a preset. Enter a name for the preset and press "Save".</p>
+<p>Click the &ldquo;Save&rdquo; button (<b>6</b>) to save the station you are listening to as a preset. Enter a name for the preset and press &ldquo;Save".</p>
 <p>To switch to a preset, click the preset selection box (<b>7</b>) and choose your new preset. The radio will switch to it immediately.</p>
-<p>To delete a preset, switch to it and press the "Remove" button (<b>8</b>).</p>
-<p>To change a preset's name, switch to it and click the "Save" button (<b>6</b>). Type the new name and press "Save".</p>
+<p>To delete a preset, switch to it and press the &ldquo;Remove&rdquo; button (<b>8</b>).</p>
+<p>To change a preset's name, switch to it and click the &ldquo;Save&rdquo; button (<b>6</b>). Type the new name and press &ldquo;Save&rdquo;.</p>
 
 <h2>Changing volume and stereo</h2>
-<p>To change the volume, click on the "loudspeaker" icon (<b>9</b>) and move the slider left and right to decrease or increase the volume. You can also use your mouse wheel on the icon to change volume directly.</p>
+<p>To change the volume, click on the &ldquo;loudspeaker&rdquo; icon (<b>9</b>) and move the slider left and right to decrease or increase the volume. You can also use your mouse wheel on the icon to change volume directly.</p>
 <p>To disable stereo click on the stereo indicator (<b>10</b>).</p>
 
 <h2>Recording from the radio</h2>
-<p>You can record what you hear on the radio into a WAV file. Just click the "Record" button (<b>11</b>) to start, and type a name for the file. You'll see that the button's label changes to "Stop"; if you press it again, the radio will stop recording.</p>
+<p>You can record what you hear on the radio into a WAV file. Just click the &ldquo;Record&rdquo; button (<b>11</b>) to start, and type a name for the file. You'll see that the button's label changes to &ldquo;Stop&rdquo;; if you press it again, the radio will stop recording.</p>
 
-<a name="settings"></a>
-<h2>Settings</h2>
-<p>You can change a lot of settings by clicking on the "wrench" icon (<b>12</b>). There you can change several settings:</p>
+<h1 id="freetuning">Tuning into other radio signals</h1>
 
-<p style="text-align:center"><img src="help-settings.png" width="381" height="291" title="Radio Receiver settings window"></p>
+<p>With Free Tuning you can use Radio Receiver to listen to all kinds of radio signals in all frequency bands your tuner can receive, such as amateur radio, marine radio, aviation radio, short wave radio (with an upconverter), etc.</p>
+
+<h2>Enabling Free Tuning</h2>
+
+<p>To be able to use Free Tuning, <a href="#settings">open the settings window</a> and click on the checkbox to enable Free Tuning mode.</p>
+
+<h2>Using Free Tuning</h2>
+
+<p>Free Tuning appears like an extra band in Radio Receiver. To enter Free Tuning, click the band indicator (<b>5</b> in the picture above) until the display changes to look like this:</p>
+
+<div class="image"><img src="help-freetuning.png" width="614" height="350" title="Radio Receiver free-tuning interface"></div>
+
+<p>Every button in Radio Receiver works in Free Tuning mode like it does elsewhere; however, you have some extra functions available.</p>
+
+<p>The frequency display (<b>1</b>) shows the current frequency in Hertz. You can change frequency by clicking on it and typing the new frequency, using the scroll wheel, and using the &ldquo;Freq-&rdquo; and &ldquo;Freq+&rdquo; buttons. You can adjust the amount by which the frequency is adjusted by changing the value of the &ldquo;Step&rdquo; field (<b>2</b>).</p>
+
+<p>To change modulation scheme, click on the &ldquo;Modulation&rdquo; field (<b>3</b>). Each time you click you toggle between the available schemes. Currently these are Wideband FM (WBFM), Narrowband FM (NBFM), and AM.</p>
+
+<p>Some modulation schemes have parameters that affect how they work; for example, NBFM has a maximum frequency deviation (Max <i>f<sub>dev</sub></i>), AM has a bandwidth, etc. You can set the value of that parameter in the corresponding field pointed to by <b>4</b>.</p>
+
+<p>If you have <a href="#settings">configured an upconverter in the settings window</a> you can enable and disable it here by clicking the &ldquo;Upconverter&rdquo; field (<b>5</b>).</p>
+
+<h1 id="settings">Settings</h1>
+<p>You can change a lot of settings by clicking on the &ldquo;wrench&rdquo; icon (<b>12</b>). There you can change several settings:</p>
+
+<div class="image"><img src="help-settings.png" width="395" height="333" title="Radio Receiver settings window"></div>
 
 <ul>
 <li><b>Region</b>: Radios use different frequencies in different parts of the world. For best results, you should select the part of the world you live in.</li>
-<li><b>Frequency correction</b>: Corrects for clock imprecision in the dongle. Most of the time you can leave it at 0 unless you know you need a different value. If you already know it, enter it here. Otherwise, you can try the "suggest a value" feature.</li>
+<li><b>Frequency correction</b>: Corrects for clock imprecision in the dongle. Most of the time you can leave it at 0 unless you know you need a different value. If you already know it, enter it here. Otherwise, you can try the &ldquo;suggest a value&rdquo; feature.</li>
 <li><b>Tuner gain</b>: Allows you to use automatic gain or set a custom fixed gain. Most people can use automatic gain.</li>
 <li><b>Use upconverter for AM</b>: Enables or disables AM radio via an upconverter.</li>
-<li><b>Upconverter frequency</b>: The frequency the upconverter shifts all signals up by.</li>
+<li><b>Upconverter frequency</b>: This is the frequency by which the upconverter shifts all the signals up.</li>
+<li><b>Enable Free Tuning mode</b>: This lets you tune into radio signals outside of the FM and Medium Wave AM band.</li>
 </ul>
 
-<a name="shortcuts"></a>
-<h1>Keyboard shortcuts</h1>
+<h1 id="shortcuts">Keyboard shortcuts</h1>
 <table>
 <tr><th>Key</th><th>Function</th></tr>
 <tr><td><tt>Space Bar</tt></td><td>Turn radio on/off</td></tr>
