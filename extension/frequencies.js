@@ -153,21 +153,21 @@ var Bands = (function() {
  * @param {number} maxF The maximum frequency in the band.
  * @param {number} stepF The step between channels in the band.
  * @param {Object} mode The band's modulation parameters.
- * @param {function(number, boolean=):string} displayFn A function that takes a frequency
- *     and returns its presentation for display.
- * @param {function(string):number} inputFn A function that take's a display
- *     representation and returns the corresponding frequency.
+ * @param {(function(number, boolean=):string)=} opt_displayFn A function that
+ *     takes a frequency and returns its presentation for display.
+ * @param {(function(string):number)=} opt_inputFn A function that takes a
+ *     display representation and returns the corresponding frequency.
  * @constructor
  */
-function Band(bandName, minF, maxF, stepF, mode, displayFn, inputFn) {
+function Band(bandName, minF, maxF, stepF, mode, opt_displayFn, opt_inputFn) {
   var name = bandName;
   var min = minF;
   var max = maxF;
   var step = stepF;
   var mode = mode;
 
-  function freeDisplayFn(freq) {
-    return freq;
+  function freeDisplayFn(freq, opt_full) {
+    return opt_full ? Frequencies.humanReadable(freq, true) : freq;
   }
 
   function freeInputFn(input) {
@@ -180,10 +180,8 @@ function Band(bandName, minF, maxF, stepF, mode, displayFn, inputFn) {
     getMax: function() { return max; },
     getStep: function() { return step; },
     getMode: function() { return mode; },
-    setStep: function(newStep) { step = newStep; },
-    setMode: function(newMode) { mode = newMode; },
-    toDisplayName: displayFn || freeDisplayFn,
-    fromDisplayName: inputFn || freeInputFn
+    toDisplayName: opt_displayFn || freeDisplayFn,
+    fromDisplayName: opt_inputFn || freeInputFn
   };
 }
 

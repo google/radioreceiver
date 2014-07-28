@@ -20,39 +20,9 @@
 function Interface(fmRadio) {
 
   /**
-   * Settings.
+   * The application state and configuration.
    */
-  var settings = {
-    'region': 'WW',
-    'ppm': 0,
-    'autoGain': true,
-    'gain': 0,
-    'useUpconverter': false,
-    'upconverterFreq': 125000000,
-    'enableFreeTuning': false
-  };
-
-  /**
-   * Current radio band.
-   */
-  var band = Bands[settings.region]['FM'];
-
-  /**
-   * The free-tuning pseudoband.
-   */
-  var freeTuningBand = new Band('', 0, 2400000000, 10000, {modulation: 'WBFM'}, null, null);
-
-  /**
-   * Last-selected stations in each band.
-   */
-  var selectedStations = {
-    'currentBand': 'FM',
-    'bands': {
-      '': 90000000
-    },
-    'currentMode': 'WBFM',
-    'modes': DefaultModes
-  };
+  var appConfig = new AppConfig();
 
   /**
    * The station presets.
@@ -60,12 +30,17 @@ function Interface(fmRadio) {
   var presets = new Presets();
 
   /**
+   * The current band configuration;
+   */
+  var currentBand = Bands['WW']['FM'];
+
+  /**
    * Updates the UI.
    */
   function update() {
     setVisible(powerOffButton, fmRadio.isPlaying());
     setVisible(powerOnButton, !fmRadio.isPlaying());
-    frequencyDisplay.textContent = band.toDisplayName(getFrequency());
+    frequencyDisplay.textContent = currentBand.toDisplayName(getFrequency());
 
     if (fmRadio.isFrequencyTuned()) {
       frequencyDisplay.classList.remove('outOfTune');
@@ -95,16 +70,16 @@ function Interface(fmRadio) {
       frequencyDisplay.classList.add('freeTuning');
       frequencyInput.classList.add('freeTuning');
       freeTuningStuff.classList.add('freeTuning');
-      var modulation = getMode().modulation;
-      modulationDisplay.textContent = modulation;
-      freqStepDisplay.textContent = band.getStep();
-      setVisible(bandwidthBox, modulation == 'AM');
-      bandwidthDisplay.textContent = Number(getMode().bandwidth);
-      setVisible(maxfBox, modulation == 'NBFM');
-      maxfDisplay.textContent = Number(getMode().maxF);
+      var mode = currentBand.getMode();
+      modulationDisplay.textContent = mode.modulation;
+      freqStepDisplay.textContent = currentBand.getStep();
+      setVisible(bandwidthBox, mode.modulation == 'AM');
+      bandwidthDisplay.textContent = Number(mode.bandwidth) || 0;
+      setVisible(maxfBox, mode.modulation == 'NBFM');
+      maxfDisplay.textContent = Number(mode.maxF) || 0;
       upconverterDisplay.textContent = isUpconverterEnabled() ? 'On' : 'Off';
     } else {
-      bandBox.textContent = band.getName();
+      bandBox.textContent = currentBand.getName();
       bandBox.classList.remove('freeTuning');
       frequencyDisplay.classList.remove('freeTuning');
       frequencyInput.classList.remove('freeTuning');
@@ -152,13 +127,12 @@ function Interface(fmRadio) {
    * Called when the 'Power Off' button is pressed.
    */
   function powerOff() {
+    saveSettings();
     setVisible(powerOffButton, false);
     setVisible(powerOnButton, true);
     if (fmRadio.isPlaying()) {
       fmRadio.stop();
     }
-    saveCurrentStation();
-    saveVolume();
   }
 
   /**
@@ -166,7 +140,7 @@ function Interface(fmRadio) {
    * Called when the space bar shortcut is pressed.
    */
   function togglePower() {
-    if (powerOnButton.style.visibility == 'hidden') {
+    if (powerOnButton.classList.contains('invisible')) {
       powerOff();
     } else {
       powerOn();
@@ -177,7 +151,7 @@ function Interface(fmRadio) {
    * Tunes to another frequency.
    */
   function changeFrequency(value) {
-    setFrequency(band.fromDisplayName(value), false);
+    setFrequency(currentBand.fromDisplayName(value), false);
   }
 
   /**
@@ -197,9 +171,9 @@ function Interface(fmRadio) {
    * Called when the '<' button is pressed.
    */
   function frequencyMinus() {
-    var newFreq = getFrequency() - band.getStep();
-    if (newFreq < band.getMin()) {
-      newFreq = band.getMax();
+    var newFreq = getFrequency() - currentBand.getStep();
+    if (newFreq < currentBand.getMin()) {
+      newFreq = currentBand.getMax();
     }
     setFrequency(newFreq, true);
   }
@@ -209,9 +183,9 @@ function Interface(fmRadio) {
    * Called when the '>' button is pressed.
    */
   function frequencyPlus() {
-    var newFreq = getFrequency() + band.getStep();
-    if (newFreq > band.getMax()) {
-      newFreq = band.getMin();
+    var newFreq = getFrequency() + currentBand.getStep();
+    if (newFreq > currentBand.getMax()) {
+      newFreq = currentBand.getMin();
     }
     setFrequency(newFreq, true);
   }
@@ -222,9 +196,9 @@ function Interface(fmRadio) {
    */
   function scanDown() {
     fmRadio.scan(
-        upconvert(band.getMin()),
-        upconvert(band.getMax()),
-        -band.getStep());
+        upconvert(currentBand.getMin()),
+        upconvert(currentBand.getMax()),
+        -currentBand.getStep());
   }
 
   /**
@@ -233,9 +207,9 @@ function Interface(fmRadio) {
    */
   function scanUp() {
     fmRadio.scan(
-        upconvert(band.getMin()),
-        upconvert(band.getMax()),
-        band.getStep());
+        upconvert(currentBand.getMin()),
+        upconvert(currentBand.getMax()),
+        currentBand.getStep());
   }
 
   /**
@@ -304,26 +278,26 @@ function Interface(fmRadio) {
    */
   function setVolume(volume) {
     volume = volume < 0 ? 0 : volume > 1 ? 1 : volume;
-    fmRadio.setVolume(volume);
+    appConfig.state.volume.set(volume);
+    restoreVolume();
   }
 
   /**
    * Switches the selected band.
    */
   function switchBand() {
-    saveCurrentStation();
-    var bands = Bands[settings['region']];
+    saveSettings();
+    var bands = appConfig.settings.region.getAvailableBands();
     var bandNames = [];
     for (var n in bands) {
       if (bands.hasOwnProperty(n)) {
-        if (!bands[n].getMode()['upconvert']
-            || settings['useUpconverter']
-            || n == band.getName()) {
+        if (appConfig.state.band.isAllowed(n)
+            || n == currentBand.getName()) {
           bandNames.push(n);
         }
       }
     }
-    if (settings['enableFreeTuning'] || !band.getName()) {
+    if (appConfig.settings.freeTuning.isEnabled() || !currentBand.getName()) {
       bandNames.push('');
     }
     if (bandNames.length == 1) {
@@ -331,13 +305,8 @@ function Interface(fmRadio) {
     }
     bandNames.sort();
     for (var i = 0; i < bandNames.length; ++i) {
-      if (!band || bandNames[i] == band.getName()) {
-        var nextName = bandNames[(i + 1) % bandNames.length];
-        if (nextName) {
-          selectBand(bands[nextName]);
-        } else {
-          selectBand(freeTuningBand);
-        }
+      if (bandNames[i] == currentBand.getName()) {
+        selectBand(bandNames[(i + 1) % bandNames.length]);
         return;
       }
     }
@@ -345,13 +314,11 @@ function Interface(fmRadio) {
 
   /**
    * Changes the radio's band.
-   * @param {Band} newBand The new band.
+   * @param {string} bandName The new band's name.
    */
-  function selectBand(newBand) {
-    band = newBand;
-    setMode(band.getMode());
-    setFrequency(selectedStations['bands'][band.getName()] || 1, true);
-    update();
+  function selectBand(bandName) {
+    appConfig.state.band.select(bandName);
+    restoreStation();
   }
 
   /**
@@ -371,8 +338,10 @@ function Interface(fmRadio) {
     for (var i = 0; i < freqs.length; ++i) {
       var value = freqs[i];
       var preset = saved[value];
-      var label = preset['display'] + ' - ' + preset['name'];
-      presetsBox.options.add(createOption(value, label));
+      if (appConfig.state.band.isAllowed(preset['band'])) {
+        var label = preset['display'] + ' - ' + preset['name'];
+        presetsBox.options.add(createOption(value, label));
+      }
     }
     selectCurrentPreset();
   }
@@ -410,17 +379,17 @@ function Interface(fmRadio) {
     var preset = presets.get(presetsBox.value);
     if (preset) {
       if (preset['mode']) {
-        freeTuningBand.setMode(preset['mode']);
+        var newMode = preset['mode'];
+        appConfig.state.mode.select(newMode['modulation']);
+        var currentMode = appConfig.state.mode.get();
+        if (newMode['step']) {
+          currentMode.step = newMode['step'];
+          delete newMode['step'];
+        }
+        currentMode.params = newMode;
+        appConfig.state.mode.update(currentMode);
       }
-      var bandPreset = preset['band'];
-      if (!bandPreset && settings['enableFreeTuning']) {
-        var newBand = freeTuningBand;
-      } else {
-        var newBand = Bands[settings.region][bandPreset || 'FM'];
-      }
-      if (newBand) {
-        selectBand(newBand);
-      }
+      selectBand(preset['band']);
       setFrequency(presetsBox.value, false);
     }
   }
@@ -433,8 +402,7 @@ function Interface(fmRadio) {
     var freq = getFrequency();
     var preset = presets.get(freq);
     var name = preset ? preset['name'] : '';
-    var display = band.toDisplayName(freq, true);
-    AuxWindows.savePreset(freq, display, name, band.getName(), band.getMode());
+    AuxWindows.savePreset(freq, name, currentBand);
   }
 
   /**
@@ -449,77 +417,28 @@ function Interface(fmRadio) {
   /**
    * Loads the last station to be tuned.
    */
-  function loadCurrentStation() {
-    chrome.storage.local.get('currentStation', function(cfg) {
-      if ('number' === typeof cfg['currentStation']) {
-        selectedStations = {
-          'currentBand': 'FM',
-          'bands': {
-            'FM': cfg['currentStation']
-          }
-        };
-      } else if (cfg['currentStation']) {
-        selectedStations = cfg['currentStation'];
-      }
-      if (!selectedStations['modes']) {
-        selectedStations['modes'] = DefaultModes;
-      }
-      if (!selectedStations['currentMode']) {
-        selectedStations['currentMode'] = 'WBFM';
-      }
-      freeTuningBand.setMode(selectedStations['modes'][selectedStations['currentMode']]);
-      var bandPreset = selectedStations['currentBand'];
-      if (!bandPreset && settings['enableFreeTuning']) {
-        var newBand = freeTuningBand;
-      } else {
-        var newBand = Bands[settings.region][bandPreset || 'FM'];
-      }
-      selectBand(newBand);
-      var newFreq = selectedStations['bands'][band.getName()];
-      if (newFreq) {
-        setFrequency(newFreq, false);
-      }
-    });
-  }
-
-  /**
-   * Saves the current station to be loaded on the next restart.
-   */
-  function saveCurrentStation() {
-    if (band) {
-      selectedStations['currentBand'] = band.getName();
-      selectedStations['bands'][band.getName()] = getFrequency();
-      if (isFreeTuning()) {
-        selectedStations['currentMode'] = getMode().modulation;
-      }
-      chrome.storage.local.set({'currentStation': selectedStations});
-    }
+  function restoreStation() {
+    currentBand = appConfig.state.band.get();
+    fmRadio.setMode(currentBand.getMode());
+    setFrequency(appConfig.state.frequency.get(), true);
   }
 
   /**
    * Loads the previously-set volume.
    */
-  function loadVolume() {
-    chrome.storage.local.get('volume', function(cfg) {
-      setVolume(cfg['volume'] || 1);
-    });
-  }
-
-  /**
-   * Saves the current volume.
-   */
-  function saveVolume() {
-    chrome.storage.local.set({'volume': fmRadio.getVolume()});
+  function restoreVolume() {
+    fmRadio.setVolume(appConfig.state.volume.get());
   }
 
   /**
    * Loads the settings.
    */
-  function loadSettings() {
-    chrome.storage.local.get('settings', function(cfg) {
-      if (cfg['settings']) {
-        setSettings(cfg['settings']);
-      }
+  function loadSettings(callback) {
+    appConfig.load(function() {
+    restoreSettings();
+    restoreStation();
+    restoreVolume();
+    callback();
     });
   }
 
@@ -527,43 +446,62 @@ function Interface(fmRadio) {
    * Saves the settings.
    */
   function saveSettings() {
-    chrome.storage.local.set({'settings': settings});
+    appConfig.save();
   }
 
   /**
    * Shows the settings dialog.
    */
   function showSettings() {
-    settings['ppm'] = fmRadio.getCorrectionPpm();
-    settings['autoGain'] = fmRadio.isAutoGain();
-    settings['gain'] = fmRadio.getManualGain();
+    saveSettings();
+    var settings = {
+      'region': appConfig.settings.region.get(),
+      'ppm': appConfig.settings.ppm.get(),
+      'autoGain': appConfig.settings.gain.isAuto(),
+      'gain': appConfig.settings.gain.get(),
+      'useUpconverter': appConfig.settings.upconverter.isEnabled(),
+      'upconverterFreq': appConfig.settings.upconverter.get(),
+      'enableFreeTuning': appConfig.settings.freeTuning.isEnabled()
+    };
     AuxWindows.settings(settings);
   }
 
   /**
    * Sets the current settings.
+   * @param {Object} newSettings The new settings.
    */
   function setSettings(newSettings) {
-    settings = newSettings;
-    if (!isFreeTuning()) {
-      var availableBands = (Bands[settings['region']] || Bands['WW']);
-      band = availableBands[band.getName()] || availableBands['FM'];
-    }
-    if (settings['autoGain'] || null == settings['autoGain']) {
-      fmRadio.setAutoGain();
-    } else {
-      fmRadio.setManualGain(settings['gain']);
-    }
-    fmRadio.setCorrectionPpm(settings['ppm'] || 0);
-    selectBand(band);
+    appConfig.settings.region.select(newSettings['region']);
+    appConfig.settings.ppm.set(newSettings['ppm']);
+    appConfig.settings.gain.setAuto(newSettings['autoGain']);
+    appConfig.settings.gain.set(newSettings['gain']);
+    appConfig.settings.upconverter.enable(newSettings['useUpconverter']);
+    appConfig.settings.upconverter.set(newSettings['upconverterFreq']);
+    appConfig.settings.freeTuning.enable(newSettings['enableFreeTuning']);
+    restoreSettings();
+    restoreStation();
+    displayPresets();
   }
 
+  /**
+   * Restores the radio settings.
+   */
+  function restoreSettings() {
+    if (appConfig.settings.gain.isAuto()) {
+      fmRadio.setAutoGain();
+    } else {
+      fmRadio.setManualGain(appConfig.settings.gain.get());
+    }
+    fmRadio.setCorrectionPpm(appConfig.settings.ppm.get());
+  }
+  
   /**
    * Returns whether the upconverter is enabled.
    * @return {boolean} Whether the upconverter is enabled.
    */
   function isUpconverterEnabled() {
-    return getMode()['upconvert'] && settings['useUpconverter'];
+    return currentBand.getMode().upconvert &&
+        appConfig.settings.upconverter.isEnabled();
   }
 
   /**
@@ -573,7 +511,7 @@ function Interface(fmRadio) {
    */
   function upconvert(freq) {
     if (isUpconverterEnabled()) {
-      return Number(freq) + Number(settings['upconverterFreq']);
+      return Number(freq) + appConfig.settings.upconverter.get();
     }
     return freq;
   }
@@ -585,7 +523,7 @@ function Interface(fmRadio) {
    */
   function downconvert(freq) {
     if (isUpconverterEnabled()) {
-      return Number(freq) - Number(settings['upconverterFreq']);
+      return Number(freq) - appConfig.settings.upconverter.get();
     }
     return freq;
   }
@@ -598,15 +536,26 @@ function Interface(fmRadio) {
    *     it doesn't set a new frequency).
    */
   function setFrequency(newFreq, bounding) {
-    newFreq = band.getMin() + band.getStep() * Math.round(
-        (newFreq - band.getMin()) / band.getStep());
-    if (newFreq >= band.getMin() && newFreq <= band.getMax()) {
-      fmRadio.setFrequency(upconvert(newFreq));
-    } else if (bounding && newFreq < band.getMin()) {
-      fmRadio.setFrequency(upconvert(band.getMin()));
-    } else if (bounding && newFreq > band.getMax()) {
-      fmRadio.setFrequency(upconvert(band.getMax()));
+    newFreq = currentBand.getMin() + currentBand.getStep() * Math.round(
+        (newFreq - currentBand.getMin()) / currentBand.getStep());
+    if (!bounding &&
+        (newFreq < currentBand.getMin() || newFreq > currentBand.getMax())) {
+      return;
     }
+    if (newFreq < currentBand.getMin()) {
+      newFreq = currentBand.getMin();
+    } else if (newFreq > currentBand.getMax()) {
+      newFreq = currentBand.getMax();
+    }
+    appConfig.state.frequency.set(newFreq);
+    restoreFrequency();
+  }
+
+  /**
+   * Restores the frequency from the settings.
+   */
+  function restoreFrequency() {
+    fmRadio.setFrequency(upconvert(appConfig.state.frequency.get()));
   }
 
   /**
@@ -618,6 +567,15 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Tells whether we are in free tuning mode.
+   * @return {boolean} Whether we are in free tuning mode.
+   */
+  function isFreeTuning() {
+    return currentBand.getName() == '' &&
+        appConfig.settings.freeTuning.isEnabled();
+  }
+
+  /**
    * Internal function to change mode.
    * @param {Object} mode The new mode.
    */
@@ -626,66 +584,18 @@ function Interface(fmRadio) {
   }
 
   /**
-   * Internal function to get the current mode.
-   * @return {Object} The current mode.
-   */
-  function getMode() {
-    return fmRadio.getMode();
-  }
-
-  /**
    * Changes modulation in free-tuning mode.
    */
   function switchModulation() {
-    saveCurrentStation();
-    var modes = selectedStations['modes'];
-    var modeNames = [];
-    for (var n in modes) {
-      if (modes.hasOwnProperty(n)) {
-        modeNames.push(n);
-      }
-    }
-    if (modeNames.length == 1) {
-      return;
-    }
-    modeNames.sort();
+    var modeNames = ['WBFM', 'NBFM', 'AM'];
     var currentMode = modulationDisplay.textContent;
     for (var i = 0; i < modeNames.length; ++i) {
       if (modeNames[i] == currentMode) {
-        var nextName = modeNames[(i + 1) % modeNames.length];
-        freeTuningBand.setMode(modes[nextName]);
-        setMode(modes[nextName]);
-        update();
+        appConfig.state.mode.select(modeNames[(i + 1) % modeNames.length]);
+        restoreStation();
         return;
       }
     }
-  }
-
-  /**
-   * Attaches events to a pair of display/input elements.
-   * @param {Element} displayElem The display element.
-   * @param {Element} inputElem The input element.
-   * @param {Function} changeFn The change function.
-   */
-  function attachDisplayInputEvents(displayElem, inputElem, changeFn) {
-    displayElem.addEventListener('click', function() {
-      inputElem.value = displayElem.textContent;
-      setVisible(displayElem, false);
-      setVisible(inputElem, true);
-      inputElem.focus();
-      inputElem.select();
-    });
-
-    inputElem.addEventListener('blur', function() {
-      setVisible(displayElem, true);
-      setVisible(inputElem, false);
-    });
-
-    inputElem.addEventListener('change', function() {
-      setVisible(displayElem, true);
-      setVisible(inputElem, false);
-      changeFn(inputElem.value);
-    });
   }
 
   /**
@@ -694,8 +604,10 @@ function Interface(fmRadio) {
   function changeFreqStep(value) {
     var newStep = Math.floor(value);
     if (newStep >= 1 && newStep <= 999999) {
-      band.setStep(newStep);
-      update();
+      var mode = appConfig.state.mode.get();
+      mode.step = newStep;
+      appConfig.state.mode.update(mode);
+      restoreStation();
     }
   }
 
@@ -705,9 +617,10 @@ function Interface(fmRadio) {
   function changeBandwidth(value) {
     var newBandwidth = Math.floor(value);
     if (newBandwidth >= 1 && newBandwidth <= 20000) {
-      band.getMode().bandwidth = newBandwidth;
-      setMode(band.getMode());
-      update();
+      var mode = appConfig.state.mode.get();
+      mode.params.bandwidth = newBandwidth;
+      appConfig.state.mode.update(mode);
+      restoreStation();
     }
   }
 
@@ -716,10 +629,11 @@ function Interface(fmRadio) {
    */
   function changeMaxf(value) {
     var newMaxf = Math.floor(value);
-    if (newMaxf >= 1 && newMaxf <= 10000) {
-      band.getMode().maxF = newMaxf;
-      setMode(band.getMode());
-      update();
+    if (newMaxf >= 1 && newMaxf <= 24000) {
+      var mode = appConfig.state.mode.get();
+      mode.params.maxF = newMaxf;
+      appConfig.state.mode.update(mode);
+      restoreStation();
     }
   }
 
@@ -727,28 +641,20 @@ function Interface(fmRadio) {
    * Toggles the upconverter on and off.
    */
   function toggleUpconverter() {
-    band.getMode().upconvert = !band.getMode().upconvert;
-    setMode(band.getMode());
-    update();
+    var mode = appConfig.state.mode.get();
+    mode.params.upconvert = !mode.params.upconvert;
+    appConfig.state.mode.update(mode);
+    restoreStation();
   }
 
   /**
    * Closes the window.
    */
   function close() {
-    saveCurrentStation();
-    saveVolume();
+    saveSettings();
     fmRadio.stop(function() {
       AuxWindows.closeCurrent();
     });
-  }
-
-  /**
-   * Tells whether we are in free tuning mode.
-   * @return {boolean} Whether we are in free tuning mode.
-   */
-  function isFreeTuning() {
-    return band.getName() == '' && settings['enableFreeTuning'];
   }
 
   /**
@@ -757,7 +663,7 @@ function Interface(fmRadio) {
   function startRecording() {
     var opt = {
       type: 'saveFile',
-      suggestedName: (band.toDisplayName(getFrequency(), true)
+      suggestedName: (currentBand.toDisplayName(getFrequency(), true)
                       + " - "
                       + new Date().toLocaleString() + ".wav")
                      .replace(/[:/\\]/g, '_'),
@@ -794,11 +700,12 @@ function Interface(fmRadio) {
     var type = event.data['type'];
     var data = event.data['data'];
     if (type == 'savepreset') {
-      presets.set(data['frequency'], data['display'], data['name'], data['band'], data['mode']);
+      presets.set(data['frequency'], data['display'], data['name'],
+                  data['band'], data['mode']);
       presets.save(displayPresets);
     } else if (type == 'setsettings') {
       setSettings(data);
-      saveSettings(data);
+      saveSettings();
     } else if (type == 'exit') {
       close();
     }
@@ -898,6 +805,33 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Attaches events to a pair of display/input elements.
+   * @param {Element} displayElem The display element.
+   * @param {Element} inputElem The input element.
+   * @param {Function} changeFn The change function.
+   */
+  function attachDisplayInputEvents(displayElem, inputElem, changeFn) {
+    displayElem.addEventListener('click', function() {
+      inputElem.value = displayElem.textContent;
+      setVisible(displayElem, false);
+      setVisible(inputElem, true);
+      inputElem.focus();
+      inputElem.select();
+    });
+
+    inputElem.addEventListener('blur', function() {
+      setVisible(displayElem, true);
+      setVisible(inputElem, false);
+    });
+
+    inputElem.addEventListener('change', function() {
+      setVisible(displayElem, true);
+      setVisible(inputElem, false);
+      changeFn(inputElem.value);
+    });
+  }
+
+  /**
    * Attaches all the event handlers, loads the presets, and updates the UI.
    */
   function attach() {
@@ -919,7 +853,8 @@ function Interface(fmRadio) {
     bandBox.addEventListener('click', switchBand);
     modulationDisplay.addEventListener('click', switchModulation);
     attachDisplayInputEvents(freqStepDisplay, freqStepInput, changeFreqStep);
-    attachDisplayInputEvents(bandwidthDisplay, bandwidthInput, changeBandwidth);
+    attachDisplayInputEvents(
+        bandwidthDisplay, bandwidthInput, changeBandwidth);
     attachDisplayInputEvents(maxfDisplay, maxfInput, changeMaxf);
     upconverterDisplay.addEventListener('click', toggleUpconverter);
     freqMinusButton.addEventListener('click', frequencyMinus);
@@ -936,11 +871,10 @@ function Interface(fmRadio) {
     window.addEventListener('keypress', handleShortcut);
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
-    loadSettings();
-    loadCurrentStation();
-    loadVolume();
-    presets.load(displayPresets);
-    update();
+    loadSettings(function() {
+      presets.load(displayPresets);
+      update();
+    });
   }
 
   return {

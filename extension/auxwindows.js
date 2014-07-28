@@ -25,7 +25,7 @@ var AuxWindows = (function() {
    * @param {string} band The name of the station's band.
    * @param {string} mode The station's mode.
    */
-  function savePreset(frequency, display, name, band, mode, presets) {
+  function savePreset(frequency, name, band) {
     chrome.app.window.create('savedialog.html', {
         'bounds': {
           'width': 300,
@@ -34,15 +34,30 @@ var AuxWindows = (function() {
         'resizable': false
       }, function(win) {
         win.contentWindow['opener'] = window;
+        var modeData = copyObject(band.getMode());
+        modeData['step'] = band.getStep();
         var stationData = {
           'frequency': frequency,
-          'display': display,
-          'band': band,
-          'mode': mode,
+          'display': band.toDisplayName(frequency, true),
+          'band': band.getName(),
+          'mode': modeData,
           'name': name
         };
         win.contentWindow['station'] = stationData;
     });
+  }
+
+  /**
+   * Makes a copy of an object as a map.
+   */
+  function copyObject(obj) {
+    var dest = {};
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        dest[key] = obj[key];
+      }
+    }
+    return dest;
   }
 
   /**
