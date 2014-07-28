@@ -81,8 +81,8 @@ function Presets() {
    * @param {number} frequency The preset's frequency.
    * @param {string} display The preset frequency's display name.
    * @param {string} name The station's name.
-   * @param {Band} band The name of the band.
-   * @param {Object} mode The name of the modulation scheme.
+   * @param {string} band The name of the band.
+   * @param {Object} mode A description of the modulation scheme.
    */
   function set(frequency, display, name, band, mode) {
     presets[frequency] = {

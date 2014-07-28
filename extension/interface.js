@@ -349,8 +349,10 @@ function Interface(fmRadio) {
     }
     var frequency = getFrequency();
     if (frequency in presets.get()) {
-      presetsBox.value = frequency;
-      if (presetsBox.selectedIndex > 0) {
+      var preset = presets.get(frequency);
+      if (preset.band == currentBand.getName() &&
+          preset.mode.modulation == currentBand.getMode().modulation) {
+        presetsBox.value = frequency;
         return;
       }
     }
