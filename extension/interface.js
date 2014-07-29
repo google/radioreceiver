@@ -280,7 +280,6 @@ function Interface(fmRadio) {
    * Switches the selected band.
    */
   function switchBand() {
-    saveSettings();
     var bands = appConfig.settings.region.getAvailableBands();
     var bandNames = [];
     for (var n in bands) {
@@ -313,6 +312,7 @@ function Interface(fmRadio) {
   function selectBand(bandName) {
     appConfig.state.band.select(bandName);
     restoreStation();
+    saveSettings();
   }
 
   /**
@@ -451,7 +451,6 @@ function Interface(fmRadio) {
    * Shows the settings dialog.
    */
   function showSettings() {
-    saveSettings();
     var settings = {
       'region': appConfig.settings.region.get(),
       'ppm': appConfig.settings.ppm.get(),
@@ -546,14 +545,8 @@ function Interface(fmRadio) {
       newFreq = currentBand.getMax();
     }
     appConfig.state.frequency.set(newFreq);
-    restoreFrequency();
-  }
-
-  /**
-   * Restores the frequency from the settings.
-   */
-  function restoreFrequency() {
     fmRadio.setFrequency(upconvert(appConfig.state.frequency.get()));
+    saveSettings();
   }
 
   /**
@@ -591,6 +584,7 @@ function Interface(fmRadio) {
       if (modeNames[i] == currentMode) {
         appConfig.state.mode.select(modeNames[(i + 1) % modeNames.length]);
         restoreStation();
+        saveSettings();
         return;
       }
     }
@@ -606,6 +600,7 @@ function Interface(fmRadio) {
       mode.step = newStep;
       appConfig.state.mode.update(mode);
       restoreStation();
+      saveSettings();
     }
   }
 
@@ -619,6 +614,7 @@ function Interface(fmRadio) {
       mode.params.bandwidth = newBandwidth;
       appConfig.state.mode.update(mode);
       restoreStation();
+      saveSettings();
     }
   }
 
@@ -632,6 +628,7 @@ function Interface(fmRadio) {
       mode.params.maxF = newMaxf;
       appConfig.state.mode.update(mode);
       restoreStation();
+      saveSettings();
     }
   }
 
@@ -643,6 +640,7 @@ function Interface(fmRadio) {
     mode.params.upconvert = !mode.params.upconvert;
     appConfig.state.mode.update(mode);
     restoreStation();
+    saveSettings();
   }
 
   /**
