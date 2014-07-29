@@ -40,18 +40,23 @@ function Interface(fmRadio) {
   function update() {
     setVisible(powerOffButton, fmRadio.isPlaying());
     setVisible(powerOnButton, !fmRadio.isPlaying());
-    frequencyDisplay.textContent = currentBand.toDisplayName(getFrequency());
 
-    if (!fmRadio.isStereoEnabled()) {
-      stereoIndicator.classList.add('stereoDisabled');
-      stereoIndicator.classList.remove('stereoUnavailable');
-    } else if (!fmRadio.isStereo()) {
-      stereoIndicator.classList.add('stereoUnavailable');
-      stereoIndicator.classList.remove('stereoDisabled');
+    var frequency = getFrequency();
+    appConfig.state.frequency.set(frequency);
+    frequencyDisplay.textContent = currentBand.toDisplayName(frequency);
+
+    if (fmRadio.isStereoEnabled()) {
+      stereoEnabledIndicator.classList.remove('stereoDisabled');
+      if (fmRadio.isStereo()) {
+        stereoActiveIndicator.classList.remove('stereoUnavailable');
+      } else {
+        stereoActiveIndicator.classList.add('stereoUnavailable');
+      }
     } else {
-      stereoIndicator.classList.remove('stereoDisabled');
-      stereoIndicator.classList.remove('stereoUnavailable');
+      stereoEnabledIndicator.classList.add('stereoDisabled');
+      stereoActiveIndicator.classList.add('stereoUnavailable');
     }
+
     if (fmRadio.isScanning()) {
       bandBox.classList.add('scanning');
     } else {
