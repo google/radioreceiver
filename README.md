@@ -16,10 +16,11 @@ Radio Receiver is 100% written in JavaScript, but is nevertheless fast enough th
 * Scan for stations.
 * Unlimited slots for presets.
 * Record what you hear on the radio.
-* Supported bands:
+* Built-in bands:
   * International and Japanese FM bands.
   * Weather band (US and Canada).
   * Medium Wave AM (requires an upconverter).
+* Free-tuning mode to listen to anything: short wave, air band, marine band, etc.
 
 ## Compatible hardware and software
 
@@ -27,7 +28,7 @@ Radio Receiver was written to work with an RTL-2832U-based DVB-T (European digit
 
 You can use this application on a ChromeBook, or on any other computer running a Chrome browser. Just [install it using the Chrome Web Store](https://chrome.google.com/webstore/detail/radio-receiver/miieomcelenidlleokajkghmifldohpo) or any other mechanism, plug in your USB dongle, and click on the icon to start the Radio Receiver application.
 
-To listen to Medium Wave AM radio, you need an upconverter connected between your antenna and the USB dongle. This upconverter shifts the signals up in frequency so that they can be tuned by your dongle. You can find upconverters for sale by searching for [SDR upconverter] on your favorite online store or web search engine.
+To listen to Medium Wave and Short Wave radio, you need an upconverter connected between your antenna and the USB dongle. This upconverter shifts the signals up in frequency so that they can be tuned by your dongle. You can find upconverters for sale by searching for [SDR upconverter] on your favorite online store or web search engine.
 
 ## Support
 
