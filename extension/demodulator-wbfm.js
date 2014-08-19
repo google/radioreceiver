@@ -39,7 +39,7 @@ function Demodulator_WBFM(inRate, outRate) {
 
   /**
    * Demodulates the signal.
-   * @param {Samples} samples The I/Q samples off the tuner.
+   * @param {Float32Array} samples The I/Q samples off the tuner.
    * @param {boolean} inStereo Whether to try decoding the stereo signal.
    * @return {{left:ArrayBuffer,right:ArrayBuffer,stereo:boolean,carrier:boolean}}
    *     The demodulated audio signal.
@@ -47,7 +47,7 @@ function Demodulator_WBFM(inRate, outRate) {
   function demodulate(samples, inStereo) {
     var demodulated = demodulator.demodulateTuned(samples);
     var leftAudio = monoSampler.downsample(demodulated);
-    var rightAudio = new Samples(new Float32Array(leftAudio.data), leftAudio.rate);
+    var rightAudio = new Float32Array(leftAudio);
     var stereoOut = false;
 
     if (inStereo) {
@@ -55,17 +55,17 @@ function Demodulator_WBFM(inRate, outRate) {
       if (stereo.found) {
         stereoOut = true;
         var diffAudio = stereoSampler.downsample(stereo.diff);
-        for (var i = 0; i < diffAudio.data.length; ++i) {
-          rightAudio.data[i] -= diffAudio.data[i];
-          leftAudio.data[i] += diffAudio.data[i];
+        for (var i = 0; i < diffAudio.length; ++i) {
+          rightAudio[i] -= diffAudio[i];
+          leftAudio[i] += diffAudio[i];
         }
       }
     }
 
     leftDeemph.inPlace(leftAudio);
     rightDeemph.inPlace(rightAudio);
-    return {left: leftAudio.data.buffer,
-            right: rightAudio.data.buffer,
+    return {left: leftAudio.buffer,
+            right: rightAudio.buffer,
             stereo: stereoOut,
             carrier: demodulator.hasCarrier()};
   }

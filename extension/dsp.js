@@ -62,12 +62,12 @@ function FIRFilter(coefficients, opt_step) {
 
   /**
    * Loads a new block of samples to filter.
-   * @param {Samples} samples The samples to load.
+   * @param {Float32Array} samples The samples to load.
    */
   function loadSamples(samples) {
-    var newSamples = new Float32Array(samples.data.length + offset);
+    var newSamples = new Float32Array(samples.length + offset);
     newSamples.set(curSamples.subarray(curSamples.length - offset));
-    newSamples.set(samples.data, offset);
+    newSamples.set(samples, offset);
     curSamples = newSamples;
   }
 
@@ -106,16 +106,16 @@ function Downsampler(inRate, outRate, coefficients) {
 
   /**
    * Returns a downsampled version of the given samples.
-   * @param {Samples} samples The sample block to downsample.
-   * @return {Samples} The downsampled block.
+   * @param {Float32Array} samples The sample block to downsample.
+   * @return {Float32Array} The downsampled block.
    */
   function downsample(samples) {
     filter.loadSamples(samples);
-    var outArr = new Float32Array(Math.floor(samples.data.length / rateMul));
+    var outArr = new Float32Array(Math.floor(samples.length / rateMul));
     for (var i = 0, readFrom = 0; i < outArr.length; ++i, readFrom += rateMul) {
       outArr[i] = filter.get(Math.floor(readFrom));
     }
-    return new Samples(outArr, outRate);
+    return outArr;
   }
 
   return {
@@ -138,12 +138,12 @@ function IQDownsampler(inRate, outRate, coefficients) {
 
   /**
    * Returns a downsampled version of each stream of samples.
-   * @param {Samples} samples The sample block to downsample.
-   * @return {Array.<Samples>} An array that contains first the downsampled I
+   * @param {Float32Array} samples The sample block to downsample.
+   * @return {Array.<Float32Array>} An array that contains first the downsampled I
    *     stream and next the downsampled Q stream.
    */
   function downsample(samples) {
-    var numSamples = Math.floor(samples.data.length / (2 * rateMul));
+    var numSamples = Math.floor(samples.length / (2 * rateMul));
     filter.loadSamples(samples);
     var outArrs = [new Float32Array(numSamples), new Float32Array(numSamples)];
     for (var i = 0, readFrom = 0; i < numSamples; ++i, readFrom += rateMul) {
@@ -151,7 +151,7 @@ function IQDownsampler(inRate, outRate, coefficients) {
       outArrs[0][i] = filter.get(idx);
       outArrs[1][i] = filter.get(idx + 1);
     }
-    return [new Samples(outArrs[0], outRate), new Samples(outArrs[1], outRate)];
+    return [outArrs[0], outArrs[1]];
   }
 
   return {
@@ -175,13 +175,13 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
 
   /**
    * Demodulates the given I/Q samples.
-   * @param {Samples} samples The samples to demodulate.
-   * @returns {Samples} The demodulated sound.
+   * @param {Float32Array} samples The samples to demodulate.
+   * @returns {Float32Array} The demodulated sound.
    */
   function demodulateTuned(samples) {
     var IQ = downsampler.downsample(samples);
-    var I = IQ[0].data;
-    var Q = IQ[1].data;
+    var I = IQ[0];
+    var Q = IQ[1];
     var iAvg = average(I);
     var qAvg = average(Q);
     var out = new Float32Array(I.length);
@@ -202,7 +202,7 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
       out[i] = (out[i] - halfPoint) / halfPoint;
     }
     carrier = sigSqrSum > (0.002 * out.length);
-    return new Samples(out, outRate);
+    return out;
   }
 
   function hasCarrier() {
@@ -236,13 +236,13 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
 
   /**
    * Demodulates the given I/Q samples.
-   * @param {Samples} samples The samples to demodulate.
-   * @returns {Samples} The demodulated sound.
+   * @param {Float32Array} samples The samples to demodulate.
+   * @returns {Float32Array} The demodulated sound.
    */
   function demodulateTuned(samples) {
     var IQ = downsampler.downsample(samples);
-    var I = IQ[0].data;
-    var Q = IQ[1].data;
+    var I = IQ[0];
+    var Q = IQ[1];
     var out = new Float32Array(I.length);
 
     var sigSqrSum = 0;
@@ -275,7 +275,7 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
       sigSqrSum += lI * lI;
     }
     carrier = sigSqrSum > (0.002 * out.length);
-    return new Samples(out, outRate);
+    return out;
   }
 
   function hasCarrier() {
@@ -314,14 +314,14 @@ function StereoSeparator(sampleRate, pilotFreq) {
 
   /**
    * Locks on to the pilot tone and uses it to demodulate the stereo audio.
-   * @param {Samples} samples The original audio stream.
+   * @param {Float32Array} samples The original audio stream.
    * @return {Object} An object with a key 'found' that tells whether a
    *     consistent stereo pilot tone was detected and a key 'diff'
    *     that contains the original stream demodulated with the
    *     reconstructed stereo carrier.
    */
   function separate(samples) {
-    var out = new Float32Array(samples.data);
+    var out = new Float32Array(samples);
     for (var i = 0; i < out.length; ++i) {
       var hdev = iavg.add(out[i] * sin);
       var vdev = qavg.add(out[i] * cos);
@@ -340,7 +340,7 @@ function StereoSeparator(sampleRate, pilotFreq) {
     }
     return {
       found: cavg.getStd() < STD_THRES,
-      diff: new Samples(out, samples.rate)
+      diff: out
     };
   }
 
@@ -361,12 +361,12 @@ function Deemphasizer(sampleRate, timeConstant_uS) {
 
   /**
    * Deemphasizes the given samples in place.
-   * @param {Samples} samples The samples to deemphasize.
+   * @param {Float32Array} samples The samples to deemphasize.
    */
   function inPlace(samples) {
-    for (var i = 0; i < samples.data.length; ++i) {
-      val = (1- mult) * samples.data[i] + mult * val;
-      samples.data[i] = val;
+    for (var i = 0; i < samples.length; ++i) {
+      val = (1- mult) * samples[i] + mult * val;
+      samples[i] = val;
     }
   }
 
@@ -426,23 +426,10 @@ function average(arr) {
 }
 
 /**
- * A class to store a list of floating-point samples with a given rate.
- * @param {Float32Array} floatArray An array of the samples.
- * @param {number} rate The sample rate.
- * @constructor
- */
-function Samples(floatArray, rate) {
-  return {
-    rate: rate,
-    data: floatArray
-  };
-}
-
-/**
  * Converts the given buffer of unsigned 8-bit samples into a samples object.
  * @param {ArrayBuffer} buffer A buffer containing the unsigned 8-bit samples.
  * @param {number} rate The buffer's sample rate.
- * @return {Samples} The converted samples.
+ * @return {Float32Array} The converted samples.
  */
 function samplesFromUint8(buffer, rate) {
   var arr = new Uint8Array(buffer);
@@ -451,5 +438,5 @@ function samplesFromUint8(buffer, rate) {
   for (var i = 0; i < len; ++i) {
     out[i] = arr[i] / 128.0 - 1;
   }
-  return new Samples(out, rate);
+  return out;
 }
