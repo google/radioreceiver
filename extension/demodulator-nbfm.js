@@ -34,12 +34,13 @@ function Demodulator_NBFM(inRate, outRate, maxF) {
 
   /**
    * Demodulates the signal.
-   * @param {Float32Array} samples The I/Q samples off the tuner.
+   * @param {Float32Array} samplesI The I components of the samples.
+   * @param {Float32Array} samplesQ The Q components of the samples.
    * @return {{left:ArrayBuffer,right:ArrayBuffer,stereo:boolean,carrier:boolean}}
    *     The demodulated audio signal.
    */
-  function demodulate(samples) {
-    var demodulated = demodulator.demodulateTuned(samples);
+  function demodulate(samplesI, samplesQ) {
+    var demodulated = demodulator.demodulateTuned(samplesI, samplesQ);
     var audio = downSampler.downsample(demodulated);
     return {left: audio.buffer,
             right: new Float32Array(audio).buffer,

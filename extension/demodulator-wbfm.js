@@ -39,13 +39,14 @@ function Demodulator_WBFM(inRate, outRate) {
 
   /**
    * Demodulates the signal.
-   * @param {Float32Array} samples The I/Q samples off the tuner.
+   * @param {Float32Array} samplesI The I components of the samples.
+   * @param {Float32Array} samplesQ The Q components of the samples.
    * @param {boolean} inStereo Whether to try decoding the stereo signal.
    * @return {{left:ArrayBuffer,right:ArrayBuffer,stereo:boolean,carrier:boolean}}
    *     The demodulated audio signal.
    */
-  function demodulate(samples, inStereo) {
-    var demodulated = demodulator.demodulateTuned(samples);
+  function demodulate(samplesI, samplesQ, inStereo) {
+    var demodulated = demodulator.demodulateTuned(samplesI, samplesQ);
     var leftAudio = monoSampler.downsample(demodulated);
     var rightAudio = new Float32Array(leftAudio);
     var stereoOut = false;

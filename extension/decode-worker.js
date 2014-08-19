@@ -41,8 +41,8 @@ function Decoder() {
    */
   function process(buffer, inStereo, opt_data) {
     var data = opt_data || {};
-    var samples = samplesFromUint8(buffer, IN_RATE);
-    var out = demodulator.demodulate(samples, inStereo);
+    var IQ = iqSamplesFromUint8(buffer, IN_RATE);
+    var out = demodulator.demodulate(IQ[0], IQ[1], inStereo);
     data['stereo'] = out['stereo'];
     data['carrier'] = out['carrier'];
     postMessage([out.left, out.right, data], [out.left, out.right]);

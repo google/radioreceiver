@@ -51,13 +51,11 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
 /**
  * An object to apply a FIR filter to a sequence of samples.
  * @param {Float32Array} coefficients The coefficients of the filter to apply.
- * @param {number=} opt_step The stepping between samples (1 by default).
  * @constructor
  */
-function FIRFilter(coefficients, opt_step) {
+function FIRFilter(coefficients) {
   var coefs = coefficients;
-  var step = opt_step || 1;
-  var offset = (coefs.length - 1) * step;
+  var offset = coefs.length - 1;
   var curSamples = new Float32Array(offset);
 
   /**
@@ -81,7 +79,7 @@ function FIRFilter(coefficients, opt_step) {
   function get(index) {
     var out = 0;
     for (var i = 0; i < coefs.length; ++i) {
-      out += coefs[i] * curSamples[index + i * step];
+      out += coefs[i] * curSamples[index + i];
     }
     return out;
   }
@@ -124,42 +122,6 @@ function Downsampler(inRate, outRate, coefficients) {
 }
 
 /**
- * A downsampler for the interlaced I/Q stream coming from the tuner. Returns
- * the separated I and Q streams.
- * @param {number} inRate The input signal's sample rate.
- * @param {number} outRate The output signal's sample rate.
- * @param {Float32Array} coefficients The coefficients for the FIR filter to
- *     apply to the original signal before downsampling it.
- * @constructor
- */
-function IQDownsampler(inRate, outRate, coefficients) {
-  var filter = new FIRFilter(coefficients, 2);
-  var rateMul = inRate / outRate;
-
-  /**
-   * Returns a downsampled version of each stream of samples.
-   * @param {Float32Array} samples The sample block to downsample.
-   * @return {Array.<Float32Array>} An array that contains first the downsampled I
-   *     stream and next the downsampled Q stream.
-   */
-  function downsample(samples) {
-    var numSamples = Math.floor(samples.length / (2 * rateMul));
-    filter.loadSamples(samples);
-    var outArrs = [new Float32Array(numSamples), new Float32Array(numSamples)];
-    for (var i = 0, readFrom = 0; i < numSamples; ++i, readFrom += rateMul) {
-      var idx = 2 * Math.floor(readFrom);
-      outArrs[0][i] = filter.get(idx);
-      outArrs[1][i] = filter.get(idx + 1);
-    }
-    return [outArrs[0], outArrs[1]];
-  }
-
-  return {
-    downsample: downsample
-  };
-}
-
-/**
  * A class to demodulate IQ-interleaved samples into a raw audio signal.
  * @param {number} inRate The sample rate for the input signal.
  * @param {number} outRate The sample rate for the output audio.
@@ -169,19 +131,22 @@ function IQDownsampler(inRate, outRate, coefficients) {
  */
 function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
   var coefs = getLowPassFIRCoeffs(inRate, filterFreq, kernelLen);
-  var downsampler = new IQDownsampler(inRate, outRate, coefs);
+  var downsamplerI = new Downsampler(inRate, outRate, coefs);
+  var downsamplerQ = new Downsampler(inRate, outRate, coefs);
 
   var carrier = false;
 
   /**
    * Demodulates the given I/Q samples.
-   * @param {Float32Array} samples The samples to demodulate.
+   * @param {Float32Array} samplesI The I component of the samples
+   *     to demodulate.
+   * @param {Float32Array} samplesQ The Q component of the samples
+   *     to demodulate.
    * @returns {Float32Array} The demodulated sound.
    */
-  function demodulateTuned(samples) {
-    var IQ = downsampler.downsample(samples);
-    var I = IQ[0];
-    var Q = IQ[1];
+  function demodulateTuned(samplesI, samplesQ) {
+    var I = downsamplerI.downsample(samplesI);
+    var Q = downsamplerQ.downsample(samplesQ);
     var iAvg = average(I);
     var qAvg = average(Q);
     var out = new Float32Array(I.length);
@@ -228,7 +193,8 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
   var AMPL_CONV = outRate / (2 * Math.PI * maxF);
 
   var coefs = getLowPassFIRCoeffs(inRate, filterFreq, kernelLen);
-  var downsampler = new IQDownsampler(inRate, outRate, coefs);
+  var downsamplerI = new Downsampler(inRate, outRate, coefs);
+  var downsamplerQ = new Downsampler(inRate, outRate, coefs);
   var lI = 0;
   var lQ = 0;
 
@@ -236,13 +202,15 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
 
   /**
    * Demodulates the given I/Q samples.
-   * @param {Float32Array} samples The samples to demodulate.
+   * @param {Float32Array} samplesI The I component of the samples
+   *     to demodulate.
+   * @param {Float32Array} samplesQ The Q component of the samples
+   *     to demodulate.
    * @returns {Float32Array} The demodulated sound.
    */
-  function demodulateTuned(samples) {
-    var IQ = downsampler.downsample(samples);
-    var I = IQ[0];
-    var Q = IQ[1];
+  function demodulateTuned(samplesI, samplesQ) {
+    var I = downsamplerI.downsample(samplesI);
+    var Q = downsamplerQ.downsample(samplesQ);
     var out = new Float32Array(I.length);
 
     var sigSqrSum = 0;
@@ -426,17 +394,21 @@ function average(arr) {
 }
 
 /**
- * Converts the given buffer of unsigned 8-bit samples into a samples object.
+ * Converts the given buffer of unsigned 8-bit samples into a pair of 32-bit
+ *     floating-point sample streams.
  * @param {ArrayBuffer} buffer A buffer containing the unsigned 8-bit samples.
  * @param {number} rate The buffer's sample rate.
- * @return {Float32Array} The converted samples.
+ * @return {Array.<Float32Array>} An array that contains first the I stream
+ *     and next the Q stream.
  */
-function samplesFromUint8(buffer, rate) {
+function iqSamplesFromUint8(buffer, rate) {
   var arr = new Uint8Array(buffer);
-  var len = arr.length;
-  var out = new Float32Array(len);
+  var len = arr.length / 2;
+  var outI = new Float32Array(len);
+  var outQ = new Float32Array(len);
   for (var i = 0; i < len; ++i) {
-    out[i] = arr[i] / 128.0 - 1;
+    outI[i] = arr[2 * i] / 128.0 - 1;
+    outQ[i] = arr[2 * i + 1] / 128.0 - 1;
   }
-  return out;
+  return [outI, outQ];
 }
