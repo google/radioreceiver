@@ -28,7 +28,7 @@
 function Demodulator_SSB(inRate, outRate, bandwidth, upper) {
   var INTER_RATE = 48000;
 
-  var demodulator = new SSBDemodulator(inRate, INTER_RATE, bandwidth, upper, 351);
+  var demodulator = new SSBDemodulator(inRate, INTER_RATE, bandwidth, upper, 151);
   var filterCoefs = getLowPassFIRCoeffs(INTER_RATE, 10000, 41);
   var downSampler = new Downsampler(INTER_RATE, outRate, filterCoefs);
 

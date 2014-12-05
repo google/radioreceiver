@@ -178,13 +178,13 @@ function Downsampler(inRate, outRate, coefficients) {
  * @constructor
  */
 function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
-  var coefs = getLowPassFIRCoeffs(inRate, 10000, 351);
+  var coefs = getLowPassFIRCoeffs(inRate, 10000, kernelLen);
   var downsamplerI = new Downsampler(inRate, outRate, coefs);
   var downsamplerQ = new Downsampler(inRate, outRate, coefs);
-  var coefsHilbert = getHilbertCoeffs(351);
+  var coefsHilbert = getHilbertCoeffs(kernelLen);
   var filterDelay = new FIRFilter(coefsHilbert);
   var filterHilbert = new FIRFilter(coefsHilbert, upper);
-  var coefsSide = getLowPassFIRCoeffs(outRate, filterFreq, 151);
+  var coefsSide = getLowPassFIRCoeffs(outRate, filterFreq, kernelLen);
   var filterSide = new FIRFilter(coefsSide);
   var hilbertMul = upper ? -1 : 1;
 
