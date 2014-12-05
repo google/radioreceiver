@@ -49,6 +49,43 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
 }
 
 /**
+ * Multiplies an array that represents a signal by a sinusoidal.
+ * @param {Float32Array} samples The array to multiply.
+ * @param {number} sampleRate The signal's sample rate.
+ * @param {number} freq The frequency to multiply by.
+ * @param {boolean} cosine Whether to use cosine (sine otherwise).
+ * @return {Float32Array} The multiplied array.
+ */
+function multiplyArray(samples, sampleRate, freq, cosine) {
+  var out = new Float32Array(samples.length);
+  var angFreq = 2 * Math.PI * freq / sampleRate;
+  var center = Math.floor(out.length / 2);
+  for (var i = 0; i < out.length; ++i) {
+    var angle = angFreq * (center - i);
+    out[i] = samples[i] * (cosine ? Math.cos(angle) : Math.sin(angle));
+  }
+  return out;
+}
+
+/**
+ * Returns coefficients for a Hilbert transform.
+ * @param {number} length The length of the kernel.
+ * @param {bool} upper Whether to calculate the coefficients for USB.
+ * @return {Float32Array} The kernel coefficients.
+ */
+function getHilbertCoeffs(length, upper) {
+  length += (length + 1) % 2;
+  var center = Math.floor(length / 2);
+  var out = new Float32Array(length);
+  for (var i = 0; i < out.length; ++i) {
+    if ((i % 2) == 0) {
+      out[i] = 2 / (Math.PI * (center - i));
+    }
+  }
+  return out;
+}
+
+/**
  * An object to apply a FIR filter to a sequence of samples.
  * @param {Float32Array} coefficients The coefficients of the filter to apply.
  * @constructor
@@ -56,6 +93,7 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
 function FIRFilter(coefficients) {
   var coefs = coefficients;
   var offset = coefs.length - 1;
+  var center = Math.floor(coefs.length / 2);
   var curSamples = new Float32Array(offset);
 
   /**
@@ -84,9 +122,18 @@ function FIRFilter(coefficients) {
     return out;
   }
 
+  /**
+   * Returns a delayed sample.
+   * @param {number} index The index of the relative sample to return.
+   */
+  function getDelayed(index) {
+    return curSamples[index + center];
+  }
+
   return {
     get: get,
-    loadSamples: loadSamples
+    loadSamples: loadSamples,
+    getDelayed: getDelayed
   };
 }
 
@@ -125,8 +172,70 @@ function Downsampler(inRate, outRate, coefficients) {
  * A class to demodulate IQ-interleaved samples into a raw audio signal.
  * @param {number} inRate The sample rate for the input signal.
  * @param {number} outRate The sample rate for the output audio.
+ * @param {number} filterFreq The bandwidth of the sideband.
+ * @param {number} upper Whether we are demodulating the upper sideband.
+ * @param {number} kernelLen The length of the filter kernel.
+ * @constructor
+ */
+function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
+  var coefs = getLowPassFIRCoeffs(inRate, 10000, 351);
+  var downsamplerI = new Downsampler(inRate, outRate, coefs);
+  var downsamplerQ = new Downsampler(inRate, outRate, coefs);
+  var coefsHilbert = getHilbertCoeffs(351);
+  var filterDelay = new FIRFilter(coefsHilbert);
+  var filterHilbert = new FIRFilter(coefsHilbert, upper);
+  var coefsSide = getLowPassFIRCoeffs(outRate, filterFreq, 151);
+  var filterSide = new FIRFilter(coefsSide);
+  var hilbertMul = upper ? -1 : 1;
+
+  var carrier = false;
+
+  /**
+   * Demodulates the given I/Q samples.
+   * @param {Float32Array} samplesI The I component of the samples
+   *     to demodulate.
+   * @param {Float32Array} samplesQ The Q component of the samples
+   *     to demodulate.
+   * @returns {Float32Array} The demodulated sound.
+   */
+  function demodulateTuned(samplesI, samplesQ) {
+    var I = downsamplerI.downsample(samplesI);
+    var Q = downsamplerQ.downsample(samplesQ);
+
+    var sigSqrSum = 0;
+    filterDelay.loadSamples(I);
+    filterHilbert.loadSamples(Q);
+    var prefilter = new Float32Array(I.length);
+    for (var i = 0; i < prefilter.length; ++i) {
+      prefilter[i] = filterDelay.getDelayed(i) + filterHilbert.get(i) * hilbertMul;
+    }
+    filterSide.loadSamples(prefilter);
+    var out = new Float32Array(I.length);
+    for (var i = 0; i < out.length; ++i) {
+      out[i] = filterSide.get(i);
+    }
+
+    carrier = sigSqrSum > (0.002 * out.length);
+    return out;
+  }
+
+  function hasCarrier() {
+    return carrier;
+  }
+
+  return {
+    demodulateTuned: demodulateTuned,
+    hasCarrier: hasCarrier
+  }
+}
+
+/**
+ * A class to demodulate IQ-interleaved samples into a raw audio signal.
+ * @param {number} inRate The sample rate for the input signal.
+ * @param {number} outRate The sample rate for the output audio.
  * @param {number} filterFreq The frequency of the low-pass filter.
  * @param {number} kernelLen The length of the filter kernel.
+
  * @constructor
  */
 function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
@@ -141,6 +250,7 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
    * @param {Float32Array} samplesI The I component of the samples
    *     to demodulate.
    * @param {Float32Array} samplesQ The Q component of the samples
+
    *     to demodulate.
    * @returns {Float32Array} The demodulated sound.
    */
@@ -165,6 +275,7 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
     var halfPoint = sigSum / out.length;
     for (var i = 0; i < out.length; ++i) {
       out[i] = (out[i] - halfPoint) / halfPoint;
+
     }
     carrier = sigSqrSum > (0.002 * out.length);
     return out;

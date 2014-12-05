@@ -19,6 +19,7 @@
 
 importScripts('dsp.js');
 importScripts('demodulator-am.js');
+importScripts('demodulator-ssb.js');
 importScripts('demodulator-nbfm.js');
 importScripts('demodulator-wbfm.js');
 
@@ -56,6 +57,12 @@ function Decoder() {
     switch (mode.modulation) {
       case 'AM':
         demodulator = new Demodulator_AM(IN_RATE, OUT_RATE, mode.bandwidth);
+        break;
+      case 'USB':
+        demodulator = new Demodulator_SSB(IN_RATE, OUT_RATE, mode.bandwidth, true);
+        break;
+      case 'LSB':
+        demodulator = new Demodulator_SSB(IN_RATE, OUT_RATE, mode.bandwidth, false);
         break;
       case 'NBFM':
         demodulator = new Demodulator_NBFM(IN_RATE, OUT_RATE, mode.maxF);

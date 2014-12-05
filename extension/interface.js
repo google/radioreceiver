@@ -72,7 +72,9 @@ function Interface(fmRadio) {
       var mode = currentBand.getMode();
       modulationDisplay.textContent = mode.modulation;
       freqStepDisplay.textContent = currentBand.getStep();
-      setVisible(bandwidthBox, mode.modulation == 'AM');
+      setVisible(bandwidthBox, mode.modulation == 'AM'
+                               || mode.modulation == 'USB'
+                               || mode.modulation == 'LSB');
       bandwidthDisplay.textContent = Number(mode.bandwidth) || 0;
       setVisible(maxfBox, mode.modulation == 'NBFM');
       maxfDisplay.textContent = Number(mode.maxF) || 0;
@@ -583,7 +585,7 @@ function Interface(fmRadio) {
    * Changes modulation in free-tuning mode.
    */
   function switchModulation() {
-    var modeNames = ['WBFM', 'NBFM', 'AM'];
+    var modeNames = ['WBFM', 'NBFM', 'AM', 'LSB', 'USB'];
     var currentMode = modulationDisplay.textContent;
     for (var i = 0; i < modeNames.length; ++i) {
       if (modeNames[i] == currentMode) {

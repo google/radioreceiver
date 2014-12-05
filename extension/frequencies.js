@@ -70,6 +70,14 @@ var DefaultModes = {
     modulation: 'AM',
     bandwidth: 10000
   },
+  'LSB': {
+    modulation: 'LSB',
+    bandwidth: 2900
+  },
+  'USB': {
+    modulation: 'USB',
+    bandwidth: 2900
+  },
   'NBFM': {
     modulation: 'NBFM',
     maxF: 10000
