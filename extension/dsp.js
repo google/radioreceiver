@@ -435,7 +435,7 @@ function StereoSeparator(sampleRate, pilotFreq) {
  * @constructor
  */
 function Deemphasizer(sampleRate, timeConstant_uS) {
-  var mult = Math.exp(-1e6 / (timeConstant_uS * sampleRate));
+  var alpha = 1 / (1 + sampleRate * timeConstant_uS / 1e6);
   var val = 0;
 
   /**
@@ -444,7 +444,7 @@ function Deemphasizer(sampleRate, timeConstant_uS) {
    */
   function inPlace(samples) {
     for (var i = 0; i < samples.length; ++i) {
-      val = (1- mult) * samples[i] + mult * val;
+      val = val + alpha * (samples[i] - val);
       samples[i] = val;
     }
   }
