@@ -187,6 +187,8 @@ function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
   var coefsSide = getLowPassFIRCoeffs(outRate, filterFreq, kernelLen);
   var filterSide = new FIRFilter(coefsSide);
   var hilbertMul = upper ? -1 : 1;
+  var powerLongAvg = new ExpAverage(outRate * 5);
+  var powerShortAvg = new ExpAverage(outRate * 0.5);
 
   var carrier = false;
 
@@ -212,10 +214,16 @@ function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
     filterSide.loadSamples(prefilter);
     var out = new Float32Array(I.length);
     for (var i = 0; i < out.length; ++i) {
-      out[i] = filterSide.get(i);
+      var sig = filterSide.get(i);
+      var power = sig * sig;
+      sigSqrSum += power;
+      var stPower = powerShortAvg.add(power);
+      var ltPower = powerLongAvg.add(power);
+      var multi = 0.9 * Math.max(1, Math.sqrt(2 / Math.min(1/128, Math.max(ltPower, stPower))));
+      out[i] = multi * filterSide.get(i);
     }
 
-    carrier = sigSqrSum > (0.002 * out.length);
+    carrier = sigSqrSum > (0.0002 * out.length);
     return out;
   }
 
