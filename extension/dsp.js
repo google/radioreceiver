@@ -189,8 +189,8 @@ function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
   var hilbertMul = upper ? -1 : 1;
   var powerLongAvg = new ExpAverage(outRate * 5);
   var powerShortAvg = new ExpAverage(outRate * 0.5);
-
-  var carrier = false;
+  var sigRatio = inRate / outRate;
+  var relSignalPower = 0;
 
   /**
    * Demodulates the given I/Q samples.
@@ -204,6 +204,7 @@ function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
     var I = downsamplerI.downsample(samplesI);
     var Q = downsamplerQ.downsample(samplesQ);
 
+    var specSqrSum = 0;
     var sigSqrSum = 0;
     filterDelay.loadSamples(I);
     filterHilbert.loadSamples(Q);
@@ -221,19 +222,23 @@ function SSBDemodulator(inRate, outRate, filterFreq, upper, kernelLen) {
       var ltPower = powerLongAvg.add(power);
       var multi = 0.9 * Math.max(1, Math.sqrt(2 / Math.min(1/128, Math.max(ltPower, stPower))));
       out[i] = multi * filterSide.get(i);
+      var origIndex = Math.floor(i * sigRatio);
+      var origI = samplesI[origIndex];
+      var origQ = samplesQ[origIndex];
+      specSqrSum += origI * origI + origQ * origQ;
     }
 
-    carrier = sigSqrSum > (0.0002 * out.length);
+    relSignalPower = sigSqrSum / specSqrSum;
     return out;
   }
 
-  function hasCarrier() {
-    return carrier;
+  function getRelSignalPower() {
+    return relSignalPower;
   }
 
   return {
     demodulateTuned: demodulateTuned,
-    hasCarrier: hasCarrier
+    getRelSignalPower: getRelSignalPower
   }
 }
 
@@ -250,8 +255,8 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
   var coefs = getLowPassFIRCoeffs(inRate, filterFreq, kernelLen);
   var downsamplerI = new Downsampler(inRate, outRate, coefs);
   var downsamplerQ = new Downsampler(inRate, outRate, coefs);
-
-  var carrier = false;
+  var sigRatio = inRate / outRate;
+  var relSignalPower = 0;
 
   /**
    * Demodulates the given I/Q samples.
@@ -269,6 +274,7 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
     var qAvg = average(Q);
     var out = new Float32Array(I.length);
 
+    var specSqrSum = 0;
     var sigSqrSum = 0;
     var sigSum = 0;
     for (var i = 0; i < out.length; ++i) {
@@ -277,25 +283,28 @@ function AMDemodulator(inRate, outRate, filterFreq, kernelLen) {
       var power = iv * iv + qv * qv;
       var ampl = Math.sqrt(power);
       out[i] = ampl;
+      var origIndex = Math.floor(i * sigRatio);
+      var origI = samplesI[origIndex];
+      var origQ = samplesQ[origIndex];
+      specSqrSum += origI * origI + origQ * origQ;
       sigSqrSum += power;
       sigSum += ampl;
     }
     var halfPoint = sigSum / out.length;
     for (var i = 0; i < out.length; ++i) {
       out[i] = (out[i] - halfPoint) / halfPoint;
-
     }
-    carrier = sigSqrSum > (0.002 * out.length);
+    relSignalPower = sigSqrSum / specSqrSum;
     return out;
   }
 
-  function hasCarrier() {
-    return carrier;
+  function getRelSignalPower() {
+    return relSignalPower;
   }
 
   return {
     demodulateTuned: demodulateTuned,
-    hasCarrier: hasCarrier
+    getRelSignalPower: getRelSignalPower
   }
 }
 
@@ -316,8 +325,8 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
   var downsamplerQ = new Downsampler(inRate, outRate, coefs);
   var lI = 0;
   var lQ = 0;
-
-  var carrier = false;
+  var lAng = 0;
+  var relSignalPower = 0;
 
   /**
    * Demodulates the given I/Q samples.
@@ -332,6 +341,7 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
     var Q = downsamplerQ.downsample(samplesQ);
     var out = new Float32Array(I.length);
 
+    var specSqrSum = 0;
     var sigSqrSum = 0;
     for (var i = 0; i < out.length; ++i) {
       var real = lI * I[i] + lQ * Q[i];
@@ -359,19 +369,19 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
                            + div * 0.19556307900617517))) * AMPL_CONV;
       lI = I[i];
       lQ = Q[i];
-      sigSqrSum += lI * lI;
+      sigSqrSum += lI * lI + lQ * lQ;
     }
-    carrier = sigSqrSum > (0.002 * out.length);
+    relSignalPower = sigSqrSum / out.length;
     return out;
   }
 
-  function hasCarrier() {
-    return carrier;
+  function getRelSignalPower() {
+    return relSignalPower;
   }
 
   return {
     demodulateTuned: demodulateTuned,
-    hasCarrier: hasCarrier
+    getRelSignalPower: getRelSignalPower
   }
 }
 

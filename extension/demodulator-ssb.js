@@ -45,7 +45,7 @@ function Demodulator_SSB(inRate, outRate, bandwidth, upper) {
     return {left: audio.buffer,
             right: new Float32Array(audio).buffer,
             stereo: false,
-            carrier: demodulator.hasCarrier()};
+            signalLevel: demodulator.getRelSignalPower() / 0.02};
   }
 
   return {

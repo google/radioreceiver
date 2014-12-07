@@ -45,7 +45,7 @@ function Decoder() {
     var IQ = iqSamplesFromUint8(buffer, IN_RATE);
     var out = demodulator.demodulate(IQ[0], IQ[1], inStereo);
     data['stereo'] = out['stereo'];
-    data['carrier'] = out['carrier'];
+    data['signalLevel'] = out['signalLevel'];
     postMessage([out.left, out.right, data], [out.left, out.right]);
   }
 

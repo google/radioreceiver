@@ -44,7 +44,7 @@ function Demodulator_AM(inRate, outRate, bandwidth) {
     return {left: audio.buffer,
             right: new Float32Array(audio).buffer,
             stereo: false,
-            carrier: demodulator.hasCarrier()};
+            signalLevel: demodulator.getRelSignalPower() / 0.02};
   }
 
   return {

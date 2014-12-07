@@ -534,7 +534,7 @@ function RadioController() {
     var right = new Float32Array(msg.data[1]);
     player.play(left, right);
     if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
-      if (msg.data[2]['carrier']) {
+      if (msg.data[2]['signalLevel'] > 1) {
         setFrequency(msg.data[2].frequency);
       }
     } else if (estimatingPpm) {
