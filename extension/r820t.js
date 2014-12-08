@@ -255,15 +255,13 @@ function R820T(com, xtalFreq, throwError) {
    * @param {Function} kont The continuation for this function.
    */
   function setPll(freq, kont) {
-    var freqKhz = Math.round(freq / 1000);
     var pllRef = Math.floor(xtalFreq);
-    var pllRefKhz = Math.round(pllRef / 1000);
     writeEach([
       [0x10, 0x00, 0x10],
       [0x1a, 0x00, 0x0c],
       [0x12, 0x80, 0xe0]
     ], function() {
-    var divNum = Math.min(6, Math.floor(Math.log(1770000 / freqKhz) / Math.LN2));
+    var divNum = Math.min(6, Math.floor(Math.log(1770000000 / freq) / Math.LN2));
     var mixDiv = 1 << (divNum + 1);
     readRegBuffer(0x00, 5, function(data) {
     var arr = new Uint8Array(data);
@@ -276,18 +274,18 @@ function R820T(com, xtalFreq, throwError) {
     writeRegMask(0x10, divNum << 5, 0xe0, function() {
     var vcoFreq = freq * mixDiv;
     var nint = Math.floor(vcoFreq / (2 * pllRef));
-    var vcoFra = Math.floor((vcoFreq - 2 * pllRef * nint) / 1000);
+    var vcoFra = vcoFreq % (2 * pllRef);
     if (nint > 63) {
       hasPllLock = false;
       return kont();
     }
     var ni = Math.floor((nint - 13) / 4);
-    var si = nint - 4 * ni - 13;
+    var si = (nint - 13) % 4;
     writeEach([
       [0x14, ni + (si << 6), 0xff],
       [0x12, vcoFra == 0 ? 0x08 : 0x00, 0x08]
     ], function() {
-    var sdm = Math.min(65535, Math.floor(32768 * vcoFra / pllRefKhz));
+    var sdm = Math.min(65535, Math.floor(32768 * vcoFra / pllRef));
     writeEach([
       [0x16, sdm >> 8, 0xff],
       [0x15, sdm & 0xff, 0xff]
