@@ -325,7 +325,6 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
   var downsamplerQ = new Downsampler(inRate, outRate, coefs);
   var lI = 0;
   var lQ = 0;
-  var lAng = 0;
   var relSignalPower = 0;
 
   /**
