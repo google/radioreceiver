@@ -141,7 +141,7 @@ option {
 }
 
 .frequencyInput {
-  top: 2px;
+  top: 4px;
   background: transparent;
   border: none;
   font-family: sans-serif;
@@ -284,7 +284,7 @@ option {
 }
 
 .freeTuningInput {
-  bottom: -3px;
+  bottom: -1px;
   background: transparent;
   border: none;
   font-family: sans-serif;
@@ -316,6 +316,7 @@ option {
 
 .modulationDisplay {
   width: 60px;
+  bottom: -1px;
 }
 
 .freqStepBox {
