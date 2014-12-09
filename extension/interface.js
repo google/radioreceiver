@@ -70,7 +70,13 @@ function Interface(fmRadio) {
       frequencyInput.classList.add('freeTuning');
       freeTuningStuff.classList.add('freeTuning');
       var mode = currentBand.getMode();
-      modulationDisplay.textContent = mode.modulation;
+      for (var i = 0; i < modulationDisplay.options.length; ++i) {
+        var option = modulationDisplay.options[i];
+        if (option.value == mode.modulation && !option.selected) {
+          option.selected = true;
+          break;
+        }
+      }
       freqStepDisplay.textContent = currentBand.getStep();
       setVisible(bandwidthBox, mode.modulation == 'AM'
                                || mode.modulation == 'USB'
@@ -585,16 +591,9 @@ function Interface(fmRadio) {
    * Changes modulation in free-tuning mode.
    */
   function switchModulation() {
-    var modeNames = ['WBFM', 'NBFM', 'AM', 'LSB', 'USB'];
-    var currentMode = modulationDisplay.textContent;
-    for (var i = 0; i < modeNames.length; ++i) {
-      if (modeNames[i] == currentMode) {
-        appConfig.state.mode.select(modeNames[(i + 1) % modeNames.length]);
-        restoreStation();
-        saveSettings();
-        return;
-      }
-    }
+    appConfig.state.mode.select(modulationDisplay.selectedOptions[0].value);
+    restoreStation();
+    saveSettings();
   }
 
   /**
@@ -854,7 +853,7 @@ function Interface(fmRadio) {
     volumeSlider.addEventListener('blur', blurVolumeSlider);
     volumeSlider.addEventListener('mousewheel', changeVolumeWheel);
     bandBox.addEventListener('click', switchBand);
-    modulationDisplay.addEventListener('click', switchModulation);
+    modulationDisplay.addEventListener('change', switchModulation);
     attachDisplayInputEvents(freqStepDisplay, freqStepInput, changeFreqStep);
     attachDisplayInputEvents(
         bandwidthDisplay, bandwidthInput, changeBandwidth);

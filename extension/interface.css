@@ -18,6 +18,10 @@ body {
   background-color: #ddd;
 }
 
+option {
+  color: black;
+}
+
 .invisible {
   visibility: hidden;
 }
@@ -308,6 +312,10 @@ body {
   bottom: 35px;
   left: 10px;
   width: 140px;
+}
+
+.modulationDisplay {
+  width: 60px;
 }
 
 .freqStepBox {

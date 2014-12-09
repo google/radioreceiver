@@ -51,7 +51,12 @@ limitations under the License.
     <div id="freeTuningStuff" class="freeTuningStuff">
       <div id="modulationBox" class="modulationBox freeTuningBox">
         <div class="freeTuningLabel"><label for="modulationDisplay">Mode:</label></div>
-        <button id="modulationDisplay" class="modulationDisplay invisibleButton freeTuningButton" tabindex="12"></button>
+        <select id="modulationDisplay" class="modulationDisplay invisibleButton freeTuningButton" tabindex="12">
+          <option value="WBFM">WBFM</option>
+          <option value="NBFM">NBFM</option>
+          <option value="AM">AM</option>
+          <option value="LSB">LSB</option>
+          <option value="USB">USB</option>
         </select>
       </div>
       <div id="freqStepBox" class="freqStepBox freeTuningBox">
