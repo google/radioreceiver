@@ -14,13 +14,13 @@ Radio Receiver is 100% written in JavaScript, but is nevertheless fast enough th
 
 * Stereo FM.
 * Scan for stations.
-* Unlimited slots for presets.
 * Record what you hear on the radio.
 * Built-in bands:
   * International and Japanese FM bands.
   * Weather band (US and Canada).
   * Medium Wave AM (requires an upconverter).
-* Free-tuning mode to listen to anything: short wave, air band, marine band, etc.
+* Free-tuning mode to use the program as a multi-band radio and listen to anything: short wave, air band, marine band, etc.
+* Supported modes: Wideband FM, Narrowband FM, AM, SSB.
 
 ## Compatible hardware and software
 
