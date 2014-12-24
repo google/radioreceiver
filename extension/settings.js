@@ -65,6 +65,9 @@ useUpconverter.addEventListener('change', function() {
   upconverterFreq.disabled = !useUpconverter.checked;
   upconverterFreqInput.className = useUpconverter.checked ? '' : 'invisible';
 });
+managePresetsLink.addEventListener('click', function() {
+  AuxWindows.managePresets(opener);
+});
 
 AuxWindows.resizeCurrentTo(350, 0);  
 

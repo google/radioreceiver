@@ -95,6 +95,23 @@ var AuxWindows = (function() {
   }
 
   /**
+   * Shows a window to manage the presets.
+   * @param {AppWindow} mainWindow The app's main window.
+   */
+  function managePresets(mainWindow) {
+    chrome.app.window.create('presetmanager.html', {
+        'bounds': {
+          'width': 700,
+          'height': 1
+        },
+        'resizable': false
+      }, function(win) {
+        win.contentWindow['opener'] = window;
+        win.contentWindow['mainWindow'] = mainWindow;
+    });  
+  }
+
+  /**
    * Shows an error window.
    * @param {string} msg The error message to show.
    */
@@ -168,6 +185,7 @@ var AuxWindows = (function() {
     savePreset: savePreset,
     settings: settings,
     estimatePpm: estimatePpm,
+    managePresets: managePresets,
     error: error,
     help: help,
     resizeCurrentTo: resizeCurrentTo,

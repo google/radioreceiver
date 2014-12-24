@@ -1,0 +1,88 @@
+<html>
+<!--
+Copyright 2014 Google Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<head>
+<title>Preset Manager</title>
+<script src="auxwindows.js"></script>
+<script src="frequencies.js"></script>
+<script src="presets.js"></script>
+<style>
+table {
+  border: 1px solid black;
+}
+.evenRow {
+  background: #ddd;
+}
+.deleteRow {
+  text-decoration: line-through;
+}
+.invisible {
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div id="showPresetPane">
+<h1>Available presets</h1>
+<table id="presetList">
+<tr><th></th><th>Frequency</th><th>Name</th><th>Mode</th></tr>
+</table>
+
+<p>
+<button id="exportButton">Export selected presets</button>
+<button id="importButton">Import presets</button>
+</p>
+</div>
+
+<div id="showDiffPane" class="invisible">
+<h1>The imported file contains the following changes:</h1>
+
+<div id="addPresetPanel">
+<h2>Add these presets</h2>
+<table id="addPresetList">
+<tr><th></th><th>Frequency</th><th>Name</th><th>Mode</th></tr>
+</table>
+</div>
+
+<div id="changePresetPanel">
+<h2>Modify these presets</h2>
+<table id="changePresetList">
+<tr><th></th><th>Frequency</th><th>Name</th><th>Mode</th></tr>
+</table>
+</div>
+
+<div id="delPresetPanel">
+<h2>Delete these presets</h2>
+<table id="deletePresetList">
+<tr><th></th><th>Frequency</th><th>Name</th><th>Mode</th></tr>
+</table>
+</div>
+
+<p>
+<button id="doImportButton">Import the selected changes</button>
+<button id="cancelImportButton">Cancel importation</button>
+</p>
+</div>
+
+<hr />
+<p>
+<button id="closeButton">Close</button>
+</p>
+<script src="presetmanager.js"></script>
+</body>
+</html>
+

@@ -834,6 +834,14 @@ function Interface(fmRadio) {
   }
 
   /**
+   * Updates the preset list.
+   */
+  function updatePresets() {
+    presets.load(displayPresets);
+    update();
+  }
+
+  /**
    * Attaches all the event handlers, loads the presets, and updates the UI.
    */
   function attach() {
@@ -873,23 +881,21 @@ function Interface(fmRadio) {
     window.addEventListener('keypress', handleShortcut);
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
-    loadSettings(function() {
-      presets.load(displayPresets);
-      update();
-    });
+    loadSettings(updatePresets);
   }
 
   return {
     attach: attach,
-    update: update
+    update: update,
+    updatePresets: updatePresets
   };
 }
 
 var radio = new RadioController();
+var interface = new Interface(radio);
 
 window.addEventListener('load', function() {
   AuxWindows.resizeCurrentTo(500, 225);
-  var interface = new Interface(radio);
   interface.attach();
 });
 
