@@ -169,19 +169,17 @@ function R820T(com, xtalFreq, throwError) {
   function setManualGain(gain, kont) {
     var step = 0;
     if (gain <= 15) {
-      step = Math.round(((0.00467 * gain - 0.127) * gain + 1.42) * gain - 0.05);
-    } else if (gain <= 41.5) {
-      step = Math.round(((0.00703 * gain - 0.0542) * gain + 1.82) * gain - 8.8);
+      step = Math.round(1.36 + gain * (1.1118 + gain * (-0.0786 + gain * 0.0027)));
     } else {
-      step = Math.round(((0.116105 * gain - 15.5431) * gain + 693.409) * gain - 10282.3);
+      step = Math.round(1.2068 + gain * (0.6875 + gain * (-0.01011 + gain * 0.0001587)));
     }
     if (step < 0) {
       step = 0;
-    } else if (step > 28) {
-      step = 28;
+    } else if (step > 30) {
+      step = 30;
     }
-    var lnaValue = Math.floor((step + 1) / 2);
-    var mixerValue = Math.floor(step / 2);
+    var lnaValue = Math.floor(step / 2);
+    var mixerValue = Math.floor((step - 1) / 2);
     writeEach([
       [0x05, 0x10, 0x10],
       [0x07, 0x00, 0x10],
