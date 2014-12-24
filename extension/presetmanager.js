@@ -16,21 +16,30 @@ var opener = window['opener'];
 var mainWindow = window['mainWindow'];
 
 closeButton.addEventListener('click', exit);
-exportButton.addEventListener('click', exportSelectedFreqs);
-importButton.addEventListener('click', importSelectedFreqs);
+exportButton.addEventListener('click', exportSelectedPresets);
+importButton.addEventListener('click', importPresetsFile);
 cancelImportButton.addEventListener('click', showCurrentEntries);
 
 var presets = new Presets();
 presets.load(showCurrentEntries);
 
+/**
+ * Adjusts the window size to its contents.
+ */
 function adjustWindow() {
   AuxWindows.resizeCurrentTo(700, 0);
 }
 
+/**
+ * Closes the current window.
+ */
 function exit() {
   AuxWindows.closeCurrent();
 }
 
+/**
+ * Removes duplicates in place from a sorted list.
+ */
 function uniq(freqs) {
   var prev = null;
   for (var i = 0; i < freqs.length; ) {
@@ -43,6 +52,9 @@ function uniq(freqs) {
   }
 }
 
+/**
+ * Shows the current list of presets.
+ */
 function showPresets(table, presets, delPresets, precheck) {
   var lines = table.getElementsByClassName('preset');
   while (lines.length > 0) {
@@ -79,6 +91,9 @@ function showPresets(table, presets, delPresets, precheck) {
   return freqs.length;
 }
 
+/**
+ * Builds a line in a preset list.
+ */
 function makePresetLine(value, preset, index, isDelete, isDouble, precheck) {
   var isEven = 0 == (index % 2);
   var line = document.createElement('tr');
@@ -98,6 +113,9 @@ function makePresetLine(value, preset, index, isDelete, isDouble, precheck) {
   return line;
 }
 
+/**
+ * Makes a cell containing a preset selection checkbox.
+ */
 function makeCheckboxCell(value, precheck, isDouble) {
   var chk = document.createElement('input');
   chk.className = 'presetBox';
@@ -112,12 +130,18 @@ function makeCheckboxCell(value, precheck, isDouble) {
   return td;
 }
 
+/**
+ * Makes a cell containing a preset's frequency.
+ */
 function makeFreqCell(preset) {
   var td = document.createElement('td');
   td.innerText = preset['display'].replace(' ', '\u00a0');
   return td;
 }
 
+/**
+ * Makes a cell containing a preset's name.
+ */
 function makeNameCell(preset) {
   var td = document.createElement('td');
   td.innerText = preset['name'].replace(' ', '\u00a0');
@@ -125,6 +149,9 @@ function makeNameCell(preset) {
   return td;
 }
 
+/**
+ * Makes a cell containing a preset's band or mode.
+ */
 function makeModeCell(preset) {
   var td = document.createElement('td');
   var band = preset['band'];
@@ -151,6 +178,9 @@ function makeModeCell(preset) {
   return td;
 }
 
+/**
+ * Returns a list of currently selected frequencies.
+ */
 function getSelectedFreqs(container) {
   var freqBoxes = container.getElementsByClassName('presetBox');
   var selected = [];
@@ -162,6 +192,9 @@ function getSelectedFreqs(container) {
   return selected;
 }
 
+/**
+ * Returns a map of currently selected presets.
+ */
 function getSelectedEntries(container) {
   var selected = {};
   var freqs = getSelectedFreqs(container);
@@ -171,7 +204,11 @@ function getSelectedEntries(container) {
   return selected;
 }
 
-function exportSelectedFreqs() {
+/**
+ * Exports the selected presets.
+ */
+function exportSelectedPresets() {
+  showError('');
   var opt = {
     type: 'saveFile',
     suggestedName: 'presets.json'
@@ -190,7 +227,11 @@ function exportSelectedFreqs() {
   });
 }
 
-function importSelectedFreqs() {
+/**
+ * Imports a presets file.
+ */
+function importPresetsFile() {
+  showError('');
   var opt = {
     type: 'openFile',
     accepts: [{
@@ -201,9 +242,17 @@ function importSelectedFreqs() {
     fileEntry.file(function(file) {
       var reader = new FileReader();
       reader.onloadend = function() {
-        var newPresets = JSON.parse(this.result);
-        if (newPresets['presets']) {
-          showImportedEntries(newPresets['presets']);
+        try {
+          var newPresets = JSON.parse(this.result);
+          if (newPresets['presets']) {
+            showImportedEntries(newPresets['presets']);
+          } else {
+            showError('Invalid presets file');
+            showCurrentEntries();
+          }
+        } catch (e) {
+          showError('Error reading the presets file: ' + e);
+          showCurrentEntries();
         }
       };
       reader.readAsText(file);
@@ -211,6 +260,21 @@ function importSelectedFreqs() {
   });
 }
 
+/**
+ * Shows an error message.
+ */
+function showError(msg) {
+  errorPane.innerText = msg;
+  if (msg) {
+    errorPane.classList.remove('invisible');
+  } else {
+    errorPane.classList.add('invisible');
+  }
+}
+
+/**
+ * Shows the current presets.
+ */
 function showCurrentEntries() {
   showPresets(presetList, presets, null, true);
   showPresetPane.classList.remove('invisible');
@@ -218,6 +282,9 @@ function showCurrentEntries() {
   adjustWindow();
 }
 
+/**
+ * Shows the presets to be imported.
+ */
 function showImportedEntries(entries) {
   var newPresets = new Presets();
   newPresets.importPresets(entries);
@@ -243,6 +310,9 @@ function showImportedEntries(entries) {
   adjustWindow();
 }
 
+/**
+ * Imports the selected items.
+ */
 function performImport(diff) {
   return function() {
     var selectedFreqs = getSelectedFreqs(showDiffPane);
