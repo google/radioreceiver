@@ -540,3 +540,31 @@ function iqSamplesFromUint8(buffer, rate) {
   }
   return [outI, outQ];
 }
+
+/**
+ * Shifts a series of IQ samples by a given frequency.
+ * @param {Array.<Float32Array>} IQ An array containing the I and Q streams.
+ * @param {number} freq The frequency to shift the samples by.
+ * @param {number} sampleRate The sample rate.
+ * @param {number} cosine The cosine of the initial phase.
+ * @param {number} sine The sine of the initial phase.
+ * @return {Array} An array containing the I stream, Q stream,
+ *     final cosine and final sine.
+ */
+function shiftFrequency(IQ, freq, sampleRate, cosine, sine) {
+  var deltaCos = Math.cos(2 * Math.PI * freq / sampleRate);
+  var deltaSin = Math.sin(2 * Math.PI * freq / sampleRate);
+  var I = IQ[0];
+  var Q = IQ[1];
+  var oI = new Float32Array(I.length);
+  var oQ = new Float32Array(Q.length);
+  for (var i = 0; i < I.length; ++i) {
+    oI[i] = I[i] * cosine - Q[i] * sine;
+    oQ[i] = I[i] * sine + Q[i] * cosine;
+    var newSine = cosine * deltaSin + sine * deltaCos;
+    cosine = cosine * deltaCos - sine * deltaSin;
+    sine = newSine;
+  }
+  return [oI, oQ, cosine, sine];
+}
+

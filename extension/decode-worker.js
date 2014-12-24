@@ -32,17 +32,23 @@ var OUT_RATE = 48000;
  */
 function Decoder() {
   var demodulator = new Demodulator_WBFM(IN_RATE, OUT_RATE);
+  var cosine = 1;
+  var sine = 0;
 
   /**
    * Demodulates the tuner's output, producing mono or stereo sound, and
    * sends the demodulated audio back to the caller.
    * @param {ArrayBuffer} buffer A buffer containing the tuner's output.
    * @param {boolean} inStereo Whether to try decoding the stereo signal.
+   * @param {number} freqOffset The frequency to shift the samples by.
    * @param {Object=} opt_data Additional data to echo back to the caller.
    */
-  function process(buffer, inStereo, opt_data) {
+  function process(buffer, inStereo, freqOffset, opt_data) {
     var data = opt_data || {};
     var IQ = iqSamplesFromUint8(buffer, IN_RATE);
+    IQ = shiftFrequency(IQ, -freqOffset, IN_RATE, cosine, sine);
+    cosine = IQ[2];
+    sine = IQ[3];
     var out = demodulator.demodulate(IQ[0], IQ[1], inStereo);
     data['stereo'] = out['stereo'];
     data['signalLevel'] = out['signalLevel'];
@@ -87,7 +93,7 @@ onmessage = function(event) {
       decoder.setMode(event.data[1]);
       break;
     default:
-      decoder.process(event.data[1], event.data[2], event.data[3]);
+      decoder.process(event.data[1], event.data[2], event.data[3], event.data[4]);
       break;
   }
 };

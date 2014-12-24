@@ -47,6 +47,7 @@ function RadioController() {
   var playingBlocks = 0;
   var mode = {};
   var frequency = 88500000;
+  var actualFrequency = 0;
   var stereo = true;
   var stereoEnabled = true;
   var volume = 1;
@@ -358,7 +359,8 @@ function RadioController() {
       tuner.setSampleRate(SAMPLE_RATE, function(rate) {
       offsetSum = 0;
       offsetCount = -1;
-      tuner.setCenterFrequency(frequency, function() {
+      tuner.setCenterFrequency(frequency, function(actualFreq) {
+      actualFrequency = actualFreq;
       processState();
       })})});
     } else if (state.substate == SUBSTATE.ALL_ON) {
@@ -409,7 +411,8 @@ function RadioController() {
       if (state.state == STATE.PLAYING) {
         if (playingBlocks <= 2) {
           ++playingBlocks;
-          decoder.postMessage([0, data, stereoEnabled], [data]);
+          decoder.postMessage(
+              [0, data, stereoEnabled, frequency - actualFrequency], [data]);
         }
       }
       processState();
@@ -431,11 +434,17 @@ function RadioController() {
     ui && ui.update();
     offsetSum = 0;
     offsetCount = -1;
-    tuner.setCenterFrequency(frequency, function() {
-    tuner.resetBuffer(function() {
-    state = new State(STATE.PLAYING);
-    startPipeline();
-    })});
+    if (Math.abs(frequency - actualFrequency) > 300000) {
+      tuner.setCenterFrequency(frequency, function(actualFreq) {
+      actualFrequency = frequency;
+      tuner.resetBuffer(function() {
+      state = new State(STATE.PLAYING);
+      startPipeline();
+      })});
+    } else {
+      state = new State(STATE.PLAYING);
+      startPipeline();
+    }
   }
 
   /**
@@ -466,9 +475,14 @@ function RadioController() {
       state = new State(STATE.SCANNING, SUBSTATE.DETECTING, param);
       offsetSum = 0;
       offsetCount = -1;
-      tuner.setCenterFrequency(frequency, function() {
-      tuner.resetBuffer(processState);
-      });
+      if (Math.abs(frequency - actualFrequency) > 300000) {
+        tuner.setCenterFrequency(frequency, function(actualFreq) {
+        actualFrequency = actualFreq;
+        tuner.resetBuffer(processState);
+        });
+      } else {
+        processState();
+      }
     } else if (state.substate == SUBSTATE.DETECTING) {
       state = new State(STATE.SCANNING, SUBSTATE.TUNING, param);
       var scanData = {
@@ -480,7 +494,9 @@ function RadioController() {
         --requestingBlocks;
         if (state.state == STATE.SCANNING) {
           ++playingBlocks;
-          decoder.postMessage([0, data, stereoEnabled, scanData], [data]);
+          decoder.postMessage(
+              [0, data, stereoEnabled, frequency - actualFrequency, scanData],
+              [data]);
         }
         processState();
       });
