@@ -79,7 +79,8 @@ function R820T(com, xtalFreq, throwError) {
   /**
    * Sets the tuner's frequency.
    * @param {number} freq The frequency to tune to.
-   * @param {Function} kont The continuation for this function.
+   * @param {Function} kont The continuation for this function, which receives
+   *     the actual tuned frequency.
    */
   function setFrequency(freq, kont) {
     setMux(freq, function() {
@@ -289,8 +290,10 @@ function R820T(com, xtalFreq, throwError) {
       [0x15, sdm & 0xff, 0xff]
     ], function() {
     getPllLock(true, function() {
-    writeRegMask(0x1a, 0x08, 0x08, kont);
-    })})})})})});
+    writeRegMask(0x1a, 0x08, 0x08, function() {
+    var actualFreq = 2 * pllRef * (nint + sdm / 65536) / mixDiv;
+    kont(actualFreq);
+    })})})})})})});
   }
 
   /**
