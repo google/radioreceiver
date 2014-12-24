@@ -881,13 +881,16 @@ function Interface(fmRadio) {
     window.addEventListener('keypress', handleShortcut);
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
-    loadSettings(updatePresets);
+    loadSettings(function() {
+      presets.load(displayPresets);
+      presets.addListener(displayPresets);
+      update();
+    });
   }
 
   return {
     attach: attach,
-    update: update,
-    updatePresets: updatePresets
+    update: update
   };
 }
 

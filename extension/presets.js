@@ -25,6 +25,11 @@ function Presets(opt_presets) {
   var presets = opt_presets || {};
 
   /**
+   * The functions that listen for changes in the presets.
+   */
+  var listeners = [];
+
+  /**
    * Loads the presets from the cloud.
    * @param {function} callback A function to call after loading the presets.
    */
@@ -32,12 +37,16 @@ function Presets(opt_presets) {
     chrome.storage.local.get('presets', function(cfg) {
       if (cfg['presets']) {
         importPresets(cfg['presets']);
+        chrome.storage.onChanged.addListener(reload);
         callback && callback();
       } else {
         chrome.storage.sync.get('presets', function(cfg) {
           var info = cfg['presets'] || {};
           importPresets(info);
-          save(callback);
+          save(function() {
+            chrome.storage.onChanged.addListener(reload);
+            callback && callback();
+          });
         });
       }
     });
@@ -49,6 +58,33 @@ function Presets(opt_presets) {
    */
   function save(callback) {
     chrome.storage.local.set(exportPresets(), callback);
+  }
+
+  /**
+   * Reloads the presets when someone has modified them.
+   * @param {Object} changes The changes made in the storage area.
+   * @param {string} areaName The area the changes were made in.
+   */
+  function reload(changes, areaName) {
+    if (areaName != 'local') {
+      return;
+    }
+    var presetChange = changes['presets'];
+    if (!presetChange) {
+      return;
+    }
+    importPresets(presetChange['newValue']);
+    for (var i = 0; i < listeners.length; ++i) {
+      listeners[i]();
+    }
+  }
+
+  /**
+   * Adds a function to listen for changes in the presets.
+   * @param {Function} fun The function to call when there's a change.
+   */
+  function addListener(fun) {
+    listeners.push(fun);
   }
 
   /**
@@ -218,6 +254,7 @@ function Presets(opt_presets) {
   return {
     load: load,
     save: save,
+    addListener: addListener,
     get: get,
     set: set,
     remove: remove,

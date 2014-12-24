@@ -262,10 +262,7 @@ function performImport(diff) {
       }
     }
     presets.change(new Presets(del), new Presets(add));
-    presets.save(function() {
-      mainWindow.interface.updatePresets();
-      exit();
-    });
+    presets.save(exit);
   }
 }
 
