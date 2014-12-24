@@ -412,7 +412,7 @@ function RadioController() {
         if (playingBlocks <= 2) {
           ++playingBlocks;
           decoder.postMessage(
-              [0, data, stereoEnabled, frequency - actualFrequency], [data]);
+              [0, data, stereoEnabled, actualFrequency - frequency], [data]);
         }
       }
       processState();
@@ -434,7 +434,7 @@ function RadioController() {
     ui && ui.update();
     offsetSum = 0;
     offsetCount = -1;
-    if (Math.abs(frequency - actualFrequency) > 300000) {
+    if (Math.abs(actualFrequency - frequency) > 300000) {
       tuner.setCenterFrequency(frequency, function(actualFreq) {
       actualFrequency = frequency;
       tuner.resetBuffer(function() {
@@ -475,7 +475,7 @@ function RadioController() {
       state = new State(STATE.SCANNING, SUBSTATE.DETECTING, param);
       offsetSum = 0;
       offsetCount = -1;
-      if (Math.abs(frequency - actualFrequency) > 300000) {
+      if (Math.abs(actualFrequency - frequency) > 300000) {
         tuner.setCenterFrequency(frequency, function(actualFreq) {
         actualFrequency = actualFreq;
         tuner.resetBuffer(processState);
@@ -495,7 +495,7 @@ function RadioController() {
         if (state.state == STATE.SCANNING) {
           ++playingBlocks;
           decoder.postMessage(
-              [0, data, stereoEnabled, frequency - actualFrequency, scanData],
+              [0, data, stereoEnabled, actualFrequency - frequency, scanData],
               [data]);
         }
         processState();

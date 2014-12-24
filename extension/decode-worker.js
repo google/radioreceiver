@@ -46,7 +46,7 @@ function Decoder() {
   function process(buffer, inStereo, freqOffset, opt_data) {
     var data = opt_data || {};
     var IQ = iqSamplesFromUint8(buffer, IN_RATE);
-    IQ = shiftFrequency(IQ, -freqOffset, IN_RATE, cosine, sine);
+    IQ = shiftFrequency(IQ, freqOffset, IN_RATE, cosine, sine);
     cosine = IQ[2];
     sine = IQ[3];
     var out = demodulator.demodulate(IQ[0], IQ[1], inStereo);
