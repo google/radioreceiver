@@ -535,8 +535,8 @@ function iqSamplesFromUint8(buffer, rate) {
   var outI = new Float32Array(len);
   var outQ = new Float32Array(len);
   for (var i = 0; i < len; ++i) {
-    outI[i] = arr[2 * i] / 128.0 - 1;
-    outQ[i] = arr[2 * i + 1] / 128.0 - 1;
+    outI[i] = arr[2 * i] / 128 - 0.995;
+    outQ[i] = arr[2 * i + 1] / 128 - 0.995;
   }
   return [outI, outQ];
 }
