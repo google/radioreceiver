@@ -340,8 +340,8 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
     var Q = downsamplerQ.downsample(samplesQ);
     var out = new Float32Array(I.length);
 
-    var specSqrSum = 0;
-    var sigSqrSum = 0;
+    var prev = 0;
+    var difSqrSum = 0;
     for (var i = 0; i < out.length; ++i) {
       var real = lI * I[i] + lQ * Q[i];
       var imag = lI * Q[i] - I[i] * lQ;
@@ -368,9 +368,12 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
                            + div * 0.19556307900617517))) * AMPL_CONV;
       lI = I[i];
       lQ = Q[i];
-      sigSqrSum += lI * lI + lQ * lQ;
+      var dif = prev - out[i];
+      difSqrSum += dif * dif;
+      prev = out[i];
     }
-    relSignalPower = sigSqrSum / out.length;
+
+    relSignalPower = 1 - Math.sqrt(difSqrSum / out.length);
     return out;
   }
 

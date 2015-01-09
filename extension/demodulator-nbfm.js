@@ -27,8 +27,6 @@ function Demodulator_NBFM(inRate, outRate, maxF) {
   var multiple = 1 + Math.floor((maxF - 1) * 7 / 75000);
   var interRate = 48000 * multiple;
   var filterF = maxF * 0.8;
-  var minRatio = 2.5e-6 * maxF;
-  minRatio *= minRatio;
 
   var demodulator = new FMDemodulator(inRate, interRate, maxF, filterF, Math.floor(50 * 7 / multiple));
   var filterCoefs = getLowPassFIRCoeffs(interRate, 8000, 41);
@@ -47,7 +45,7 @@ function Demodulator_NBFM(inRate, outRate, maxF) {
     return {left: audio.buffer,
             right: new Float32Array(audio).buffer,
             stereo: false,
-            signalLevel: demodulator.getRelSignalPower() / minRatio};
+            signalLevel: demodulator.getRelSignalPower() * 2};
   }
 
   return {
