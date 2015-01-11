@@ -27,6 +27,7 @@ var Frequencies = (function() {
    * @param {number} frequency The frequency to convert.
    * @param {boolean} showUnits Whether to show the units (Hz, kHz, MHz, etc.)
    * @param {number=} opt_digits If specified, use a fixed number of digits.
+   * @return {string} The converted frequency.
    */
   function humanReadable(frequency, showUnits, opt_digits) {
     var units;
@@ -56,8 +57,34 @@ var Frequencies = (function() {
     }
   }
 
+  /**
+   * Converts a frequency in a human-readable format to a number.
+   * @param {string} frequency The frequency to convert.
+   * @return {number} The converted frequency.
+   */
+  function parseReadableInput(frequency) {
+    var mul = 1;
+    frequency = frequency.toLowerCase().trim();
+    if (frequency.substr(-2) == "hz") {
+      frequency = frequency.substr(0, frequency.length - 2).trim();
+    }
+    var suffix = frequency.substr(-1);
+    if (suffix == "k") {
+      mul = 1e3;
+    } else if (suffix == "m") {
+      mul = 1e6;
+    } else if (suffix == "g") {
+      mul = 1e9;
+    }
+    if (mul != 1) {
+      frequency = frequency.substr(0, frequency.length - 1).trim();
+    }
+    return Math.floor(mul * Number(frequency));
+  }
+
   return {
-    humanReadable: humanReadable
+    humanReadable: humanReadable,
+    parseReadableInput: parseReadableInput
   };
 
 })();
@@ -178,7 +205,7 @@ function Band(bandName, minF, maxF, stepF, mode, opt_displayFn, opt_inputFn) {
   }
 
   function freeInputFn(input) {
-    return Math.floor(Number(input));
+    return Frequencies.parseReadableInput(input);
   }
 
   return {
