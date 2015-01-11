@@ -149,7 +149,7 @@ option {
 }
 
 .frequencyDisplay.freeTuning, .frequencyInput.freeTuning {
-  font-size: 54px;
+  font-size: 50px;
 }
 
 .volumeBox, .volumeOccluder {
@@ -309,7 +309,7 @@ option {
 }
 
 .modulationBox {
-  bottom: 45px;
+  bottom: 50px;
   left: 10px;
   width: 140px;
 }
@@ -320,7 +320,7 @@ option {
 }
 
 .freqStepBox {
-  bottom: 45px;
+  bottom: 50px;
   right: 60px;
 }
 
@@ -329,7 +329,7 @@ option {
 }
 
 .bandwidthBox {
-  bottom: 25px;
+  bottom: 30px;
   left: 10px;
 }
 
@@ -338,7 +338,7 @@ option {
 }
 
 .maxfBox {
-  bottom: 25px;
+  bottom: 30px;
   left: 10px;
 }
 
@@ -347,7 +347,7 @@ option {
 }
 
 .upconverterBox {
-  bottom: 25px;
+  bottom: 30px;
   right: 60px;
   width: 122px;
 }
@@ -358,7 +358,7 @@ option {
 }
 
 .squelchBox {
-  bottom: 5px;
+  bottom: 10px;
   right: 35px;
   width: 135px;
 }
