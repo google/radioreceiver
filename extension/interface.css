@@ -309,7 +309,7 @@ option {
 }
 
 .modulationBox {
-  bottom: 35px;
+  bottom: 45px;
   left: 10px;
   width: 140px;
 }
@@ -320,7 +320,7 @@ option {
 }
 
 .freqStepBox {
-  bottom: 35px;
+  bottom: 45px;
   right: 60px;
 }
 
@@ -329,7 +329,7 @@ option {
 }
 
 .bandwidthBox {
-  bottom: 15px;
+  bottom: 25px;
   left: 10px;
 }
 
@@ -338,7 +338,7 @@ option {
 }
 
 .maxfBox {
-  bottom: 15px;
+  bottom: 25px;
   left: 10px;
 }
 
@@ -347,14 +347,24 @@ option {
 }
 
 .upconverterBox {
-  bottom: 15px;
+  bottom: 25px;
   right: 60px;
-  width: 115px;
+  width: 122px;
 }
 
 .upconverterDisplay {
   width: 25px;
   text-align: right;
+}
+
+.squelchBox {
+  bottom: 5px;
+  right: 35px;
+  width: 135px;
+}
+
+.squelchDisplay, .squelchInput {
+  width: 30px;
 }
 
 .freqMinusButton, .freqPlusButton {

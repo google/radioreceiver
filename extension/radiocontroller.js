@@ -141,6 +141,22 @@ function RadioController() {
   }
 
   /**
+   * Sets the squelch level.
+   * @param {Object} level The new squelch level, must be >= 0.
+   */
+  function setSquelch(level) {
+    squelch = level;
+  }
+
+  /**
+   * Returns the squelch level.
+   * @return {number} The current squelch level.
+   */
+  function getSquelch() {
+    return squelch;
+  }
+
+  /**
    * Searches a given frequency band for a station, starting at the
    * current frequency.
    * @param {number} min The minimum frequency, in Hz.
@@ -546,11 +562,12 @@ function RadioController() {
       stereo = newStereo;
       ui && ui.update();
     }
+    var level = msg.data[2]['signalLevel'];
     var left = new Float32Array(msg.data[0]);
     var right = new Float32Array(msg.data[1]);
-    player.play(left, right);
+    player.play(left, right, level, squelch / 100);
     if (state.state == STATE.SCANNING && msg.data[2]['scanning']) {
-      if (msg.data[2]['signalLevel'] > 1) {
+      if (msg.data[2]['signalLevel'] > 0.5) {
         setFrequency(msg.data[2].frequency);
       }
     } else if (estimatingPpm) {
@@ -645,6 +662,8 @@ function RadioController() {
     getFrequency: getFrequency,
     setMode: setMode,
     getMode: getMode,
+    setSquelch: setSquelch,
+    getSquelch: getSquelch,
     scan: scan,
     isScanning: isScanning,
     isPlaying: isPlaying,

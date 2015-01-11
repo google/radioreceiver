@@ -33,11 +33,15 @@ function Player() {
    * Queues the given samples for playing at the appropriate time.
    * @param {Float32Array} leftSamples The samples for the left speaker.
    * @param {Float32Array} rightSamples The samples for the right speaker.
+   * @param {number} level The radio signal's level.
+   * @param {number} squelch The current squelch level.
    */
-  function play(leftSamples, rightSamples) {
+  function play(leftSamples, rightSamples, level, squelch) {
     var buffer = ac.createBuffer(2, leftSamples.length, OUT_RATE);
-    buffer.getChannelData(0).set(leftSamples);
-    buffer.getChannelData(1).set(rightSamples);
+    if (level >= squelch) {
+      buffer.getChannelData(0).set(leftSamples);
+      buffer.getChannelData(1).set(rightSamples);
+    }
     var source = ac.createBufferSource();
     source.buffer = buffer;
     source.connect(gainNode);

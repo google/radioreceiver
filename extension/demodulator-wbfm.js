@@ -68,7 +68,7 @@ function Demodulator_WBFM(inRate, outRate) {
     return {left: leftAudio.buffer,
             right: rightAudio.buffer,
             stereo: stereoOut,
-            signalLevel: demodulator.getRelSignalPower() * 2};
+            signalLevel: demodulator.getRelSignalPower() };
   }
 
   return {

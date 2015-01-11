@@ -85,6 +85,7 @@ function Interface(fmRadio) {
       setVisible(maxfBox, mode.modulation == 'NBFM');
       maxfDisplay.textContent = Number(mode.maxF) || 0;
       upconverterDisplay.textContent = isUpconverterEnabled() ? 'On' : 'Off';
+      squelchDisplay.textContent = (mode.squelch || 0);
     } else {
       bandBox.textContent = currentBand.getName();
       bandBox.classList.remove('freeTuning');
@@ -431,6 +432,7 @@ function Interface(fmRadio) {
   function restoreStation() {
     currentBand = appConfig.state.band.get();
     fmRadio.setMode(currentBand.getMode());
+    fmRadio.setSquelch(currentBand.getMode().squelch || 0);
     setFrequency(appConfig.state.frequency.get(), true);
   }
 
@@ -647,6 +649,40 @@ function Interface(fmRadio) {
     appConfig.state.mode.update(mode);
     restoreStation();
     saveSettings();
+  }
+
+  /**
+   * Changes the squelch level.
+   */
+  function changeSquelch(value) {
+    var newSquelch = Math.floor(value);
+    if (newSquelch >= 0 && newSquelch < 1000) {
+      var mode = appConfig.state.mode.get();
+      mode.params.squelch = newSquelch;
+      appConfig.state.mode.update(mode);
+      fmRadio.setSquelch(mode.params.squelch);
+      saveSettings();
+      update();
+    }
+  }
+
+  /**
+   * Changes the squelch level with the mouse wheel.
+   * @param {MouseWheelEvent} event The received event.
+   */
+  function changeSquelchWheel(event) {
+    var delta = 5;
+    if (event.wheelDelta < 0) {
+      delta = -5;
+    }
+    var mode = appConfig.state.mode.get();
+    var newSquelch = (mode.params.squelch || 0) + delta;
+    newSquelch = Math.min(999, Math.max(0, newSquelch));
+    mode.params.squelch = newSquelch;
+    appConfig.state.mode.update(mode);
+    fmRadio.setSquelch(mode.params.squelch);
+    saveSettings();
+    update();
   }
 
   /**
@@ -867,6 +903,8 @@ function Interface(fmRadio) {
         bandwidthDisplay, bandwidthInput, changeBandwidth);
     attachDisplayInputEvents(maxfDisplay, maxfInput, changeMaxf);
     upconverterDisplay.addEventListener('click', toggleUpconverter);
+    attachDisplayInputEvents(squelchDisplay, squelchInput, changeSquelch);
+    squelchDisplay.addEventListener('mousewheel', changeSquelchWheel);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);
