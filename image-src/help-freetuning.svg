@@ -70,8 +70,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="108.5"
-     inkscape:cy="267.98429"
+     inkscape:cx="350"
+     inkscape:cy="250"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -111,7 +111,7 @@
        sodipodi:nodetypes="cc"
        inkscape:connector-curvature="0"
        id="path4410"
-       d="m 305.82032,733.86218 -14,-70.5"
+       d="m 314.82032,723.86218 -23,-60.5"
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
        inkscape:export-filename="C:\Users\Jacobo\Documents\radioreceiver\extension\text4472-0.png"
        inkscape:export-xdpi="90"
@@ -120,7 +120,7 @@
        sodipodi:nodetypes="cc"
        inkscape:connector-curvature="0"
        id="path4428"
-       d="m 257.32032,792.36218 -185.000008,-33.5"
+       d="m 246.32032,780.36218 -174.000008,-21.5"
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
        inkscape:export-filename="C:\Users\Jacobo\Documents\radioreceiver\extension\text4472-0.png"
        inkscape:export-xdpi="90"
@@ -141,7 +141,7 @@
          y="767.36218">3</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
-       d="m 487.82032,794.36218 141.5,-37"
+       d="m 492.82032,781.36218 136.5,-24"
        id="path4440"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
@@ -180,14 +180,14 @@
        sodipodi:nodetypes="cc"
        inkscape:connector-curvature="0"
        id="path3031"
-       d="m 493.32032,823.86218 136,18.5"
+       d="m 493.32032,807.86218 136,34.5"
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
        inkscape:export-filename="C:\Users\Jacobo\Documents\radioreceiver\extension\text4472-0.png"
        inkscape:export-xdpi="90"
        inkscape:export-ydpi="90" />
     <path
        style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
-       d="m 267.0586,837.32072 -32.5,98.54146"
+       d="m 276.0586,822.32072 -41.5,113.54146"
        id="path4470-4"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc"
@@ -222,5 +222,28 @@
          x="276.82031"
          id="tspan3052"
          sodipodi:role="line">1</tspan></text>
+    <text
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="C:\Users\Jacobo\Documents\radioreceiver\extension\text4472-0.png"
+       sodipodi:linespacing="125%"
+       id="text3039"
+       y="910.86218"
+       x="638.32031"
+       style="font-size:40px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Sans"
+       xml:space="preserve"><tspan
+         y="910.86218"
+         x="638.32031"
+         id="tspan3041"
+         sodipodi:role="line">6</tspan></text>
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="C:\Users\Jacobo\Documents\radioreceiver\extension\text4472-0.png"
+       style="fill:none;stroke:#000000;stroke-width:5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;marker-start:url(#Arrow1Sstart)"
+       d="m 493.32032,830.86218 136,61.5"
+       id="path3043"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
   </g>
 </svg>
