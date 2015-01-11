@@ -656,7 +656,7 @@ function Interface(fmRadio) {
    */
   function changeSquelch(value) {
     var newSquelch = Math.floor(value);
-    if (newSquelch >= 0 && newSquelch < 1000) {
+    if (newSquelch >= 0 && newSquelch <= 100) {
       var mode = appConfig.state.mode.get();
       mode.params.squelch = newSquelch;
       appConfig.state.mode.update(mode);
@@ -677,7 +677,7 @@ function Interface(fmRadio) {
     }
     var mode = appConfig.state.mode.get();
     var newSquelch = (mode.params.squelch || 0) + delta;
-    newSquelch = Math.min(999, Math.max(0, newSquelch));
+    newSquelch = Math.min(100, Math.max(0, newSquelch));
     mode.params.squelch = newSquelch;
     appConfig.state.mode.update(mode);
     fmRadio.setSquelch(mode.params.squelch);

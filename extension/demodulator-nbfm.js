@@ -45,7 +45,7 @@ function Demodulator_NBFM(inRate, outRate, maxF) {
     return {left: audio.buffer,
             right: new Float32Array(audio).buffer,
             stereo: false,
-            signalLevel: demodulator.getRelSignalPower() * 2};
+            signalLevel: demodulator.getRelSignalPower()};
   }
 
   return {
