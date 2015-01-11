@@ -198,7 +198,7 @@ function getSelectedFreqs(container) {
 function getSelectedEntries(container) {
   var selected = {};
   var freqs = getSelectedFreqs(container);
-  for (var i = 0; i < freqBoxes.length; ++i) {
+  for (var i = 0; i < freqs.length; ++i) {
     selected[freqs[i]] = presets.get(freqs[i]);
   }
   return selected;
@@ -219,7 +219,7 @@ function exportSelectedPresets() {
     fileEntry.createWriter(function(writer) {
       writer.onwriteend = function() {
         if (this.position == 0) {
-          writer.write(new Blob([JSON.stringify(exported)]));
+          writer.write(new Blob([JSON.stringify(exported, null, 4)]));
         }
       };
       writer.truncate(0);
