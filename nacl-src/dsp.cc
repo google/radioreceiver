@@ -31,7 +31,7 @@ using namespace std;
 
 namespace radioreceiver {
 
-const double kPi = 3.141592653989793238;
+const double kPi = 3.141592653589793238;
 const double k2Pi = 2 * kPi;
 const double kPi2 = kPi / 2;
 
