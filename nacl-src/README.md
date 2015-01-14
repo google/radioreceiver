@@ -1,4 +1,4 @@
-# NaCl implementation of the DSP code
+# NaCl implementation of the DSP code (currently unused)
 
 I started Radio Receiver as an experiment to see if I could grab samples from a USB device, demodulate radio signals, and produce audio in real time, in 100% JavaScript, on the old ChromeBook I have at home.
 
