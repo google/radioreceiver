@@ -98,7 +98,7 @@ function RtlCom(conn) {
       readReg(block, reg, 1, function(old) {
       value &= mask;
       old &= ~mask;
-      value |= mask;
+      value |= old;
       writeReg(block, reg, value, 1, kont);
       });
     }
