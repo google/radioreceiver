@@ -138,7 +138,7 @@ var AuxWindows = (function() {
           'width': 700,
           'height': 600
         },
-        'state': 'maximized',
+        'state': 'normal',
         'resizable': true
       });
   }

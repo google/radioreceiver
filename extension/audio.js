@@ -39,6 +39,7 @@ function Player() {
   function play(leftSamples, rightSamples, level, squelch) {
     var buffer = ac.createBuffer(2, leftSamples.length, OUT_RATE);
     if (level >= squelch) {
+//      console.log(level);
       buffer.getChannelData(0).set(leftSamples);
       buffer.getChannelData(1).set(rightSamples);
     }
@@ -50,7 +51,9 @@ function Player() {
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
     if (wavSaver != null) {
-      wavSaver.writeSamples(leftSamples, rightSamples);
+      if ( level >= squelch ) {
+         wavSaver.writeSamples(leftSamples, rightSamples);
+      }
     }
   }
 
