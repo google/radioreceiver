@@ -262,6 +262,12 @@ function Interface(fmRadio) {
   function changeVolumeUp() {
     setVolume(fmRadio.getVolume() + 0.1);
   }
+  /**
+   * Mute volume (change to 0).
+   */
+  function muteVolume() {
+    setVolume(0.0);
+  }
 
   /**
    * Changes volume with the mouse wheel.
@@ -809,8 +815,14 @@ function Interface(fmRadio) {
         case 98:  // b
           switchBand();
           break;
+        case  70: // F
         case 102: // f
-          showFrequencyEditor();
+//          showFrequencyEditor();         not defined
+//          frequencyDisplay.click();      but this causes crash
+          break;
+        case 77:  // M
+        case 109: // m
+          muteVolume();
           break;
         case 80:  // P
         case 112: // p
