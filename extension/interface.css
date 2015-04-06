@@ -367,6 +367,27 @@ option {
   width: 30px;
 }
 
+.signalDisplay {
+  bottom: 10px;
+  left: 10px;
+  width: 125px;
+}
+
+progress {
+  left: 0px;
+  width: 100px;
+  height: 15px;
+  border: 1px solid #afd;
+  background: #343;
+//  visibility: hidden;
+}
+progress::-webkit-progress-bar { 
+  background: #343; 
+}
+progress[value]::-webkit-progress-value {
+  background-image:  -webkit-linear-gradient(left, red 0%, orange 70%, yellow 90%, white 100%);
+}
+
 .freqMinusButton, .freqPlusButton {
   position: absolute;
   top: 0;

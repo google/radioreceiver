@@ -24,6 +24,8 @@ function Player() {
   var frameno = 0;
 
   var wavSaver = null;
+  
+  var dampedLevel = 0;
 
   var ac = new (window.AudioContext || window.webkitAudioContext)();
   var gainNode = ac.createGain ? ac.createGain() : ac.createGainNode();
@@ -38,7 +40,9 @@ function Player() {
    */
   function play(leftSamples, rightSamples, level, squelch) {
     var buffer = ac.createBuffer(2, leftSamples.length, OUT_RATE);
-    if (level >= squelch) {
+    dampedLevel = 0.75 * dampedLevel + .25*level*100;
+    signalBar.value = Math.floor(dampedLevel);
+    if ((dampedLevel/100) >= squelch) {
       buffer.getChannelData(0).set(leftSamples);
       buffer.getChannelData(1).set(rightSamples);
     }
@@ -50,7 +54,7 @@ function Player() {
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
     if (wavSaver != null) {
-      if ( level >= squelch ) {
+       if ((dampedLevel/100) >= squelch) {
          wavSaver.writeSamples(leftSamples, rightSamples);
       }
     }

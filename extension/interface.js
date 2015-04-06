@@ -105,6 +105,8 @@ function Interface(fmRadio) {
 
     setVisible(recordButton, !fmRadio.isRecording());
     setVisible(stopButton, fmRadio.isRecording());
+    
+//    setVisible(signalDisplay, isFreeTuning());
 
     selectCurrentPreset();
   }
