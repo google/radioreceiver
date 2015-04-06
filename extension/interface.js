@@ -692,6 +692,23 @@ function Interface(fmRadio) {
     saveSettings();
     update();
   }
+  
+function nextPreset(){
+//    presetsBox.value = "18110000";
+//    var x = presetsBox.index();
+    if ( presetsBox[presetsBox.length-1].selected ) {
+       presetsBox[1].selected = "1";
+       selectPreset();
+    } else {
+       for (i = 0; i < presetsBox.length; i++){
+          if ( presetsBox[i].selected ){
+             presetsBox[i+1].selected = "1";
+             selectPreset();
+             break;
+          }
+       }
+    }
+  }
 
   /**
    * Closes the window.
@@ -785,6 +802,9 @@ function Interface(fmRadio) {
     }
     if (e.type == 'keydown') {
       switch (e.keyCode) {
+        case 34:   // PgDn
+          nextPreset();
+          break;
         case 37:
           frequencyMinus();
           break;
