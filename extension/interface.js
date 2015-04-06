@@ -693,9 +693,12 @@ function Interface(fmRadio) {
     update();
   }
   
+  /**
+   * Selects the next preset in the list.
+   */
+  
 function nextPreset(){
-//    presetsBox.value = "18110000";
-//    var x = presetsBox.index();
+    if ( presetsBox.length < 3 ) { return; }
     if ( presetsBox[presetsBox.length-1].selected ) {
        presetsBox[1].selected = "1";
        selectPreset();
