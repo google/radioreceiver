@@ -2,7 +2,7 @@
 
 An application to listen to broadcast FM and AM radio from your Chrome browser or your ChromeBook computer using a $15 USB digital TV tuner.
 
-![Radio Receiver screenshot](image-src/interface.png)
+![Radio Receiver screenshot](image-src/interface2.png)
 
 ## What is this
 
