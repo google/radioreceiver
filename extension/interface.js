@@ -705,7 +705,7 @@ function clickChangeSquelch(value){
    * Selects the previous preset in the list.
    */
   
-function prevPreset(){
+function prevPreset(shiftKey){
     if ( presetsBox.length < 3 ) { return; }
     signalBar.value = 0;
     if ( presetsBox[0].selected || presetsBox[1].selected ) {
@@ -725,9 +725,11 @@ function prevPreset(){
   /**
    * Selects the next preset in the list.
    */
-  
-function nextPreset(){
+function nextPreset(shiftKey){
     if ( presetsBox.length < 3 ) { return; }
+    if ( shiftKey ) {
+       scanPresets = ! scanPresets;
+    }
     signalBar.value = 0;
     if ( presetsBox[presetsBox.length-1].selected ) {
        presetsBox[1].selected = true;
@@ -836,10 +838,10 @@ function nextPreset(){
     if (e.type == 'keydown') {
       switch (e.keyCode) {
         case 33:   // PgUp
-          prevPreset();
+          prevPreset(e.shiftKey);
           break;
         case 34:   // PgDn
-          nextPreset();
+          nextPreset(e.shiftKey);
           break;
         case 37:
           frequencyMinus();
@@ -875,7 +877,7 @@ function nextPreset(){
           break;
         case  70: // F
         case 102: // f
-          frequencyDisplay.click();     // but this causes crash
+          frequencyDisplay.click(); 
           break;
         case 77:  // M
         case 109: // m
@@ -998,6 +1000,7 @@ function nextPreset(){
 
   return {
     attach: attach,
+    nextPreset: nextPreset,
     update: update
   };
 }

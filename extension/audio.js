@@ -57,7 +57,20 @@ function Player() {
     if (wavSaver != null) {
        if ((dampedLevel/100) >= squelch) {
          wavSaver.writeSamples(leftSamples, rightSamples);
-      }
+       }
+    }
+    if (typeof scanPresets == 'undefined') {         // proof of concept for preset scanning
+       scanPresets = false;                          // not likely to be the way it will be implemented
+       scanCount = 0;                                // a test to find the possible problems...
+    }
+    if ( scanPresets ) {
+       scanCount++;
+       if ( scanCount > 10 ){
+          scanCount = 0;
+          if ((dampedLevel/100) < squelch) {
+             interface.nextPreset(false);
+          }
+       }
     }
   }
 
