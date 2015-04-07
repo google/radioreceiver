@@ -694,18 +694,26 @@ function Interface(fmRadio) {
   }
   
   /**
+   * Change squelch by clicking on signal strength display.
+   */
+  
+function clickChangeSquelch(value){
+  changeSquelch(value.offsetX);
+  }
+  
+  /**
    * Selects the next preset in the list.
    */
   
 function nextPreset(){
     if ( presetsBox.length < 3 ) { return; }
     if ( presetsBox[presetsBox.length-1].selected ) {
-       presetsBox[1].selected = "1";
+       presetsBox[1].selected = true;
        selectPreset();
     } else {
        for (i = 0; i < presetsBox.length; i++){
           if ( presetsBox[i].selected ){
-             presetsBox[i+1].selected = "1";
+             presetsBox[i+1].selected = true;
              selectPreset();
              break;
           }
@@ -942,6 +950,7 @@ function nextPreset(){
     upconverterDisplay.addEventListener('click', toggleUpconverter);
     attachDisplayInputEvents(squelchDisplay, squelchInput, changeSquelch);
     squelchDisplay.addEventListener('mousewheel', changeSquelchWheel);
+    signalDisplay.addEventListener('click', clickChangeSquelch);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);

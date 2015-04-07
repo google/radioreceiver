@@ -42,6 +42,7 @@ function Player() {
     var buffer = ac.createBuffer(2, leftSamples.length, OUT_RATE);
     dampedLevel = 0.75 * dampedLevel + .25*level*100;
     signalBar.value = Math.floor(dampedLevel);
+    signalBar.title = signalBar.value;
     if ((dampedLevel/100) >= squelch) {
       buffer.getChannelData(0).set(leftSamples);
       buffer.getChannelData(1).set(rightSamples);
