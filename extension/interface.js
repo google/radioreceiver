@@ -702,11 +702,33 @@ function clickChangeSquelch(value){
   }
   
   /**
+   * Selects the previous preset in the list.
+   */
+  
+function prevPreset(){
+    if ( presetsBox.length < 3 ) { return; }
+    signalBar.value = 0;
+    if ( presetsBox[0].selected || presetsBox[1].selected ) {
+       presetsBox[presetsBox.length-1].selected = true;
+       selectPreset();
+    } else {
+       for (i = 0; i < presetsBox.length; i++){
+          if ( presetsBox[i].selected ){
+             presetsBox[i-1].selected = true;
+             selectPreset();
+             break;
+          }
+       }
+    }
+  }
+  
+  /**
    * Selects the next preset in the list.
    */
   
 function nextPreset(){
     if ( presetsBox.length < 3 ) { return; }
+    signalBar.value = 0;
     if ( presetsBox[presetsBox.length-1].selected ) {
        presetsBox[1].selected = true;
        selectPreset();
@@ -813,6 +835,9 @@ function nextPreset(){
     }
     if (e.type == 'keydown') {
       switch (e.keyCode) {
+        case 33:   // PgUp
+          prevPreset();
+          break;
         case 34:   // PgDn
           nextPreset();
           break;
@@ -850,8 +875,7 @@ function nextPreset(){
           break;
         case  70: // F
         case 102: // f
-//          showFrequencyEditor();         not defined
-//          frequencyDisplay.click();      but this causes crash
+          frequencyDisplay.click();     // but this causes crash
           break;
         case 77:  // M
         case 109: // m
