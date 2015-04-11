@@ -33,7 +33,7 @@ function Interface(fmRadio) {
    * The current band configuration;
    */
   var currentBand = Bands['WW']['FM'];
-
+  var currentSquelch = 0;
   /**
    * Updates the UI.
    */
@@ -694,56 +694,76 @@ function Interface(fmRadio) {
   }
   
   /**
+   * Monitor - open squelch by clicking on "Squelch:" to monitor frequency
+   *           Click again on "MONITOR" to resume stored squelch setting
+   */
+
+  function squelchClick() {
+     var mode = appConfig.state.mode.get();
+     if ( Squelch.textContent == 'Squelch:') {
+        currentSquelch = mode.params.squelch;
+        fmRadio.setSquelch(0);
+        squelchDisplay.hidden = true;
+        Squelch.textContent = 'MONITOR';
+     } else {
+        fmRadio.setSquelch(currentSquelch);
+        Squelch.textContent = 'Squelch:';
+        squelchDisplay.hidden = false;
+     }
+  }
+  
+ 
+  /**
    * Change squelch by clicking on signal strength display.
    */
   
-function clickChangeSquelch(value){
-  changeSquelch(value.offsetX);
-  }
+   function clickChangeSquelch(value){
+     changeSquelch(value.offsetX);
+     }
+     
+     /**
+      * Selects the previous preset in the list.
+      */
   
-  /**
-   * Selects the previous preset in the list.
-   */
-  
-function prevPreset(shiftKey){
-    if ( presetsBox.length < 3 ) { return; }
-    signalBar.value = 0;
-    if ( presetsBox[0].selected || presetsBox[1].selected ) {
-       presetsBox[presetsBox.length-1].selected = true;
-       selectPreset();
-    } else {
-       for (i = 0; i < presetsBox.length; i++){
-          if ( presetsBox[i].selected ){
-             presetsBox[i-1].selected = true;
-             selectPreset();
-             break;
+   function prevPreset(shiftKey){
+       if ( presetsBox.length < 3 ) { return; }
+       signalBar.value = 0;
+       if ( presetsBox[0].selected || presetsBox[1].selected ) {
+          presetsBox[presetsBox.length-1].selected = true;
+          selectPreset();
+       } else {
+          for (i = 0; i < presetsBox.length; i++){
+             if ( presetsBox[i].selected ){
+                presetsBox[i-1].selected = true;
+                selectPreset();
+                break;
+             }
           }
        }
-    }
-  }
+     }
   
   /**
    * Selects the next preset in the list.
    */
-function nextPreset(shiftKey){
-    if ( presetsBox.length < 3 ) { return; }
-    if ( shiftKey ) {
-       scanPresets = ! scanPresets;
-    }
-    signalBar.value = 0;
-    if ( presetsBox[presetsBox.length-1].selected ) {
-       presetsBox[1].selected = true;
-       selectPreset();
-    } else {
-       for (i = 0; i < presetsBox.length; i++){
-          if ( presetsBox[i].selected ){
-             presetsBox[i+1].selected = true;
-             selectPreset();
-             break;
+   function nextPreset(shiftKey){
+       if ( presetsBox.length < 3 ) { return; }
+       if ( shiftKey ) {
+          scanPresets = ! scanPresets;
+       }
+       signalBar.value = 0;
+       if ( presetsBox[presetsBox.length-1].selected ) {
+          presetsBox[1].selected = true;
+          selectPreset();
+       } else {
+          for (i = 0; i < presetsBox.length; i++){
+             if ( presetsBox[i].selected ){
+                presetsBox[i+1].selected = true;
+                selectPreset();
+                break;
+             }
           }
        }
-    }
-  }
+     }
 
   /**
    * Closes the window.
@@ -989,6 +1009,7 @@ function nextPreset(shiftKey){
     window.addEventListener('message', getMessage);
     window.addEventListener('keydown', handleShortcut);
     window.addEventListener('keypress', handleShortcut);
+    Squelch.addEventListener('mousedown',squelchClick);
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
     loadSettings(function() {

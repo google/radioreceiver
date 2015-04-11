@@ -155,6 +155,10 @@ function RadioController() {
   function getSquelch() {
     return squelch;
   }
+  
+  function getRB() {
+    return requestingBlocks;
+  }
 
   /**
    * Searches a given frequency band for a station, starting at the
@@ -686,6 +690,8 @@ function RadioController() {
     stopRecording: stopRecording,
     isRecording: isRecording,
     setInterface: setInterface,
-    setOnError: setOnError
+    setOnError: setOnError,
+    requestingBlocks: getRB
+    
   };
 }

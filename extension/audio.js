@@ -63,13 +63,17 @@ function Player() {
        scanPresets = false;                          // not likely to be the way it will be implemented
        scanCount = 0;                                // a test to find the possible problems...
     }
+    if (radio.requestingBlocks > 0) {
+       return;
+    }
     if ( scanPresets ) {
        scanCount++;
-       if ( scanCount > 10 ){
+       if ((dampedLevel/100) > squelch) {
+          scanCount = -5;                         // resume scanning after x+n no signal events
+       }
+       if ( scanCount > 5 && (level < squelch)) {  // scan every n events
+          interface.nextPreset();                  // tweak this parameter if too fast for dongle/decoder
           scanCount = 0;
-          if ((dampedLevel/100) < squelch) {
-             interface.nextPreset(false);
-          }
        }
     }
   }
@@ -113,7 +117,7 @@ function Player() {
   function setVolume(volume) {
     gainNode.gain.value = volume;
   }
-
+  
   return {
     play: play,
     setVolume: setVolume,
