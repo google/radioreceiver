@@ -170,7 +170,7 @@ var Bands = (function() {
       'AM': new Band('AM', 540000, 1710000, 10000, AM, amDisplay, amInput)
     },
     'JP': {
-      'FM': new Band('FM', 76000000, 90000000, 100000, WBFM, fmDisplay, fmInput),
+      'FM': new Band('FM', 76000000, 95000000, 100000, WBFM, fmDisplay, fmInput),
       'AM': new Band('AM', 531000, 1611000, 9000, AM, amDisplay, amInput)
     },
     'IT': {
