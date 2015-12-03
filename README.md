@@ -34,6 +34,8 @@ To listen to Medium Wave and Short Wave radio, you need an upconverter connected
 
 If you'd like to talk about Radio Receiver, or have any bug reports or suggestions, please post a message in [the radioreceiver Google Group](https://groups.google.com/forum/#!forum/radioreceiver).
 
+Note: This is not an official Google product (experimental or otherwise), it is just code that happens to be owned by Google.
+
 ## Acknowledgements
 
 Kudos and thanks to the [RTL-SDR project](http://sdr.osmocom.org/trac/wiki/rtl-sdr) for figuring out the magic numbers needed to drive the USB tuner.
