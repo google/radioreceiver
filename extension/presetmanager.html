@@ -22,6 +22,7 @@ limitations under the License.
 <style>
 table {
   border: 1px solid black;
+  width: 100%;
 }
 .evenRow {
   background: #ddd;
@@ -38,6 +39,10 @@ table {
   font-size: 150%;
   color: red;
 }
+.presetListBox {
+  height: 500px;
+  overflow-y: scroll;
+}
 </style>
 </head>
 <body>
@@ -47,9 +52,11 @@ table {
 
 <div id="showPresetPane">
 <h1>Available presets</h1>
+<div class="presetListBox">
 <table id="presetList">
 <tr><th></th><th>Frequency</th><th>Name</th><th>Mode</th></tr>
 </table>
+</div>
 
 <p>
 <button id="exportButton">Export selected presets</button>
