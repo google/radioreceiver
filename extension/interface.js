@@ -704,7 +704,7 @@ function Interface(fmRadio) {
       suggestedName: (currentBand.toDisplayName(getFrequency(), true)
                       + " - "
                       + new Date().toLocaleString() + ".wav")
-                     .replace(/[:/\\]/g, '_'),
+                     .replace(/[:/\\]/g, '_')
     };
     chrome.fileSystem.chooseEntry(opt, doRecord);
   }
@@ -933,10 +933,10 @@ function Interface(fmRadio) {
 }
 
 var radio = new RadioController();
-var interface = new Interface(radio);
+var iface = new Interface(radio);
 
 window.addEventListener('load', function() {
   AuxWindows.resizeCurrentTo(500, 225);
-  interface.attach();
+  iface.attach();
 });
 
