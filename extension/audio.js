@@ -24,6 +24,8 @@ function Player() {
   var frameno = 0;
 
   var wavSaver = null;
+  
+  var dampedLevel = 0;
 
   var ac = new (window.AudioContext || window.webkitAudioContext)();
   var gainNode = ac.createGain ? ac.createGain() : ac.createGainNode();
@@ -38,7 +40,10 @@ function Player() {
    */
   function play(leftSamples, rightSamples, level, squelch) {
     var buffer = ac.createBuffer(2, leftSamples.length, OUT_RATE);
-    if (level >= squelch) {
+    dampedLevel = 0.75 * dampedLevel + .25*level*100;
+    signalBar.value = Math.floor(dampedLevel);
+    signalBar.title = signalBar.value;
+    if ((dampedLevel/100) >= squelch) {
       buffer.getChannelData(0).set(leftSamples);
       buffer.getChannelData(1).set(rightSamples);
     }
@@ -50,7 +55,26 @@ function Player() {
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
     if (wavSaver != null) {
-      wavSaver.writeSamples(leftSamples, rightSamples);
+       if ((dampedLevel/100) >= squelch) {
+         wavSaver.writeSamples(leftSamples, rightSamples);
+       }
+    }
+    if (typeof scanPresets == 'undefined') {         // proof of concept for preset scanning
+       scanPresets = false;                          // not likely to be the way it will be implemented
+       scanCount = 0;                                // a test to find the possible problems...
+    }
+    if (radio.requestingBlocks > 0) {
+       return;
+    }
+    if ( scanPresets ) {
+       scanCount++;
+       if ((dampedLevel/100) > squelch) {
+          scanCount = -5;                         // resume scanning after x+n no signal events
+       }
+       if ( scanCount > 5 && (level < squelch)) {  // scan every n events
+          interface.nextPreset();                  // tweak this parameter if too fast for dongle/decoder
+          scanCount = 0;
+       }
     }
   }
 
@@ -93,7 +117,7 @@ function Player() {
   function setVolume(volume) {
     gainNode.gain.value = volume;
   }
-
+  
   return {
     play: play,
     setVolume: setVolume,

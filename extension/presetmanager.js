@@ -80,7 +80,7 @@ function showPresets(table, presets, delPresets, precheck) {
     var isDouble = preset && delPreset;
     var line;
     if (delPreset) {
-      line = makePresetLine(value, delPreset, i, true, isDouble, precheck);
+      line = makePresetLine(value, delPreset, i, true, isDouble, true);
       table.firstElementChild.appendChild(line);
     }
     if (preset) {
@@ -172,6 +172,9 @@ function makeModeCell(preset) {
     }
     if (mode['upconvert']) {
       text += '; upconvert=on';
+    }
+    if (mode['squelch']) {
+      text += '; squelch='+mode['squelch'];
     }
   }
   td.appendChild(document.createTextNode(text));

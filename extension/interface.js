@@ -33,7 +33,7 @@ function Interface(fmRadio) {
    * The current band configuration;
    */
   var currentBand = Bands['WW']['FM'];
-
+  var currentSquelch = 0;
   /**
    * Updates the UI.
    */
@@ -261,6 +261,12 @@ function Interface(fmRadio) {
    */
   function changeVolumeUp() {
     setVolume(fmRadio.getVolume() + 0.1);
+  }
+  /**
+   * Mute volume (change to 0).
+   */
+  function muteVolume() {
+    setVolume(0.0);
   }
 
   /**
@@ -684,6 +690,78 @@ function Interface(fmRadio) {
     saveSettings();
     update();
   }
+  
+  /**
+   * Monitor - open squelch by clicking on "Squelch:" to monitor frequency
+   *           Click again on "MONITOR" to resume stored squelch setting
+   */
+
+  function squelchClick() {
+     var mode = appConfig.state.mode.get();
+     if ( Squelch.textContent == 'Squelch:') {
+        currentSquelch = mode.params.squelch;
+        fmRadio.setSquelch(0);
+        squelchDisplay.hidden = true;
+        Squelch.textContent = 'MONITOR';
+     } else {
+        fmRadio.setSquelch(currentSquelch);
+        Squelch.textContent = 'Squelch:';
+        squelchDisplay.hidden = false;
+     }
+  }
+  
+ 
+  /**
+   * Change squelch by clicking on signal strength display.
+   */
+  
+   function clickChangeSquelch(value){
+     changeSquelch(value.offsetX);
+     }
+     
+     /**
+      * Selects the previous preset in the list.
+      */
+  
+   function prevPreset(shiftKey){
+       if ( presetsBox.length < 3 ) { return; }
+       signalBar.value = 0;
+       if ( presetsBox[0].selected || presetsBox[1].selected ) {
+          presetsBox[presetsBox.length-1].selected = true;
+          selectPreset();
+       } else {
+          for (i = 0; i < presetsBox.length; i++){
+             if ( presetsBox[i].selected ){
+                presetsBox[i-1].selected = true;
+                selectPreset();
+                break;
+             }
+          }
+       }
+     }
+  
+  /**
+   * Selects the next preset in the list.
+   */
+   function nextPreset(shiftKey){
+       if ( presetsBox.length < 3 ) { return; }
+       if ( shiftKey ) {
+          scanPresets = ! scanPresets;
+       }
+       signalBar.value = 0;
+       if ( presetsBox[presetsBox.length-1].selected ) {
+          presetsBox[1].selected = true;
+          selectPreset();
+       } else {
+          for (i = 0; i < presetsBox.length; i++){
+             if ( presetsBox[i].selected ){
+                presetsBox[i+1].selected = true;
+                selectPreset();
+                break;
+             }
+          }
+       }
+     }
 
   /**
    * Closes the window.
@@ -777,6 +855,12 @@ function Interface(fmRadio) {
     }
     if (e.type == 'keydown') {
       switch (e.keyCode) {
+        case 33:   // PgUp
+          prevPreset(e.shiftKey);
+          break;
+        case 34:   // PgDn
+          nextPreset(e.shiftKey);
+          break;
         case 37:
           frequencyMinus();
           break;
@@ -809,8 +893,13 @@ function Interface(fmRadio) {
         case 98:  // b
           switchBand();
           break;
+        case  70: // F
         case 102: // f
-          showFrequencyEditor();
+          frequencyDisplay.click(); 
+          break;
+        case 77:  // M
+        case 109: // m
+          muteVolume();
           break;
         case 80:  // P
         case 112: // p
@@ -905,6 +994,7 @@ function Interface(fmRadio) {
     upconverterDisplay.addEventListener('click', toggleUpconverter);
     attachDisplayInputEvents(squelchDisplay, squelchInput, changeSquelch);
     squelchDisplay.addEventListener('mousewheel', changeSquelchWheel);
+    signalDisplay.addEventListener('click', clickChangeSquelch);
     freqMinusButton.addEventListener('click', frequencyMinus);
     freqPlusButton.addEventListener('click', frequencyPlus);
     scanDownButton.addEventListener('click', scanDown);
@@ -917,6 +1007,7 @@ function Interface(fmRadio) {
     window.addEventListener('message', getMessage);
     window.addEventListener('keydown', handleShortcut);
     window.addEventListener('keypress', handleShortcut);
+    Squelch.addEventListener('mousedown',squelchClick);
     fmRadio.setInterface(this);
     fmRadio.setOnError(showErrorWindow);
     loadSettings(function() {
@@ -928,6 +1019,7 @@ function Interface(fmRadio) {
 
   return {
     attach: attach,
+    nextPreset: nextPreset,
     update: update
   };
 }

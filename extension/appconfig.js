@@ -34,7 +34,7 @@ function AppConfig() {
       /** Upconverter. */
       upconverter: {
         enable: false,
-        frequency: 125000000
+        frequency: 99999020 // Peter's up converter
       },
       /** Whether free tuning is enabled. */
       freeTuning: false

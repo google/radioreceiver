@@ -1,4 +1,6 @@
 *.pem
 *.crx
 *.zip
+*.bak
+*.db
 nacl-src/pnacl

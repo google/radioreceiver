@@ -1,8 +1,29 @@
+# Modifications in this fork:
+
+* Automatically pauses recording if signal is below the squelch threshold.
+
+* m key mutes audio instantly (recording is not affected). Adjust volute to resume.
+
+* Signal level is displayed with a bar. Hover mouse to read numerical value.
+
+* Clicking signal bar sets squelch level.
+
+* PgDn/PgUp moves through the list of saved preset stations.
+
+* Shift-PgDn begins (or ends) scanning through preset stations. Scanning stops when signal is above preset squelch level and resumes when signal drops below squelch level for a while.
+
+* Export/Import preset list includes the squelch setting for each station.
+
+* Clicking on the "Squelch" heading enters or leaves MONITOR mode, where squelch is temporarily set to zero to monitor frequency.
+
+* f/F key moves to the frequency display for editing (this is in the original help file, but didn't work).
+
+
 # Radio Receiver
 
 An application to listen to broadcast FM and AM radio from your Chrome browser or your ChromeBook computer using a $15 USB digital TV tuner.
 
-![Radio Receiver screenshot](image-src/interface.png)
+![Radio Receiver screenshot](image-src/interface2.png)
 
 ## What is this
 

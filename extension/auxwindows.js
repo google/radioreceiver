@@ -36,6 +36,7 @@ var AuxWindows = (function() {
         win.contentWindow['opener'] = window;
         var modeData = copyObject(band.getMode());
         modeData['step'] = band.getStep();
+        modeData['squelch'] = squelch;
         var stationData = {
           'frequency': frequency,
           'display': band.toDisplayName(frequency, true),
@@ -138,7 +139,7 @@ var AuxWindows = (function() {
           'width': 700,
           'height': 600
         },
-        'state': 'maximized',
+        'state': 'normal',
         'resizable': true
       });
   }
