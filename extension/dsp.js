@@ -35,9 +35,8 @@ function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
     if (i == center) {
       val = 2 * Math.PI * freq;
     } else {
-      var angle = 2 * Math.PI * (i + 1) / (length + 1);
       val = Math.sin(2 * Math.PI * freq * (i - center)) / (i - center);
-      val *= 0.42 - 0.5 * Math.cos(angle) + 0.08 * Math.cos(2 * angle);
+      val *= 0.54 - 0.46 * Math.cos(2 * Math.PI * i / (length - 1))
     }
     sum += val;
     coefs[i] = val;
