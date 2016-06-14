@@ -19,8 +19,10 @@
 function Player() {
   var OUT_RATE = 48000;
   var TIME_BUFFER = 0.05;
+  var SQUELCH_TAIL = 0.3;
 
   var lastPlayedAt = -1;
+  var squelchTime = -2;
   var frameno = 0;
 
   var wavSaver = null;
@@ -39,8 +41,16 @@ function Player() {
   function play(leftSamples, rightSamples, level, squelch) {
     var buffer = ac.createBuffer(2, leftSamples.length, OUT_RATE);
     if (level >= squelch) {
+      squelchTime = null;
+    } else if (squelchTime === null) {
+      squelchTime = lastPlayedAt;
+    }
+    if (squelchTime === null || lastPlayedAt - squelchTime < SQUELCH_TAIL) {
       buffer.getChannelData(0).set(leftSamples);
       buffer.getChannelData(1).set(rightSamples);
+      if (wavSaver != null) {
+        wavSaver.writeSamples(leftSamples, rightSamples);
+      }
     }
     var source = ac.createBufferSource();
     source.buffer = buffer;
@@ -49,9 +59,6 @@ function Player() {
         lastPlayedAt + leftSamples.length / OUT_RATE,
         ac.currentTime + TIME_BUFFER);
     source.start(lastPlayedAt);
-    if (wavSaver != null) {
-      wavSaver.writeSamples(leftSamples, rightSamples);
-    }
   }
 
   /**
