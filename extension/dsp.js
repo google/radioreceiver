@@ -22,7 +22,7 @@
  * @param {number} sampleRate The signal's sample rate.
  * @param {number} halfAmplFreq The half-amplitude frequency in Hz.
  * @param {number} length The filter kernel's length. Should be an odd number.
- * @return {Float32Array} The FIR coefficients for the filter. 
+ * @return {Float32Array} The FIR coefficients for the filter.
  */
 function getLowPassFIRCoeffs(sampleRate, halfAmplFreq, length) {
   length += (length + 1) % 2;
@@ -345,22 +345,27 @@ function FMDemodulator(inRate, outRate, maxF, filterFreq, kernelLen) {
       var real = lI * I[i] + lQ * Q[i];
       var imag = lI * Q[i] - I[i] * lQ;
       var sgn = 1;
-      if (imag < 0) {
-        sgn *= -1;
-        imag *= -1;
-      }
+      var circ = 0;
       var ang = 0;
-      var div;
-      if (real == imag) {
-        div = 1;
-      } else if (real > imag) {
+      var div = 1;
+      if (real < 0) {
+        sgn = -sgn;
+        real = -real;
+        circ = Math.PI;
+      }
+      if (imag < 0) {
+        sgn = -sgn;
+        imag = -imag;
+        circ = -circ;
+      }
+      if (real > imag) {
         div = imag / real;
-      } else {
+      } else if (real != imag) {
         ang = -Math.PI / 2;
         div = real / imag;
-        sgn *= -1;
+        sgn = -sgn;
       }
-      out[i] = sgn *
+      out[i] = circ + sgn *
         (ang + div
                / (0.98419158358617365
                   + div * (0.093485702629671305
