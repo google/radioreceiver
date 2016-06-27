@@ -133,12 +133,15 @@ var Bands = (function() {
     maxF: 10000
   };
 
+  var WX_NAMES = [2, 4, 5, 3, 6, 7, 1];
+  var WX_INDEX = [6, 0, 3, 1, 2, 4, 5];
+
   function wxDisplay(freq, opt_full) {
-    return (opt_full ? 'WX ' : '') + Math.floor(1 + (freq - 162400000) / 25000);
+    return (opt_full ? 'WX ' : '') + WX_NAMES[Math.floor((freq - 162400000) / 25000)];
   }
 
   function wxInput(input) {
-    return Math.floor((input - 1) * 25000) + 162400000;
+    return Math.floor(WX_INDEX[input - 1] * 25000) + 162400000;
   }
 
   var AM = {
