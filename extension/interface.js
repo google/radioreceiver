@@ -847,15 +847,18 @@ function Interface(fmRadio) {
    * @param {Element} displayElem The display element.
    * @param {Element} inputElem The input element.
    * @param {Function} changeFn The change function.
+   * @return {Function} A function to trigger the input element.
    */
   function attachDisplayInputEvents(displayElem, inputElem, changeFn) {
-    displayElem.addEventListener('click', function() {
+    var editFn = function() {
       inputElem.value = displayElem.textContent;
       setVisible(displayElem, false);
       setVisible(inputElem, true);
       inputElem.focus();
       inputElem.select();
-    });
+    };
+
+    displayElem.addEventListener('click', editFn);
 
     inputElem.addEventListener('blur', function() {
       setVisible(displayElem, true);
@@ -867,6 +870,8 @@ function Interface(fmRadio) {
       setVisible(inputElem, false);
       changeFn(inputElem.value);
     });
+
+    return editFn;
   }
 
   /**
@@ -878,6 +883,12 @@ function Interface(fmRadio) {
   }
 
   /**
+   * A function to edit the current frequency.
+   * @type {function()}
+   */
+  var showFrequencyEditor;
+
+  /**
    * Attaches all the event handlers, loads the presets, and updates the UI.
    */
   function attach() {
@@ -886,7 +897,7 @@ function Interface(fmRadio) {
     settingsButton.addEventListener('click', showSettings);
     helpButton.addEventListener('click', showHelp);
     closeButton.addEventListener('click', close);
-    attachDisplayInputEvents(
+    showFrequencyEditor = attachDisplayInputEvents(
         frequencyDisplay, frequencyInput, changeFrequency);
     frequencyDisplay.addEventListener('mousewheel', changeFrequencyWheel);
     stereoIndicatorBox.addEventListener('click', toggleStereo);
